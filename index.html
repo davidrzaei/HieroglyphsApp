@@ -1,0 +1,1725 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#17202a" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+@font-face { font-family: 'Noto Sans Egyptian Hieroglyphs'; font-style: normal; font-display: swap; font-weight: 400; src: url(fonts/noto-sans-egyptian-hieroglyphs-egyptian-hieroglyphs-400-normal.woff2) format('woff2'); unicode-range: U+13000-13455,U+13460-143FA; }
+@font-face { font-family: 'Noto Sans Egyptian Hieroglyphs'; font-style: normal; font-display: swap; font-weight: 400; src: url(fonts/noto-sans-egyptian-hieroglyphs-latin-ext-400-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'Noto Sans Egyptian Hieroglyphs'; font-style: normal; font-display: swap; font-weight: 400; src: url(fonts/noto-sans-egyptian-hieroglyphs-latin-400-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-display: swap; font-weight: 400; src: url(fonts/ibm-plex-sans-vietnamese-400-normal.woff2) format('woff2'); unicode-range: U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-display: swap; font-weight: 400; src: url(fonts/ibm-plex-sans-latin-ext-400-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-display: swap; font-weight: 400; src: url(fonts/ibm-plex-sans-latin-400-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-display: swap; font-weight: 500; src: url(fonts/ibm-plex-sans-vietnamese-500-normal.woff2) format('woff2'); unicode-range: U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-display: swap; font-weight: 500; src: url(fonts/ibm-plex-sans-latin-ext-500-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-display: swap; font-weight: 500; src: url(fonts/ibm-plex-sans-latin-500-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-display: swap; font-weight: 600; src: url(fonts/ibm-plex-sans-vietnamese-600-normal.woff2) format('woff2'); unicode-range: U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-display: swap; font-weight: 600; src: url(fonts/ibm-plex-sans-latin-ext-600-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-display: swap; font-weight: 600; src: url(fonts/ibm-plex-sans-latin-600-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-display: swap; font-weight: 400; src: url(fonts/ibm-plex-mono-vietnamese-400-normal.woff2) format('woff2'); unicode-range: U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-display: swap; font-weight: 400; src: url(fonts/ibm-plex-mono-latin-ext-400-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-display: swap; font-weight: 400; src: url(fonts/ibm-plex-mono-latin-400-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-display: swap; font-weight: 500; src: url(fonts/ibm-plex-mono-vietnamese-500-normal.woff2) format('woff2'); unicode-range: U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-display: swap; font-weight: 500; src: url(fonts/ibm-plex-mono-latin-ext-500-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-display: swap; font-weight: 500; src: url(fonts/ibm-plex-mono-latin-500-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Gentium Book Plus'; font-style: normal; font-display: swap; font-weight: 400; src: url(fonts/gentium-book-plus-vietnamese-400-normal.woff2) format('woff2'); unicode-range: U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB; }
+@font-face { font-family: 'Gentium Book Plus'; font-style: normal; font-display: swap; font-weight: 400; src: url(fonts/gentium-book-plus-latin-ext-400-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'Gentium Book Plus'; font-style: normal; font-display: swap; font-weight: 400; src: url(fonts/gentium-book-plus-latin-400-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Gentium Book Plus'; font-style: italic; font-display: swap; font-weight: 400; src: url(fonts/gentium-book-plus-vietnamese-400-italic.woff2) format('woff2'); unicode-range: U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB; }
+@font-face { font-family: 'Gentium Book Plus'; font-style: italic; font-display: swap; font-weight: 400; src: url(fonts/gentium-book-plus-latin-ext-400-italic.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'Gentium Book Plus'; font-style: italic; font-display: swap; font-weight: 400; src: url(fonts/gentium-book-plus-latin-400-italic.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Gentium Book Plus'; font-style: normal; font-display: swap; font-weight: 700; src: url(fonts/gentium-book-plus-vietnamese-700-normal.woff2) format('woff2'); unicode-range: U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB; }
+@font-face { font-family: 'Gentium Book Plus'; font-style: normal; font-display: swap; font-weight: 700; src: url(fonts/gentium-book-plus-latin-ext-700-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'Gentium Book Plus'; font-style: normal; font-display: swap; font-weight: 700; src: url(fonts/gentium-book-plus-latin-700-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+</style>
+<title>Hieroglyphs</title>
+<style>
+/* Layout: telefonen til venstre som det, man betjener; til højre det, der forklarer, hvad der sker i databasen. På smal skærm ligger de under hinanden.
+   Inde i telefonen: inputfeltet ligger frit oven på resultatområdet og flyttes med transform (midten, lige over tastaturet, toppen).
+   Tastatur, indstillingsskuffe og fotoark er lag oven på skærmen, som glider ind fra kanten. */
+:root{
+  --bg:#eef1f4; --surface:#ffffff; --ink:#17212b; --muted:#5a6876; --line:#d3dae1; --key:#f4f6f8;
+  --lapis:#1f4e8c; --lapis-soft:#e3ecf8; --on-lapis:#ffffff;
+  --guess:#74540a; --guess-soft:#f3e7bd; --guess-line:#c9ac55; --guess-hatch:#dcc67e;
+  --err:#96382b; --err-soft:#f5e2dd; --err-line:#cf9c92;
+  --ok:#1d7a4a; --warn:#b4530f; --bad:#b3261e; --phone:#101820; --scrim:rgba(13,19,25,.46);
+  --display:"Gentium Book Plus","Gentium Plus",Georgia,serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --glyph:"Noto Sans Egyptian Hieroglyphs","Segoe UI Historic","Apple Symbols",serif;
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1319; --surface:#17202a; --ink:#e6ebf0; --muted:#9aa8b5; --line:#2f3b47; --key:#1f2a36;
+  --lapis:#8fb8ee; --lapis-soft:#1b2d48; --on-lapis:#0d1319;
+  --guess:#e2c670; --guess-soft:#383016; --guess-line:#7a6a2c; --guess-hatch:#5a4c22;
+  --err:#eea195; --err-soft:#40211c; --err-line:#7d4138;
+  --ok:#6fd09a; --warn:#f09a5c; --bad:#f2928a; --phone:#000000; --scrim:rgba(0,0,0,.6); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1319; --surface:#17202a; --ink:#e6ebf0; --muted:#9aa8b5; --line:#2f3b47; --key:#1f2a36;
+  --lapis:#8fb8ee; --lapis-soft:#1b2d48; --on-lapis:#0d1319;
+  --guess:#e2c670; --guess-soft:#383016; --guess-line:#7a6a2c; --guess-hatch:#5a4c22;
+  --err:#eea195; --err-soft:#40211c; --err-line:#7d4138;
+  --ok:#6fd09a; --warn:#f09a5c; --bad:#f2928a; --phone:#000000; --scrim:rgba(0,0,0,.6); color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:26px 56px}
+h1,h2,h3{font-family:var(--display);font-weight:700;line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:2rem} h2{font-size:1.25rem} h3{font-size:1.02rem}
+p{margin:0}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--lapis);outline-offset:2px}
+.wrap{max-width:1180px;margin-inline:auto;display:flex;flex-direction:column;gap:18px}
+.lede{color:var(--muted);max-width:70ch}
+.stage{display:grid;grid-template-columns:minmax(0,404px) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:900px){.stage{grid-template-columns:minmax(0,1fr)}}
+.phonecol{display:flex;flex-direction:column;gap:10px;align-items:center;min-width:0}
+.phonecol>.note{text-align:center;max-width:36ch}
+.tl{font-family:var(--display);font-style:italic}
+.mono{font-family:var(--mono);font-size:.86em}
+.gl{font-family:var(--glyph);font-size:1.9rem;line-height:1.25;display:inline-block;white-space:nowrap;-webkit-text-stroke:.017em currentColor}
+.gl.rtl{transform:scaleX(-1)}
+.gl.sm{font-size:1.35rem}
+.lac{color:var(--muted)}
+.lacm{display:inline-block;border:1.5px solid currentColor;border-radius:5px;padding:0 .14em;margin-inline:.12em;font-size:.8em;line-height:1.12;vertical-align:.06em}
+.lacm i{font-style:normal;font-family:var(--body);font-size:.62em;vertical-align:.2em;margin-left:1px}
+.lacw{display:inline-block;border:1.5px dashed currentColor;border-radius:5px;font-family:var(--body);font-size:.55em;line-height:1.5;padding:0 .55em;vertical-align:.3em;margin-inline:.25em}
+/* Tegn, brugeren ikke selv har skrevet: brun, kraftigere streg på gul bund. Kun udfyldte huller har kant. */
+.rest,.cont,.gw.restw .gl{background-color:var(--guess-soft);border-radius:4px;color:var(--guess);-webkit-text-stroke:.03em currentColor}
+.cont{box-shadow:0 0 0 1.5px var(--guess-line)}
+.rest,.gw.restw .gl{background-image:repeating-linear-gradient(135deg,transparent 0 5px,var(--guess-hatch) 5px 6.5px)}
+/* Appens egen læsning af det, brugeren har skrevet: brune tegn uden bund. */
+.gw.guess .gl{color:var(--guess);-webkit-text-stroke:.03em currentColor}
+.rest,.cont{margin-inline:2px}
+.rest::before,.rest::after{font-family:var(--body);font-size:.62em;vertical-align:.25em;color:var(--guess)}
+.rest::before{content:"["} .rest::after{content:"]"}
+.cart{display:inline-block;border:2px solid var(--ink);border-radius:999px;padding:0 9px}
+
+/* ---------- telefonen ---------- */
+.phone{width:100%;max-width:404px;height:820px;margin-inline:auto;border:10px solid var(--phone);border-radius:38px;background:var(--surface);overflow:hidden;overflow:clip;display:flex;flex-direction:column;position:relative}
+@media (max-width:480px){.phone{border-width:3px;border-radius:18px;height:760px;height:clamp(600px,calc(100dvh - 16px),760px)}}
+.appbar{display:flex;align-items:center;gap:8px;padding:8px 8px 8px 16px;border-bottom:1px solid var(--line)}
+.appbar b{font-family:var(--display);font-size:1.15rem}
+.appbar span{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);flex:1}
+.iconbtn{border:0;background:none;width:40px;height:40px;border-radius:10px;display:grid;place-items:center;padding:0;flex:none}
+.iconbtn:hover{background:var(--key)}
+.iconbtn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.view{flex:1;min-height:0;display:flex;flex-direction:column}
+.seg{display:flex;gap:0;margin:10px 14px 0;border:1px solid var(--line);border-radius:9px;overflow:hidden;flex:none}
+.seg button{flex:1;border:0;background:var(--surface);padding:7px 4px;font-size:.86rem;font-weight:500;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--lapis);color:var(--on-lapis)}
+
+/* søgeområdet: resultater nederst, feltet frit ovenpå */
+#stage{flex:1;min-height:0;position:relative}
+.results{position:absolute;left:0;right:0;bottom:0;top:var(--rt,0px);overflow-y:auto;padding:12px 14px 14px;display:flex;flex-direction:column;gap:12px}
+.phone:not(.searched):not(.mode-sign) #results{visibility:hidden}
+.results.list{padding:0 46px 14px 14px}
+#fieldwrap{position:absolute;left:14px;right:14px;top:0;z-index:2;transform:translateY(var(--fy,0px))}
+.mode-sign #fieldwrap{display:none}
+#intro{position:absolute;left:0;right:0;bottom:calc(100% + 16px);text-align:center;display:flex;flex-direction:column;gap:4px;align-items:center}
+#intro b{font-family:var(--display);font-size:1.35rem;line-height:1.2}
+#intro span{color:var(--muted);font-size:.9rem;max-width:30ch}
+.searched #intro{opacity:0;visibility:hidden}
+#field{min-height:58px;border:1px solid var(--line);border-radius:12px;background:var(--key);padding:6px 48px;display:flex;align-items:center;cursor:text;position:relative;overflow:hidden}
+#field.nocam{padding-inline:14px}
+.kb-open #field{border-color:var(--lapis);box-shadow:0 0 0 1px var(--lapis)}
+#fieldtext{flex:1;min-width:0;text-align:center;line-height:1}
+#fieldtext .ph{color:var(--muted);font-size:.92rem;line-height:1.4}
+#fieldtext .ft{vertical-align:middle;max-width:none}
+#fieldtext .ft.txt{display:inline-block;white-space:pre;font-size:1.3rem;line-height:1.3}
+#fieldtext .ft.wrap{white-space:normal;overflow-wrap:anywhere;word-break:break-all;max-width:100%}
+#fieldtext .ft.txt.wrap{white-space:pre-wrap}
+.caret{display:inline-block;width:2px;height:1em;background:var(--lapis);vertical-align:-.14em;margin-left:2px}
+#cam{position:absolute;right:6px;top:50%;margin-top:-20px;color:var(--muted)}
+#cam:hover{color:var(--lapis);background:var(--surface)}
+.ready #fieldwrap{transition:transform .32s var(--ease)}
+.ready #intro{transition:opacity .2s,visibility .2s}
+
+/* resultater */
+.results>*,.pad>*{flex-shrink:0}
+.empty{color:var(--muted);font-size:.92rem}
+.rhead{display:flex;align-items:center;gap:8px}
+.rhead .grow{flex:1;min-width:0}
+.eyebrow{font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.banner{border:1px solid var(--guess-line);background:var(--guess-soft);color:var(--guess);border-radius:8px;padding:8px 10px;font-size:.88rem}
+.banner.err{border-color:var(--err-line);background:var(--err-soft);color:var(--err)}
+/* Gule og grå bokse starter sammenfoldet som en lav, afrundet bjælke i boksens farve med en lille pil, der viser, at den kan foldes ud.
+   Bjælken er 18px høj, trykfladen 32px. Udfoldet står pilen i bunden og peger op. Røde bokse er altid åbne. */
+.banner{cursor:pointer;position:relative}
+.banner.err{cursor:default}
+.banner::after{content:"";position:absolute;left:50%;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;opacity:.75}
+.banner.err::after{content:none}
+.banner[aria-expanded="true"]{padding-bottom:20px}
+.banner[aria-expanded="true"]::after{bottom:7px;transform:translateX(-50%) rotate(-135deg)}
+.banner.folded{height:18px;padding:0;border-radius:999px;font-size:0;line-height:0;user-select:none;-webkit-user-select:none}
+.banner.folded::before{content:"";position:absolute;inset:-7px 0}
+.banner.folded::after{top:50%;transform:translate(-50%,-72%) rotate(45deg)}
+.banner.folded:hover{filter:brightness(.95)}
+.banner.info{border-color:var(--line);background:var(--key);color:var(--ink)}
+.note{font-size:.86rem;color:var(--muted)}
+.gline{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:flex-end}
+.gline.rtl{flex-direction:row-reverse}
+.gw{border:0;background:none;padding:2px 3px;border-radius:6px;display:flex;flex-direction:column;align-items:center;gap:0}
+.gw:hover{background:var(--lapis-soft)}
+.gw small{font-family:var(--display);font-style:italic;font-size:.82rem;color:var(--muted)}
+.gw.restw .gl{padding-inline:2px}
+.trl{font-family:var(--display);font-style:italic;font-size:1.25rem}
+.trn{font-size:1.05rem}
+.trn small{display:block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.guess-text{color:var(--guess)}
+details{border-top:1px solid var(--line);padding-top:8px}
+summary{cursor:pointer;font-weight:600;font-size:.92rem}
+details>div{margin-top:8px;display:flex;flex-direction:column;gap:8px}
+table.t{border-collapse:collapse;width:100%;font-size:.86rem}
+table.t th{font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:600}
+table.t th,table.t td{padding:5px 8px 5px 0;border-bottom:1px solid var(--line);vertical-align:middle}
+table.t .gl{font-size:1.25rem}
+.rowbtn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:7px 10px;min-width:0;overflow:hidden}
+.rowbtn:hover{border-color:var(--lapis)}
+.rowbtn .grow{flex:1;min-width:0}
+.rowbtn small{display:block;color:var(--muted);font-size:.8rem}
+.pill{display:inline-block;font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:1px 8px;color:var(--muted);white-space:nowrap}
+.pill.g{border-color:var(--guess);color:var(--guess)}
+.star{font-size:1.25rem;line-height:1;border:1px solid var(--line);background:var(--surface);border-radius:8px;width:38px;height:36px;flex:none}
+.star[aria-pressed="true"]{background:var(--lapis);color:var(--on-lapis);border-color:var(--lapis)}
+.ibtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;min-width:36px;height:36px;padding:0 8px;font-size:.9rem;flex:none}
+.linkb{border:0;background:none;padding:0;color:var(--lapis);text-decoration:underline;text-underline-offset:3px;font-size:.9rem;align-self:flex-start}
+.rhead .linkb{align-self:auto}
+.primary{border:0;background:var(--lapis);color:var(--on-lapis);border-radius:9px;padding:8px 14px;font-weight:600}
+.secondary{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:7px 12px;font-size:.9rem}
+
+/* tegnlisten under Sign: kategorier som i en telefonbog */
+.signlist section{display:flex;flex-direction:column}
+.cathead{position:sticky;top:0;z-index:1;background:var(--surface);padding:10px 0 6px;border-bottom:2px solid var(--ink);font-family:var(--body);font-size:.8rem;font-weight:600;letter-spacing:.02em;display:flex;gap:10px;align-items:baseline}
+.cathead .mono{font-size:1rem;font-weight:500;min-width:1.6em}
+.srow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;padding:7px 2px;min-height:56px}
+.srow:hover{background:var(--key)}
+.srow .gl{width:44px;text-align:center;font-size:1.7rem;flex:none}
+.srow .grow{flex:1;min-width:0}
+.srow small{display:block;color:var(--muted);font-size:.8rem}
+.srow .chev{color:var(--muted);font-size:1.1rem}
+#catindex{position:absolute;right:4px;top:50%;transform:translateY(-50%);z-index:2;display:flex;flex-direction:column;gap:0;background:var(--key);border:1px solid var(--line);border-radius:999px;padding:6px 3px}
+#catindex button{border:0;background:none;font-family:var(--mono);font-size:.72rem;font-weight:500;width:30px;height:24px;border-radius:999px;padding:0;color:var(--lapis)}
+#catindex button:hover{background:var(--lapis-soft)}
+
+/* gennemsyn: valg mellem tegn og ord, liste med kategoristribe i bunden */
+#bstage{flex:1;min-height:0;position:relative}
+.results.blist{padding:0 14px 14px}
+.results.blist>.linkb{margin-top:10px}
+.bhome{margin:auto 0;display:flex;flex-direction:column;gap:12px}
+.bhome h3{font-size:1.35rem;text-align:center}
+.bhome>p{text-align:center;margin-bottom:6px}
+.bigbtn{display:flex;align-items:center;gap:14px;width:100%;text-align:left;border:1px solid var(--line);background:var(--key);border-radius:14px;padding:16px 14px;min-height:84px}
+.bigbtn:hover{border-color:var(--lapis)}
+.bigbtn .gl{font-size:1.6rem;flex:none}
+.bigbtn .grow{flex:1;min-width:0}
+.bigbtn b{display:block;font-family:var(--display);font-size:1.2rem}
+.bigbtn small{display:block;color:var(--muted);font-size:.84rem}
+.bigbtn .chev{color:var(--muted);font-size:1.3rem}
+.srow.w .gl{width:auto;font-size:1.3rem;text-align:right}
+.srow .pos{font-size:.74rem;color:var(--muted);margin-left:6px}
+.cathead .tl{font-size:1.15rem;font-weight:400;min-width:1.2em}
+.sortrow{display:flex;align-items:center;gap:10px;padding:10px 0 4px}
+.sortrow .grow{flex:1;min-width:0}
+#bcats{flex:none;padding:9px 10px;border-top:1px solid var(--line);background:var(--key)}
+.bcats button .tl{font-size:1rem}
+
+/* tastatur: lag i bunden, kun fremme mens feltet er aktivt */
+.kbd{position:absolute;left:0;right:0;bottom:0;z-index:4;border-top:1px solid var(--line);background:var(--key);padding:6px 8px 10px;display:flex;flex-direction:column;gap:6px;transform:translateY(104%);user-select:none;-webkit-user-select:none}
+.ready .kbd{transition:transform .3s var(--ease)}
+.kb-open .kbd{transform:none;box-shadow:0 -8px 22px rgba(0,0,0,.12)}
+.kb-part{display:flex;flex-direction:column;gap:6px;min-width:0}
+.kb-tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;position:relative;padding-block:1px}
+.kb-tabs::-webkit-scrollbar,.kb-pages::-webkit-scrollbar{display:none}
+.kb-tabs button{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 11px;font-size:.84rem;font-weight:500}
+.kb-tabs button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.kb-cat{font-size:.74rem;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:18px}
+.dots{display:flex;gap:5px;align-items:center}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--ink)}
+.kb-pages{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;margin-inline:-8px;cursor:grab}
+.kb-pages.dragging,.kb-tabs.dragging{scroll-snap-type:none;cursor:grabbing}
+.kb-page{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;display:grid;grid-template-columns:repeat(5,1fr);grid-auto-rows:var(--kh,58px);gap:5px;padding-inline:8px;height:calc(4*var(--kh,58px) + 15px);align-content:start}
+.key{border:1px solid var(--line);background:var(--surface);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0;gap:0;min-width:0}
+.key:active{background:var(--lapis-soft)}
+.key .gl{font-size:1.5rem;line-height:1.15}
+.key small{font-family:var(--mono);font-size:.62rem;color:var(--muted)}
+.kb-rows{display:flex;flex-direction:column;gap:5px}
+.kb-row{display:flex;gap:4px;justify-content:center}
+.kb-row button{flex:0 0 calc((100% - 36px)/10);min-width:0;height:calc(var(--kh,58px) - 1px);border:1px solid var(--line);background:var(--surface);border-radius:7px;font-size:1.05rem;padding:0}
+.kb-row button:active{background:var(--lapis-soft)}
+.kb-row.sp button{font-family:var(--display);font-style:italic;font-size:1.2rem;background:var(--lapis-soft);border-color:transparent}
+.kb-act{display:grid;grid-template-columns:.62fr .62fr 1.2fr .62fr 1.26fr;gap:6px}
+.mode-text .kb-act{grid-template-columns:1.3fr 1fr .62fr 1.08fr}
+.kb-act button{height:44px;border-radius:9px;padding:0 4px;font-size:.92rem;display:grid;place-items:center;min-width:0}
+.kb-act svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.kb-act .lac{font-size:1.45rem;line-height:1;color:var(--ink)}
+.kb-act{position:relative}
+#kfirst{position:relative;touch-action:none;-webkit-touch-callout:none}
+#kfirst .more{position:absolute;top:0;right:5px;font-style:normal;font-size:.72rem;color:var(--muted);line-height:1.2}
+.lostpop{position:absolute;left:0;bottom:calc(100% + 8px);z-index:5;display:flex;gap:6px;padding:6px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.24);touch-action:none}
+.kb-act .lostpop button{width:94px;height:74px;border:1px solid var(--line);background:var(--key);border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:2px 5px}
+.kb-act .lostpop button:hover,.kb-act .lostpop button:active{background:var(--lapis-soft);border-color:var(--lapis)}
+.lostpop .gl{line-height:1.1}
+/* kvadrater: tegnene tegnes i en lille tegning, så de kan stå over og ved siden af hinanden */
+.quad{display:inline-block;overflow:visible;margin-inline:.04em}
+.quad text{fill:currentColor;stroke:currentColor;stroke-width:17}
+.gw.guess .quad text{stroke-width:30}
+.quadpop{position:absolute;left:0;right:0;bottom:calc(100% + 8px);z-index:5;max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.24)}
+.quadpop .qhead{font-weight:600;font-size:.9rem}
+.quadpop .qopts{display:flex;flex-wrap:wrap;gap:6px}
+.kb-act .quadpop .qopts button{width:58px;height:58px;border:1px solid var(--line);background:var(--key);border-radius:9px;padding:0;display:grid;place-items:center}
+.kb-act .quadpop .qopts button:hover,.kb-act .quadpop .qopts button:active{background:var(--lapis-soft);border-color:var(--lapis)}
+.quadpop .gl{font-size:1.7rem;line-height:1}
+.kb-act .quadpop .secondary{height:38px;align-self:flex-start;padding:0 12px}
+.lostpop small{font-size:.68rem;line-height:1.15;color:var(--muted);text-align:center}
+
+/* bundmenu, skuffe, ark */
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);background:var(--surface);flex:none}
+.tabs button{border:0;background:none;padding:10px 2px 12px;font-size:.82rem;font-weight:500;color:var(--muted);border-top:3px solid transparent}
+.tabs button[aria-pressed="true"]{color:var(--lapis);border-top-color:var(--lapis)}
+.pad{padding:12px 14px 14px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;flex:1;min-height:0}
+.scrim{position:absolute;inset:0;background:var(--scrim);opacity:0;visibility:hidden;z-index:6}
+.ready .scrim{transition:opacity .25s,visibility .25s}
+.drawer-open .scrim,.sheet-open .scrim{opacity:1;visibility:visible}
+.drawer{position:absolute;top:0;right:0;bottom:0;width:66.667%;background:var(--surface);z-index:7;transform:translateX(103%);overflow:hidden;border-left:1px solid var(--line)}
+/* Skuffen har to ruder. Ved History vokser skuffen mod venstre til hele skærmen, mens historikken glider ind fra højre; tilbage går samme vej. */
+.drawer.hist{width:100%;border-left-color:transparent}
+.dpane{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--surface)}
+#dset{right:0;left:auto;width:100%}
+#dhist{transform:translateX(100%);visibility:hidden}
+.drawer.hist #dhist{transform:none;visibility:visible}
+.drawer.hist #dset{opacity:0;visibility:hidden}
+.ready .drawer{transition:transform .3s var(--ease),width .32s var(--ease)}
+.ready .dpane{transition:transform .32s var(--ease),opacity .2s,visibility .32s}
+.ready .sheet{transition:transform .3s var(--ease)}
+.drawer-open .drawer{transform:none;box-shadow:-10px 0 28px rgba(0,0,0,.18)}
+.sheet{position:absolute;left:0;right:0;bottom:0;height:90%;background:var(--surface);z-index:7;border-radius:18px 18px 0 0;transform:translateY(103%);display:flex;flex-direction:column}
+.sheet-open .sheet{transform:none}
+.ohead{display:flex;align-items:center;gap:8px;padding:8px 6px 8px 14px;border-bottom:1px solid var(--line);flex:none}
+.ohead h2{flex:1;font-size:1.1rem}
+.drow{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:none;padding:13px 14px;font-weight:600;font-size:.92rem;flex:none}
+.drow:hover{background:var(--key)}
+.drow .grow{flex:1}
+.drow small{font-weight:400;color:var(--muted);font-size:.8rem}
+.drow .chev{color:var(--muted);font-size:1.1rem}
+#dhist .ohead{padding-left:6px}
+.hrow{align-items:flex-start}
+.hrow .gl{white-space:normal;overflow-wrap:anywhere;word-break:break-all;line-height:1.35}
+.hrow .htxt{font-size:1.05rem}
+.hrow .pill{margin-top:4px}
+.hrow small .tl{font-size:1.05rem}
+#saved .rhead{align-items:flex-start}
+#saved .rhead .ibtn{margin-top:6px}
+.who{font-size:.8rem;color:var(--muted);padding:10px 14px;border-top:1px solid var(--line);flex:none}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-size:.82rem;font-weight:600}
+.field select{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--surface);width:100%;min-width:0}
+.field small{color:var(--muted);font-size:.78rem}
+.toast{position:absolute;left:14px;right:14px;top:58px;background:var(--ink);color:var(--surface);border-radius:10px;padding:9px 12px;font-size:.88rem;z-index:9}
+
+/* foto */
+.slab{border-radius:10px;padding:18px 14px;background:var(--key);border:1px solid var(--line);display:flex;justify-content:center}
+.slab .gl{font-size:2.3rem;letter-spacing:2px}
+.slab .dmg{opacity:.28;filter:blur(1.2px)}
+.words{display:flex;flex-wrap:wrap;gap:8px}
+.wchip{border:1px solid var(--line);border-radius:9px;background:var(--surface);padding:5px 8px;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:64px}
+.wchip[aria-pressed="true"]{border-color:var(--lapis);box-shadow:0 0 0 1px var(--lapis)}
+.conf{font-family:var(--mono);font-size:.74rem;font-weight:500}
+.c-ok{color:var(--ok)} .c-warn{color:var(--warn)} .c-bad{color:var(--bad)} .c-guess{color:var(--guess)}
+.bar{height:4px;border-radius:2px;background:var(--line);width:100%;overflow:hidden}
+.bar i{display:block;height:100%}
+.b-ok{background:var(--ok)} .b-warn{background:var(--warn)} .b-bad{background:var(--bad)} .b-guess{background:var(--guess)}
+.signrow{display:grid;grid-template-columns:44px 1fr;gap:4px 10px;align-items:center;border-bottom:1px solid var(--line);padding:6px 0}
+.alts{display:flex;flex-wrap:wrap;gap:5px}
+.alts button{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:2px 8px;display:flex;align-items:center;gap:5px;font-size:.78rem}
+.alts button[aria-pressed="true"]{border-color:var(--lapis);background:var(--lapis-soft)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.76rem;color:var(--muted)}
+
+/* sidepanel */
+.side{display:flex;flex-direction:column;gap:22px;min-width:0}
+.side section{display:flex;flex-direction:column;gap:8px;min-width:0}
+.ex{display:flex;flex-direction:column;gap:6px}
+.ex button{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 10px;display:flex;gap:10px;align-items:baseline}
+.ex button:hover{border-color:var(--lapis)}
+.ex button b{font-weight:600;font-size:.9rem}
+.ex button span{color:var(--muted);font-size:.84rem}
+.exgroup{font-size:.74rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-top:6px}
+#trace{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;font-size:.92rem;min-width:0}
+#trace li{overflow-wrap:anywhere}
+#trace .tb{font-family:var(--mono);font-size:.8rem;background:var(--lapis-soft);color:var(--lapis);border-radius:4px;padding:0 5px;margin-right:4px;white-space:nowrap}
+#tracetitle{color:var(--muted);font-size:.9rem}
+.facts{color:var(--muted);font-size:.92rem;max-width:70ch}
+.facts li{margin-bottom:4px}
+ul{margin:0;padding-left:20px}
+@media (prefers-reduced-motion: no-preference){
+  .key,.rowbtn,.srow{transition:background .1s,border-color .1s}
+  .kb-open .caret{animation:blink 1.06s steps(1) infinite}
+}
+@keyframes blink{50%{opacity:0}}
+@media (prefers-reduced-motion: reduce){.ready #fieldwrap,.ready .kbd,.ready .drawer,.ready .dpane,.ready .sheet,.ready .scrim,.ready #intro{transition:none}}
+</style>
+
+<style>
+/* Webapp: appen fylder hele skærmen. Rammen, forklaringerne og eksemplerne fra prototypen er skjult. */
+html,body.app{height:100%}
+body.app{padding:0;background:var(--surface);overflow:hidden;overscroll-behavior:none}
+body.app .wrap{max-width:none;gap:0;height:100%}
+body.app .wrap>header,body.app .side,body.app #restart,body.app .phonecol>.note{display:none}
+body.app .stage,body.app .phonecol{display:block;height:100%}
+body.app .phone{max-width:none;width:100%;height:100dvh;border:0;border-radius:0;margin:0}
+body.app .appbar{padding-top:calc(8px + env(safe-area-inset-top))}
+body.app .tabs{padding-bottom:env(safe-area-inset-bottom)}
+body.app .kbd{padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+body.app button{touch-action:manipulation}
+/* Tasterne følger skærmens højde, så tastaturet fylder omtrent det samme på en høj telefon som på en lav. */
+body.app .phone{--kh:clamp(54px,7.4dvh,72px)}
+</style>
+</head>
+<body class="app">
+<div class="wrap">
+  <header>
+    <h1>Hieroglyf-app prototype</h1>
+    <p class="lede">En fungerende model af appen med et lille datasæt. Appen åbner i Dictionary, hvor man kan bladre i tegn og ord. Vælg Search i bunden for at skrive selv: et tryk på feltet midt på skærmen får tastaturet frem. Eksemplerne til højre udfylder en søgning for dig, og panelet "Bag kulisserne" viser, hvilke tabeller hvert trin ville bruge i den rigtige database.</p>
+  </header>
+
+  <div class="stage">
+    <div class="phonecol">
+      <div class="phone mode-sentence" id="phone" aria-label="App prototype">
+        <div class="appbar"><b>Hieroglyphs</b><span>prototype</span>
+          <button type="button" class="iconbtn" id="menubtn" aria-label="Open settings" aria-haspopup="dialog" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+        </div>
+
+        <section class="view" id="v-search">
+          <div class="seg" role="group" aria-label="Search mode">
+            <button type="button" data-mode="sign" aria-pressed="false">Sign</button>
+            <button type="button" data-mode="word" aria-pressed="false">Word</button>
+            <button type="button" data-mode="sentence" aria-pressed="true">Sentence</button>
+            <button type="button" data-mode="text" aria-pressed="false">Text</button>
+          </div>
+          <div id="stage">
+            <div class="results" id="results"></div>
+            <nav id="catindex" aria-label="Jump to a sign category" hidden></nav>
+            <div id="fieldwrap">
+              <div id="intro"></div>
+              <div id="field" role="textbox" tabindex="0" aria-haspopup="true" aria-expanded="false">
+                <div id="fieldtext"></div>
+                <button type="button" class="iconbtn" id="cam" aria-label="Read from a photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="v-browse" hidden>
+          <div id="bstage"><div class="results" id="bresults"></div></div>
+          <div class="kb-tabs bcats" id="bcats" role="group" aria-label="Jump to a category" hidden></div>
+        </section>
+
+        <section class="view" id="v-saved" hidden>
+          <div class="pad" id="saved"></div>
+        </section>
+
+        <nav class="tabs" aria-label="App sections">
+          <button type="button" data-view="browse" aria-pressed="false">Dictionary</button>
+          <button type="button" data-view="search" aria-pressed="true">Search</button>
+          <button type="button" data-view="saved" aria-pressed="false">Saved</button>
+        </nav>
+
+        <div class="kbd" id="kbd" inert>
+          <div class="kb-part" id="kb-sign">
+            <div class="kb-tabs" id="kbtabs"></div>
+            <div class="kb-cat"><span id="kbcat"></span><span class="dots" id="kbdots" aria-hidden="true"></span></div>
+            <div class="kb-pages" id="kbpages"></div>
+          </div>
+          <div class="kb-part" id="kb-text" hidden><div class="kb-rows" id="kbrows"></div></div>
+          <div class="kb-act">
+            <div class="lostpop" id="lostpop" role="menu" aria-label="Kinds of loss" hidden></div>
+            <div class="quadpop" id="quadpop" role="menu" aria-label="Arrange signs in a square" hidden></div>
+            <button type="button" class="secondary" id="kfirst" data-act="lacuna" aria-haspopup="menu" aria-expanded="false"></button>
+            <button type="button" class="secondary" id="kquad" aria-haspopup="menu" aria-expanded="false" aria-label="Quadrat: arrange the last signs in one square"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="6" rx="1.2"/><rect x="4" y="13" width="6.5" height="7" rx="1.2"/><rect x="13.5" y="13" width="6.5" height="7" rx="1.2"/></svg></button>
+            <button type="button" class="secondary" data-act="clear">Clear</button>
+            <button type="button" class="secondary" data-act="back" aria-label="Delete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5h11a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H9l-6-7z"/><path d="M12 9.5l5 5M17 9.5l-5 5"/></svg></button>
+            <button type="button" class="primary" data-act="search">Search</button>
+          </div>
+        </div>
+
+        <div class="scrim" id="scrim"></div>
+        <aside class="drawer" id="drawer" role="dialog" aria-label="Settings" inert>
+          <div class="dpane" id="dset">
+            <div class="ohead"><h2>Settings</h2><button type="button" class="iconbtn" data-act="closeover" aria-label="Close settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+            <div class="pad" id="settings"></div>
+            <button type="button" class="drow" data-act="history"><span class="grow">History</span><small id="histcount"></small><span class="chev" aria-hidden="true">›</span></button>
+            <p class="who">Guest. Data is kept on this device only.</p>
+          </div>
+          <div class="dpane" id="dhist" inert>
+            <div class="ohead"><button type="button" class="iconbtn" data-act="histback" aria-label="Back to settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><h2>History</h2></div>
+            <div class="pad" id="hist"></div>
+          </div>
+        </aside>
+        <div class="sheet" id="sheet" role="dialog" aria-label="Photo" inert>
+          <div class="ohead"><h2>Read from a photo</h2><button type="button" class="iconbtn" data-act="closeover" aria-label="Close photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+          <div class="pad" id="photo"></div>
+        </div>
+        <div class="toast" id="toast" role="status" hidden></div>
+      </div>
+      <button type="button" class="secondary" id="restart">↻ Genstart appen</button>
+      <p class="note">Genstart åbner appen forfra i Dictionary. Favoritter, historik og indstillinger bliver.</p>
+    </div>
+
+    <div class="side">
+      <section>
+        <h2>Prøv disse</h2>
+        <div class="ex" id="examples"></div>
+      </section>
+      <section>
+        <h2>Bag kulisserne</h2>
+        <p id="tracetitle">Intet søgt endnu. Her vises trinene for den seneste handling.</p>
+        <ol id="trace"></ol>
+      </section>
+      <section>
+        <h2>Datasættet og grænserne</h2>
+        <ul class="facts" id="facts"></ul>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+const D = {"signs":[{"c":"A1","ch":"𓀀","cat":"A","d":"seated man","base":null,"v":[{"f":"det","t":null,"n":"man, person"},{"f":"log","t":"ỉ","n":null}]},{"c":"D21","ch":"𓂋","cat":"D","d":"mouth","base":null,"v":[{"f":"uni","t":"r","n":null}]},{"c":"D36","ch":"𓂝","cat":"D","d":"forearm","base":null,"v":[{"f":"uni","t":"ꜥ","n":null}]},{"c":"D46","ch":"𓂧","cat":"D","d":"hand","base":null,"v":[{"f":"uni","t":"d","n":null}]},{"c":"D54","ch":"𓂻","cat":"D","d":"walking legs","base":null,"v":[{"f":"det","t":null,"n":"movement"}]},{"c":"F21","ch":"𓄔","cat":"F","d":"ear of an ox","base":null,"v":[{"f":"tri","t":"sḏm","n":null}]},{"c":"F22","ch":"𓄖","cat":"F","d":"hindquarters of a lion","base":null,"v":[{"f":"bi","t":"pḥ","n":null}]},{"c":"F26","ch":"𓄚","cat":"F","d":"skin of a goat","base":null,"v":[{"f":"bi","t":"ẖn","n":null}]},{"c":"F35","ch":"𓄤","cat":"F","d":"heart and windpipe","base":null,"v":[{"f":"tri","t":"nfr","n":null}]},{"c":"G17","ch":"𓅓","cat":"G","d":"owl","base":null,"v":[{"f":"uni","t":"m","n":null}]},{"c":"G43","ch":"𓅱","cat":"G","d":"quail chick","base":null,"v":[{"f":"uni","t":"w","n":null}]},{"c":"I9","ch":"𓆑","cat":"I","d":"horned viper","base":null,"v":[{"f":"uni","t":"f","n":null}]},{"c":"I10","ch":"𓆓","cat":"I","d":"cobra","base":null,"v":[{"f":"uni","t":"ḏ","n":null}]},{"c":"L1","ch":"𓆣","cat":"L","d":"scarab beetle","base":null,"v":[{"f":"tri","t":"ḫpr","n":null}]},{"c":"M17","ch":"𓇋","cat":"M","d":"flowering reed","base":null,"v":[{"f":"uni","t":"ỉ","n":null}]},{"c":"M23","ch":"𓇓","cat":"M","d":"sedge","base":null,"v":[{"f":"bi","t":"sw","n":null}]},{"c":"N1","ch":"𓇯","cat":"N","d":"sky","base":null,"v":[{"f":"det","t":null,"n":"sky, above"},{"f":"log","t":"pt","n":null}]},{"c":"N5","ch":"𓇳","cat":"N","d":"sun disc","base":null,"v":[{"f":"det","t":null,"n":"sun, light, time"},{"f":"log","t":"rꜥ","n":null}]},{"c":"N35","ch":"𓈖","cat":"N","d":"ripple of water","base":null,"v":[{"f":"uni","t":"n","n":null}]},{"c":"O1","ch":"𓉐","cat":"O","d":"house plan","base":null,"v":[{"f":"log","t":"pr","n":null},{"f":"bi","t":"pr","n":null},{"f":"det","t":null,"n":"buildings"}]},{"c":"Q3","ch":"𓊪","cat":"Q","d":"stool","base":null,"v":[{"f":"uni","t":"p","n":null}]},{"c":"R4","ch":"𓊵","cat":"R","d":"loaf on a reed mat","base":null,"v":[{"f":"tri","t":"ḥtp","n":null}]},{"c":"R8","ch":"𓊹","cat":"R","d":"cloth on a pole","base":null,"v":[{"f":"tri","t":"nṯr","n":null}]},{"c":"S29","ch":"𓋴","cat":"S","d":"folded cloth","base":null,"v":[{"f":"uni","t":"s","n":null}]},{"c":"U36","ch":"𓍛","cat":"U","d":"fuller's club","base":null,"v":[{"f":"bi","t":"ḥm","n":null}]},{"c":"V28","ch":"𓎛","cat":"V","d":"twisted wick","base":null,"v":[{"f":"uni","t":"ḥ","n":null}]},{"c":"V30","ch":"𓎟","cat":"V","d":"basket","base":null,"v":[{"f":"bi","t":"nb","n":null}]},{"c":"V31","ch":"𓎡","cat":"V","d":"basket with handle","base":null,"v":[{"f":"uni","t":"k","n":null}]},{"c":"W24","ch":"𓏌","cat":"W","d":"bowl","base":null,"v":[{"f":"bi","t":"nw","n":null}]},{"c":"X1","ch":"𓏏","cat":"X","d":"loaf of bread","base":null,"v":[{"f":"uni","t":"t","n":null}]},{"c":"X8","ch":"𓏙","cat":"X","d":"conical loaf","base":null,"v":[{"f":"log","t":"dỉ","n":null}]},{"c":"Y5","ch":"𓏠","cat":"Y","d":"game board","base":null,"v":[{"f":"bi","t":"mn","n":null}]},{"c":"Z1","ch":"𓏤","cat":"Z","d":"single stroke","base":null,"v":[{"f":"det","t":null,"n":"marks a logogram"},{"f":"num","t":null,"n":"1"}]},{"c":"Z2","ch":"𓏥","cat":"Z","d":"plural strokes","base":null,"v":[{"f":"det","t":null,"n":"plural"}]},{"c":"Z3","ch":"𓏪","cat":"Z","d":"plural strokes, vertical","base":"Z2","v":[]},{"c":"Z7","ch":"𓏲","cat":"Z","d":"coil","base":null,"v":[{"f":"uni","t":"w","n":null}]},{"c":"Aa1","ch":"𓐍","cat":"Aa","d":"placenta (?)","base":null,"v":[{"f":"uni","t":"ḫ","n":null}]}],"cats":{"A":"Man and his occupations","D":"Parts of the human body","F":"Parts of mammals","G":"Birds","I":"Reptiles","L":"Invertebrates","M":"Trees and plants","N":"Sky, earth, water","O":"Buildings","Q":"Furniture","R":"Temple furniture","S":"Crowns, dress, staves","U":"Agriculture and crafts","V":"Rope and baskets","W":"Vessels","X":"Loaves and cakes","Y":"Writing and games","Z":"Strokes","Aa":"Unclassified"},"common":["G17","N35","D21","X1","Q3","I9","G43","M17","D36","S29","V31","Z1","Z2","N5","O1","A1","V28","Aa1","D46","I10","R8","F35","V30","M23"],"lemmas":{"ra":{"t":"rꜥ","pos":"noun","g":"m","senses":["Re (the sun god)","sun"],"gloss":"Re","art":false,"count":5000},"m":{"t":"m","pos":"preposition","g":null,"senses":["in; with; from"],"gloss":"in","count":40000},"n":{"t":"n","pos":"preposition","g":null,"senses":["to, for"],"gloss":"for","count":30000},"pt":{"t":"pt","pos":"noun","g":"f","senses":["sky, heaven"],"gloss":"sky","count":3000},"pr":{"t":"pr","pos":"noun","g":"m","senses":["house"],"gloss":"house","pl":"houses","count":6000},"f":{"t":".f","pos":"suffix pronoun","g":null,"senses":["he, him, his"],"gloss":"he","subj":"he","poss":"his","aux":"has","count":90000},"k":{"t":".k","pos":"suffix pronoun","g":null,"senses":["you, your (masculine singular)"],"gloss":"you","subj":"you","poss":"your","aux":"have","count":60000},"nn":{"t":".n","pos":"suffix pronoun","g":null,"senses":["we, us, our"],"gloss":"we","subj":"we","poss":"our","aux":"have","count":20000},"i":{"t":".ỉ","pos":"suffix pronoun","g":null,"senses":["I, me, my"],"gloss":"I","subj":"I","poss":"my","aux":"have","count":80000},"nfr":{"t":"nfr","pos":"adjective","g":null,"senses":["good, beautiful"],"gloss":"good","root":"nfr","count":4000},"nfrw":{"t":"nfrw","pos":"noun","g":"m","senses":["beauty, goodness"],"gloss":"beauty","root":"nfr","count":600},"hm1":{"t":"ḥm","pos":"noun","g":"m","senses":["servant"],"gloss":"servant","pl":"servants","hom":1,"count":900},"hm2":{"t":"ḥm","pos":"noun","g":"m","senses":["majesty"],"gloss":"majesty","hom":2,"count":2500},"ntr":{"t":"nṯr","pos":"noun","g":"m","senses":["god"],"gloss":"god","pl":"gods","count":7000},"hmntr":{"t":"ḥm-nṯr","pos":"noun","g":"m","senses":["priest (literally: god's servant)"],"gloss":"priest","pl":"priests","parts":["hm1","ntr"],"count":1500},"nsw":{"t":"nsw","pos":"noun","g":"m","senses":["king"],"gloss":"king","pl":"kings","alt":"nswt","count":8000},"htp":{"t":"ḥtp","pos":"noun","g":"m","senses":["offering"],"gloss":"offering","pl":"offerings","count":3500},"di":{"t":"dỉ","pos":"verb","g":null,"senses":["give"],"gloss":"give","pp":"given","s3":"gives","count":20000},"sdm":{"t":"sḏm","pos":"verb","g":null,"senses":["hear"],"gloss":"hear","pp":"heard","s3":"hears","vclass":"3-lit","count":4000},"ph":{"t":"pḥ","pos":"verb","g":null,"senses":["reach, arrive at"],"gloss":"reach","pp":"reached","s3":"reaches","vclass":"2-lit","count":1200},"dd":{"t":"ḏd","pos":"verb","g":null,"senses":["say, speak"],"gloss":"say","pp":"said","s3":"says","vclass":"2-lit","count":30000},"mk":{"t":"mk","pos":"particle","g":null,"senses":["look, behold"],"gloss":"look","count":2500},"hnw":{"t":"ẖnw","pos":"noun","g":"m","senses":["home, residence; interior"],"gloss":"home","art":false,"count":1800},"nb1":{"t":"nb","pos":"noun","g":"m","senses":["lord, master"],"gloss":"lord","pl":"lords","hom":1,"count":15000},"nb2":{"t":"nb","pos":"adjective","g":null,"senses":["every, all"],"gloss":"every","hom":2,"count":12000},"mnkhpr":{"t":"Mn-ḫpr-Rꜥ","pos":"proper noun","g":null,"senses":["Menkheperre (throne name of Thutmose III)"],"gloss":"Menkheperre","art":false,"count":400}},"spellings":[{"id":"ra_full","lemma":"ra","form":"base","t":"rꜥ","mdc":"r:a-ra-Z1","primary":1,"cart":0,"signs":[{"c":"D21","f":"uni","rp":null,"comp":0},{"c":"D36","f":"uni","rp":null,"comp":0},{"c":"N5","f":"det","rp":null,"comp":0},{"c":"Z1","f":"det","rp":null,"comp":0}]},{"id":"ra_short","lemma":"ra","form":"base","t":"rꜥ","mdc":"ra-Z1","primary":0,"cart":0,"signs":[{"c":"N5","f":"log","rp":null,"comp":0},{"c":"Z1","f":"det","rp":null,"comp":0}]},{"id":"m","lemma":"m","form":"base","t":"m","mdc":"m","primary":1,"cart":0,"signs":[{"c":"G17","f":"uni","rp":null,"comp":0}]},{"id":"n","lemma":"n","form":"base","t":"n","mdc":"n","primary":1,"cart":0,"signs":[{"c":"N35","f":"uni","rp":null,"comp":0}]},{"id":"pt","lemma":"pt","form":"base","t":"pt","mdc":"p*t:pt","primary":1,"cart":0,"signs":[{"c":"Q3","f":"uni","rp":null,"comp":0},{"c":"X1","f":"uni","rp":null,"comp":0},{"c":"N1","f":"det","rp":null,"comp":0}]},{"id":"pr","lemma":"pr","form":"base","t":"pr","mdc":"pr-Z1","primary":1,"cart":0,"signs":[{"c":"O1","f":"log","rp":null,"comp":0},{"c":"Z1","f":"det","rp":null,"comp":0}]},{"id":"prw","lemma":"pr","form":"plural","t":"prw","mdc":"pr-Z1-Z2","primary":1,"cart":0,"signs":[{"c":"O1","f":"log","rp":null,"comp":0},{"c":"Z1","f":"det","rp":null,"comp":0},{"c":"Z2","f":"det","rp":null,"comp":0}]},{"id":"f","lemma":"f","form":"base","t":".f","mdc":"f","primary":1,"cart":0,"signs":[{"c":"I9","f":"uni","rp":null,"comp":0}]},{"id":"k","lemma":"k","form":"base","t":".k","mdc":"k","primary":1,"cart":0,"signs":[{"c":"V31","f":"uni","rp":null,"comp":0}]},{"id":"nn","lemma":"nn","form":"base","t":".n","mdc":"n:Z2","primary":1,"cart":0,"signs":[{"c":"N35","f":"uni","rp":null,"comp":0},{"c":"Z2","f":"det","rp":null,"comp":0}]},{"id":"i","lemma":"i","form":"base","t":".ỉ","mdc":"A1","primary":1,"cart":0,"signs":[{"c":"A1","f":"log","rp":null,"comp":0}]},{"id":"nfr","lemma":"nfr","form":"base","t":"nfr","mdc":"nfr","primary":1,"cart":0,"signs":[{"c":"F35","f":"tri","rp":null,"comp":0}]},{"id":"nfr_c","lemma":"nfr","form":"base","t":"nfr","mdc":"nfr-f:r","primary":0,"cart":0,"signs":[{"c":"F35","f":"tri","rp":null,"comp":0},{"c":"I9","f":"uni","rp":null,"comp":1},{"c":"D21","f":"uni","rp":null,"comp":1}]},{"id":"nfrw","lemma":"nfrw","form":"base","t":"nfrw","mdc":"nfr-w-Z2","primary":1,"cart":0,"signs":[{"c":"F35","f":"tri","rp":null,"comp":0},{"c":"G43","f":"uni","rp":null,"comp":0},{"c":"Z2","f":"det","rp":null,"comp":0}]},{"id":"hm1","lemma":"hm1","form":"base","t":"ḥm","mdc":"Hm-Z1","primary":1,"cart":0,"signs":[{"c":"U36","f":"bi","rp":null,"comp":0},{"c":"Z1","f":"det","rp":null,"comp":0}]},{"id":"hm2","lemma":"hm2","form":"base","t":"ḥm","mdc":"Hm-Z1","primary":1,"cart":0,"signs":[{"c":"U36","f":"bi","rp":null,"comp":0},{"c":"Z1","f":"det","rp":null,"comp":0}]},{"id":"ntr","lemma":"ntr","form":"base","t":"nṯr","mdc":"nTr-Z1","primary":1,"cart":0,"signs":[{"c":"R8","f":"tri","rp":null,"comp":0},{"c":"Z1","f":"det","rp":null,"comp":0}]},{"id":"hmntr","lemma":"hmntr","form":"base","t":"ḥm-nṯr","mdc":"nTr-Hm","primary":1,"cart":0,"signs":[{"c":"R8","f":"tri","rp":2,"comp":0},{"c":"U36","f":"bi","rp":1,"comp":0}]},{"id":"nsw","lemma":"nsw","form":"base","t":"nsw","mdc":"sw-t:n","primary":1,"cart":0,"signs":[{"c":"M23","f":"bi","rp":2,"comp":0},{"c":"X1","f":"uni","rp":3,"comp":0},{"c":"N35","f":"uni","rp":1,"comp":0}]},{"id":"htp","lemma":"htp","form":"base","t":"ḥtp","mdc":"Htp:t*p","primary":1,"cart":0,"signs":[{"c":"R4","f":"tri","rp":null,"comp":0},{"c":"X1","f":"uni","rp":null,"comp":1},{"c":"Q3","f":"uni","rp":null,"comp":1}]},{"id":"di","lemma":"di","form":"base","t":"dỉ","mdc":"di","primary":1,"cart":0,"signs":[{"c":"X8","f":"log","rp":null,"comp":0}]},{"id":"sdm","lemma":"sdm","form":"base","t":"sḏm","mdc":"sDm-m","primary":1,"cart":0,"signs":[{"c":"F21","f":"tri","rp":null,"comp":0},{"c":"G17","f":"uni","rp":null,"comp":1}]},{"id":"ph","lemma":"ph","form":"base","t":"pḥ","mdc":"p-pH-D54","primary":1,"cart":0,"signs":[{"c":"Q3","f":"uni","rp":null,"comp":1},{"c":"F22","f":"bi","rp":null,"comp":0},{"c":"D54","f":"det","rp":null,"comp":0}]},{"id":"phn","lemma":"ph","form":"sdm_n_f","t":"pḥ.n","mdc":"p-pH-D54-n","primary":1,"cart":0,"signs":[{"c":"Q3","f":"uni","rp":null,"comp":1},{"c":"F22","f":"bi","rp":null,"comp":0},{"c":"D54","f":"det","rp":null,"comp":0},{"c":"N35","f":"uni","rp":null,"comp":0}]},{"id":"dd","lemma":"dd","form":"base","t":"ḏd","mdc":"D:d","primary":1,"cart":0,"signs":[{"c":"I10","f":"uni","rp":null,"comp":0},{"c":"D46","f":"uni","rp":null,"comp":0}]},{"id":"mk","lemma":"mk","form":"base","t":"mk","mdc":"m:a-k","primary":1,"cart":0,"signs":[{"c":"G17","f":"uni","rp":null,"comp":0},{"c":"D36","f":"uni","rp":null,"comp":0},{"c":"V31","f":"uni","rp":null,"comp":0}]},{"id":"hnw","lemma":"hnw","form":"base","t":"ẖnw","mdc":"Xn:n-nw:w-pr","primary":1,"cart":0,"signs":[{"c":"F26","f":"bi","rp":null,"comp":0},{"c":"N35","f":"uni","rp":null,"comp":1},{"c":"W24","f":"bi","rp":null,"comp":0},{"c":"G43","f":"uni","rp":null,"comp":1},{"c":"O1","f":"det","rp":null,"comp":0}]},{"id":"nb1","lemma":"nb1","form":"base","t":"nb","mdc":"nb","primary":1,"cart":0,"signs":[{"c":"V30","f":"bi","rp":null,"comp":0}]},{"id":"nb2","lemma":"nb2","form":"base","t":"nb","mdc":"nb","primary":1,"cart":0,"signs":[{"c":"V30","f":"bi","rp":null,"comp":0}]},{"id":"mnkhpr","lemma":"mnkhpr","form":"base","t":"Mn-ḫpr-Rꜥ","mdc":"<-ra-mn-xpr->","primary":1,"cart":1,"signs":[{"c":"N5","f":"log","rp":3,"comp":0},{"c":"Y5","f":"bi","rp":1,"comp":0},{"c":"L1","f":"tri","rp":2,"comp":0}]}],"sentences":[{"id":"S1","toks":[{"sp":"mk","sense":0,"role":"particle","wp":null,"status":"intact"},{"sp":"phn","sense":0,"role":"predicate","wp":null,"status":"intact"},{"sp":"nn","sense":0,"role":"subject","wp":null,"status":"intact"},{"sp":"hnw","sense":0,"role":"object","wp":null,"status":"intact"}],"t":"mk pḥ.n.n ẖnw","pattern":"perfect","lit":"Look, reached-have we home","free":"Look, we have reached home","src":{"work":"The Shipwrecked Sailor","witness":"P. Hermitage 1115","line":"lines 2–3","passage":"ShS 2-3","note":"The papyrus is written in hieratic. The hieroglyphs are a modern transcription."}},{"id":"S2","toks":[{"sp":"ra_full","sense":0,"role":"subject","wp":null,"status":"intact"},{"sp":"m","sense":0,"role":"predicate","wp":null,"status":"intact"},{"sp":"pt","sense":0,"role":"complement","wp":null,"status":"intact"}],"t":"rꜥ m pt","pattern":"adverbial","lit":"Re (is) in sky","free":"Re is in the sky","src":{"work":"Grammar examples","witness":"Example A","line":"line 1","passage":"G1","note":"Constructed textbook example, not from a monument."}},{"id":"S3","toks":[{"sp":"ra_short","sense":0,"role":"subject","wp":null,"status":"intact"},{"sp":"m","sense":0,"role":"predicate","wp":null,"status":"intact"},{"sp":"pt","sense":0,"role":"complement","wp":null,"status":"restored"}],"t":"rꜥ m pt","pattern":"adverbial","lit":"Re (is) in sky","free":"Re is in the sky","src":{"work":"Grammar examples","witness":"Example B","line":"line 1","passage":"G1","note":"Constructed variant with a shorter spelling of rꜥ. The last word is marked as restored."}},{"id":"S4","toks":[{"sp":"nfr","sense":0,"role":"predicate","wp":null,"status":"intact"},{"sp":"pr","sense":0,"role":"subject","wp":null,"status":"intact"},{"sp":"f","sense":0,"role":"possessor","wp":null,"status":"intact"}],"t":"nfr pr.f","pattern":"adjectival","lit":"Good (is) his house","free":"His house is good","src":{"work":"Grammar examples","witness":"Example A","line":"line 2","passage":"G2","note":"Constructed textbook example."}},{"id":"S5","toks":[{"sp":"htp","sense":0,"role":null,"wp":2,"status":"intact"},{"sp":"di","sense":0,"role":null,"wp":3,"status":"intact"},{"sp":"nsw","sense":0,"role":null,"wp":1,"status":"intact"}],"t":"ḥtp dỉ nsw","pattern":"formula","lit":"Offering gives king","free":"An offering which the king gives","src":{"work":"Offering formula","witness":"Stelae (generic)","line":"opening words","passage":"OF1","note":"Opening of the offering formula. The word for king is written first out of respect but read last."}},{"id":"S6","toks":[{"sp":"nsw","sense":0,"role":"head","wp":null,"status":"intact"},{"sp":"mnkhpr","sense":0,"role":"apposition","wp":null,"status":"intact"}],"t":"nsw Mn-ḫpr-Rꜥ","pattern":"apposition","lit":"King Menkheperre","free":"King Menkheperre","src":{"work":"Royal caption","witness":"Example C","line":"line 1","passage":"RC1","note":"Constructed caption with a throne name in a cartouche."}}],"patterns":{"adverbial":{"gardiner":"Sentence with adverbial predicate","standard":"Adverbial sentence","allen":"Adverbial sentence"},"adjectival":{"gardiner":"Sentence with adjectival predicate","standard":"Adjectival sentence","allen":"Adjectival sentence"},"perfect":{"gardiner":"Verbal sentence with sḏm.n.f","standard":"Circumstantial sḏm.n.f after particle","allen":"Verbal sentence, perfect"},"sdm_f":{"gardiner":"Verbal sentence with sḏm.f","standard":"sḏm.f clause","allen":"Verbal sentence, imperfective or subjunctive"},"formula":{"gardiner":"Offering formula","standard":"Offering formula","allen":"Offering formula"},"apposition":{"gardiner":"Noun with name in apposition","standard":"Apposition","allen":"Apposition"}},"forms":{"base":{"gardiner":"base form","standard":"base form","allen":"base form"},"plural":{"gardiner":"plural","standard":"plural","allen":"plural"},"sdm_n_f":{"gardiner":"sḏm.n.f form","standard":"circumstantial sḏm.n.f","allen":"perfect"},"sdm_f":{"gardiner":"sḏm.f form","standard":"sḏm.f","allen":"imperfective or subjunctive"}},"rules":[{"form":"sdm_n_f","pos":"verb","affix":".n","signs":["N35"]},{"form":"plural","pos":"noun","affix":"w","signs":["Z2"]}],"entities":[{"lemma":"mnkhpr","name":"Thutmose III","type":"King","lines":[["Name type","Throne name, written in a cartouche"],["Dynasty","18th Dynasty, New Kingdom"],["Reign","c. 1479–1425 BCE"],["Reign, older chronology","c. 1504–1450 BCE"]]},{"lemma":"ra","name":"Re","type":"Deity","lines":[["Role","Sun god"],["Cult place","Heliopolis (ancient ỉwnw)"]]}],"letters":["ꜣ","ỉ","y","ꜥ","w","b","p","f","m","n","r","h","ḥ","ḫ","ẖ","z","s","š","ḳ","k","g","t","ṯ","d","ḏ"],"loose":["a","i","y","a","w","b","p","f","m","n","r","h","h","h","h","z","s","s","k","k","g","t","t","d","d"],"mdc":["A","i","y","a","w","b","p","f","m","n","r","h","H","x","X","z","s","S","q","k","g","t","T","d","D"],"scans":[{"id":"P1","title":"Papyrus fragment","sub":"Clear, one damaged sign","dir":"rtl","conf":0.78,"words":[{"conf":0.95,"signs":[{"c":"D21","conf":0.97,"status":"intact","alts":[]},{"c":"D36","conf":0.96,"status":"intact","alts":[]},{"c":"N5","conf":0.93,"status":"intact","alts":[]},{"c":"Z1","conf":0.98,"status":"intact","alts":[]}]},{"conf":0.99,"signs":[{"c":"G17","conf":0.99,"status":"intact","alts":[]}]},{"conf":0.62,"signs":[{"c":"Q3","conf":0.9,"status":"intact","alts":[]},{"c":"X1","conf":0.88,"status":"intact","alts":[]},{"c":"N1","conf":0.45,"status":"partial","alts":[["N1",0.45],["N35",0.3],["O1",0.12]]}]}]},{"id":"P2","title":"Stela with cartouche","sub":"Worn surface, one sign lost","dir":"ltr","conf":0.61,"words":[{"conf":0.9,"signs":[{"c":"M23","conf":0.92,"status":"intact","alts":[]},{"c":"X1","conf":0.9,"status":"intact","alts":[]},{"c":"N35","conf":0.89,"status":"intact","alts":[]}]},{"conf":0.58,"cart":1,"signs":[{"c":"N5","conf":0.91,"status":"intact","alts":[]},{"c":"Y5","conf":0.52,"status":"partial","alts":[["Y5",0.52],["N35",0.31]]},{"c":"L1","conf":0.34,"status":"restored","alts":[["L1",0.34],["G17",0.22]]}]}]}]};
+const APP = true;   /* sand i den installerbare webapp: gemmer lokalt, kobler tilbageknappen og virker uden net */
+const $ = (s, r) => (r || document).querySelector(s);
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+/* ---------- data og indeks ---------- */
+const SG = {}; D.signs.forEach(s => { SG[s.c] = s; });
+const canon = c => (SG[c] && SG[c].base) || c;
+const valuesOf = c => { const s = SG[c]; if (!s) return []; return s.v.length ? s.v : (s.base ? SG[s.base].v : []); };
+Object.keys(D.lemmas).forEach(k => { D.lemmas[k].id = k; });
+const SP = {}, GROUPS = {}, BYFIRST = {};
+D.spellings.forEach(sp => {
+  sp.lem = D.lemmas[sp.lemma]; sp.codes = sp.signs.map(x => canon(x.c)); sp.key = sp.codes.join('-'); SP[sp.id] = sp;
+  (GROUPS[sp.key] = GROUPS[sp.key] || []).push(sp);
+});
+Object.keys(GROUPS).forEach(k => { const g = GROUPS[k]; (BYFIRST[g[0].codes[0]] = BYFIRST[g[0].codes[0]] || []).push(g); });
+D.sentences.forEach(s => {
+  s.written = s.toks.map((t, i) => ({ t, o: t.wp || i + 1 })).sort((a, b) => a.o - b.o).map(x => x.t);
+  s.codes = s.written.reduce((a, t) => a.concat(SP[t.sp].codes), []); s.key = s.codes.join('-');
+  s.wkey = s.written.map(t => SP[t.sp].key).join(' ');   /* tegn adskilt af bindestreg, ord adskilt af mellemrum */
+});
+const SEN = {}; D.sentences.forEach(s => { SEN[s.id] = s; });
+const FUNC = { uni: 'uniliteral', bi: 'biliteral', tri: 'triliteral', log: 'logogram', det: 'determinative', num: 'numeral' };
+const ROLE = { particle: 'particle', predicate: 'predicate', subject: 'subject', object: 'object', complement: 'complement', possessor: 'possessor', head: 'head noun', apposition: 'apposition' };
+
+/* ---------- tilstand ---------- */
+const S = { mode: 'sentence', detail: 'basic', trans: 'free', trad: 'gardiner', scheme: 'gardiner', dir: 'ltr', conf: true, hist: 50 };
+const state = { buf: [], stack: [], favs: [], hist: [], favSort: 'new', saved: 'fav', scan: null, scanWord: 0, scanEdits: {}, seq: 0, sugg: 0 };
+
+/* ---------- translitteration ---------- */
+const RANK = {}, LOOSE = {}, MDC = {};
+D.letters.forEach((l, i) => { RANK[l] = i; LOOSE[l] = D.loose[i]; MDC[l] = D.mdc[i]; });
+function tl(s) {
+  if (S.scheme === 'tla') return s.replace(/ỉ/g, 'j').replace(/ḳ/g, 'q').replace(/Ỉ/g, 'J');
+  if (S.scheme === 'mdc') return Array.from(s.toLowerCase()).map(ch => MDC[ch] || ch).join('');
+  return s;
+}
+const fold = s => Array.from(s.toLowerCase()).map(ch => LOOSE[ch] || '').join('');
+const sortKey = s => Array.from(s.toLowerCase()).map(ch => ch in RANK ? String.fromCharCode(97 + RANK[ch]) : '').join('');
+const T = s => '<span class="tl">' + esc(tl(s)) + '</span>';
+
+/* ---------- tegn på skærmen ---------- */
+/* Tre slags huller: '?' er ét tabt tegn, '*' er tabte tegn i ukendt antal, '_' er et tabt ord. */
+const isLost = c => c === '?' || c === '*' || c === '_';
+const lacHTML = c => c === '*' ? '<span class="lac lacm">▨<i>⋯</i></span>' : (c === '_' ? '<span class="lac lacw">⋯</span>' : '<span class="lac">▨</span>');
+/* En tegnfølge med huller bliver til et mønster over stavemådens søgenøgle. Hvert led fanges, så man kan se, hvor mange tegn et hul dækker. */
+const lostRe = slice => new RegExp('^' + slice.map(c => c === '?' ? '([^-]+)' : (c === '*' ? '([^-]+(?:-[^-]+)*)' : '(' + c + ')')).join('-') + '$');
+const lostFill = (slice, sp) => { const m = lostRe(slice).exec(sp.key); return m ? m.slice(1).map(x => x.split('-').length) : null; };
+const baseCodes = w => w.rule ? w.codes.slice(0, w.codes.length - w.rule.signs.length) : w.codes;
+/* ---------- kvadrater ----------
+   En kvadrat er kun en opstilling af tegn, der i forvejen står i rækkefølge. Træet siger, hvad der står over (v) og ved siden af (h) hinanden;
+   bladene er tegnenes plads i rækkefølgen. Søgning og læsning bruger stadig den flade rækkefølge.
+   Tegnenes faktiske omrids måles i skrifttypen, så de kan stilles tæt og skaleres samlet ned til én kvadrat. */
+const FAM = getComputedStyle(document.documentElement).getPropertyValue('--glyph').trim() || 'serif';
+const INK = {}; let QH = 1, QD = 0;
+function measureInk() {
+  const cx = document.createElement('canvas').getContext('2d'); cx.font = '1000px ' + FAM; cx.textBaseline = 'alphabetic';
+  let hh = 0, dd = 0;
+  D.signs.forEach(s => {
+    const m = cx.measureText(s.ch), w = (m.actualBoundingBoxLeft + m.actualBoundingBoxRight) / 1000, h = (m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) / 1000;
+    INK[s.c] = { l: m.actualBoundingBoxLeft / 1000, a: m.actualBoundingBoxAscent / 1000, w: Math.max(w, .05), h: Math.max(h, .05) };
+    hh = Math.max(hh, h); dd = Math.max(dd, m.actualBoundingBoxDescent / 1000);
+  });
+  QH = hh || 1; QD = dd;
+}
+measureInk();
+const QGAP = 0.1;
+/* Pladsen i kvadraten deles, som man fylder vand i kar: et tegn, der fylder lidt (en flad vandlinje i en stak), får det, det skal bruge,
+   og resten deles ligeligt mellem de store. Hvert tegn skaleres for sig til sin plads, aldrig op over sin naturlige størrelse. */
+function qFill(need, avail) {
+  if (need.reduce((a, b) => a + b, 0) <= avail) return need.slice();
+  const s = need.slice().sort((x, y) => x - y); let rem = avail, tau = 0;
+  for (let i = 0; i < s.length; i++) { if (s[i] * (s.length - i) <= rem) rem -= s[i]; else { tau = rem / (s.length - i); break; } }
+  return need.map(v => Math.min(v, tau));
+}
+function qFit(node, codes, W, H) {
+  if (typeof node === 'number') { const k = INK[codes[node]], s = Math.min(1, W / k.w, H / k.h); return { w: k.w * s, h: k.h * s, put: (x, y, out) => out.push({ c: codes[node], x, y, s }) }; }
+  if (node.t === 'g') {   /* gitter: rækker og kolonner flugter */
+    const R = node.k.length, C = node.k[0].length, nat = node.k.map(r => r.map(n => qFit(n, codes, Infinity, Infinity)));
+    const cw = qFill(Array.from({ length: C }, (x, j) => Math.max(...nat.map(r => r[j].w))), W - QGAP * (C - 1));
+    const rh = qFill(Array.from({ length: R }, (x, i) => Math.max(...nat[i].map(c => c.h))), H - QGAP * (R - 1));
+    const kids = node.k.map((r, i) => r.map((n, j) => qFit(n, codes, cw[j], rh[i])));
+    const aw = cw.map((x, j) => Math.max(...kids.map(r => r[j].w))), ah = rh.map((x, i) => Math.max(...kids[i].map(c => c.h)));
+    return { w: aw.reduce((p, q) => p + q, 0) + QGAP * (C - 1), h: ah.reduce((p, q) => p + q, 0) + QGAP * (R - 1), put: (x, y, out) => {
+      let cy = y; kids.forEach((r, i) => { let cx = x; r.forEach((k, j) => { k.put(cx + (aw[j] - k.w) / 2, cy + (ah[i] - k.h) / 2, out); cx += aw[j] + QGAP; }); cy += ah[i] + QGAP; }); } };
+  }
+  const n = node.k.length, gaps = QGAP * (n - 1);
+  if (node.t === 'h') {
+    const need = node.k.map(c => qFit(c, codes, Infinity, H).w), al = qFill(need, W - gaps), kids = node.k.map((c, i) => qFit(c, codes, al[i], H));
+    const w = kids.reduce((p, k) => p + k.w, 0) + gaps, h = Math.max(...kids.map(k => k.h));
+    return { w, h, put: (x, y, out) => { let cx = x; kids.forEach(k => { k.put(cx, y + (h - k.h) / 2, out); cx += k.w + QGAP; }); } };
+  }
+  const need = node.k.map(c => qFit(c, codes, W, Infinity).h), al = qFill(need, H - gaps), kids = node.k.map((c, i) => qFit(c, codes, W, al[i]));
+  const w = Math.max(...kids.map(k => k.w)), h = kids.reduce((p, k) => p + k.h, 0) + gaps;
+  return { w, h, put: (x, y, out) => { let cy = y; kids.forEach(k => { k.put(x + (w - k.w) / 2, cy, out); cy += k.h + QGAP; }); } };
+}
+function quadSVG(codes, tree) {
+  const g = qFit(tree, codes, QH, QH), out = []; g.put(0, (QH - g.h) / 2, out);
+  const u = v => Math.round(v * 1000);
+  return '<svg class="quad" viewBox="0 0 ' + u(g.w) + ' ' + u(QH) + '" style="width:' + g.w.toFixed(3) + 'em;height:' + QH.toFixed(3) + 'em;vertical-align:' + (-QD).toFixed(3) + 'em" aria-hidden="true">' +
+    out.map(o => { const k = INK[o.c]; return '<text data-c="' + o.c + '" x="' + u(o.x + k.l * o.s) + '" y="' + u(o.y + k.a * o.s) + '" font-size="' + u(o.s) + '">' + esc(SG[o.c].ch) + '</text>'; }).join('') + '</svg>';
+}
+/* Opstillingen skrevet i Manuel de Codage: kolon er over hinanden, stjerne er ved siden af hinanden. */
+function mdcOf(codes, node, inner) {
+  if (typeof node === 'number') return codes[node];
+  let s;
+  if (node.t === 'g') s = node.cm ? node.k[0].map((x, j) => '(' + node.k.map(r => mdcOf(codes, r[j], true)).join(':') + ')').join('*') : node.k.map(r => '(' + r.map(n => mdcOf(codes, n, true)).join('*') + ')').join(':');
+  else s = node.k.map(n => mdcOf(codes, n, true)).join(node.t === 'v' ? ':' : '*');
+  return inner ? '(' + s + ')' : s;
+}
+/* En gemt stavemådes opstilling læses ud af dens MdC-tekst. Passer antallet af tegn ikke, vises den på én række. */
+function parseMdc(mdc, n) {
+  const quads = []; let at = 0;
+  for (const g of String(mdc || '').replace(/^<-/, '').replace(/->$/, '').split('-')) {
+    const rows = g.split(':').map(r => r.split('*')), cnt = rows.reduce((a, r) => a + r.length, 0);
+    if (cnt > 1) { let i = 0; quads.push({ at, n: cnt, tree: rows.length === 1 ? { t: 'h', k: rows[0].map(() => i++) } : { t: 'v', k: rows.map(r => r.length === 1 ? i++ : { t: 'h', k: r.map(() => i++) }) } }); }
+    at += cnt;
+  }
+  return at === n ? quads : [];
+}
+D.spellings.forEach(sp => { sp.quads = parseMdc(sp.mdc, sp.signs.length); });
+function seqHTML(codes, quads) {
+  let out = '', i = 0;
+  while (i < codes.length) {
+    const q = quads && quads.find(x => x.at === i && x.at + x.n <= codes.length && codes.slice(i, i + x.n).every(c => INK[c]));
+    if (q) { out += quadSVG(codes.slice(i, i + q.n), q.tree); i += q.n; }
+    else { const c = codes[i]; out += isLost(c) ? lacHTML(c) : esc(SG[c].ch); i++; }
+  }
+  return out;
+}
+function G(codes, cls, quads) {
+  return '<span class="gl' + (S.dir === 'rtl' ? ' rtl' : '') + (cls ? ' ' + cls : '') + '">' + seqHTML(codes, quads) + '</span>';
+}
+/* Et ord, hvor et tabt tegn er udfyldt: det udfyldte tegn vises i klammer. */
+/* w.marks: tegn i en gemt stavemåde, som er udfyldt ud fra brugerens indtastning. De vises i klammer, også efter at man har åbnet forslaget. */
+function GW(w, cls) {
+  const open = '<span class="gl' + (S.dir === 'rtl' ? ' rtl' : '') + (cls ? ' ' + cls : '') + '">';
+  const fill = w.lost ? lostFill(baseCodes(w), w.sp) : null;
+  let inner, p = 0;
+  if ((w.marks && w.marks.length) || (w.cont && w.cont.length)) {
+    const kind = i => (w.marks && w.marks.includes(i)) ? 'rest' : ((w.cont && w.cont.includes(i)) ? 'cont' : '');
+    let out = '', cur = '';
+    w.codes.forEach((c, i) => { const k = kind(i); if (k !== cur) { if (cur) out += '</span>'; if (k) out += '<span class="' + k + '">'; cur = k; } out += isLost(c) ? lacHTML(c) : esc(SG[c].ch); });
+    inner = open + out + (cur ? '</span>' : '') + '</span>';
+  } else if (!fill) inner = G(w.codes, cls, w.quads || (w.sp.signs && w.codes.length === w.sp.signs.length && w.codes.every((c, i) => c === w.sp.signs[i].c) ? w.sp.quads : null));
+  else inner = open + w.codes.map((c, i) => {
+    if (i >= fill.length) return esc(SG[c].ch);
+    const part = w.sp.signs.slice(p, p + fill[i]); p += fill[i];
+    return isLost(c) ? '<span class="rest">' + part.map(x => esc(SG[x.c].ch)).join('') + '</span>' : esc(SG[c].ch);
+  }).join('') + '</span>';
+  return w.sp.cart ? '<span class="cart">' + inner + '</span>' : inner;
+}
+/* Hvilke tegn i en gemt stavemåde brugeren ikke selv har skrevet. rest: udfylder et hul, brugeren har markeret. cont: står der bare ikke i indtastningen. */
+function diffMarks(sp, user) {
+  if (user.some(isLost) && lostFill(user, sp)) return { rest: restIdx(sp, user), cont: [] };
+  const a = user.filter(c => !isLost(c)).map(canon), b = sp.codes, n = a.length, m = b.length;
+  const L = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  const keep = []; let i = 0, j = 0;
+  while (i < n && j < m) { if (a[i] === b[j]) { keep.push(j); i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) i++; else j++; }
+  const other = b.map((x, q) => q).filter(q => !keep.includes(q));
+  return user.some(isLost) ? { rest: other, cont: [] } : { rest: [], cont: other };
+}
+/* Hvilke af stavemådens tegn et sæt huller dækker. */
+function restIdx(sp, slice) {
+  const fill = lostFill(slice, sp) || [], out = []; let p = 0;
+  slice.forEach((c, i) => { const k = fill[i] || 0; if (isLost(c)) for (let q = 0; q < k; q++) out.push(p + q); p += k; });
+  return out;
+}
+const GS = (sp, cls) => sp.cart ? '<span class="cart">' + G(sp.signs.map(x => x.c), cls, sp.quads) + '</span>' : G(sp.signs.map(x => x.c), cls, sp.quads);
+
+/* ---------- spor til sidepanelet ---------- */
+let TR = [];
+function trace(title) { TR = []; $('#tracetitle').textContent = title; }
+function step(tables, text) { TR.push('<li>' + tables.map(t => '<span class="tb">' + t + '</span>').join(' ') + esc(text) + '</li>'); $('#trace').innerHTML = TR.join(''); }
+
+/* ---------- motor: opdeling i ord ---------- */
+const sharedValue = (a, b) => { const x = valuesOf(a).filter(v => v.t).map(v => v.t), y = valuesOf(b).filter(v => v.t).map(v => v.t); return x.find(v => y.includes(v)) || null; };
+function segment(codes) {
+  const n = codes.length, best = new Array(n + 1).fill(null); best[0] = { score: 0, toks: [] };
+  const put = (j, score, toks, tok) => { const b = best[j]; if (!b || score > b.score || (score === b.score && toks.length + 1 < b.toks.length)) best[j] = { score, toks: toks.concat([tok]) }; };
+  for (let i = 0; i < n; i++) {
+    const cur = best[i]; if (!cur) continue;
+    const prev = cur.toks[cur.toks.length - 1];
+    /* Tabte tegn inde i et ord: en kendt stavemåde må dække hullet, når mindst ét bevaret tegn passer på sin plads. */
+    for (let j = i + 2; j <= Math.min(n, i + 8); j++) {
+      const sl = codes.slice(i, j); if (sl.includes('_')) break;
+      const wild = sl.filter(isLost), realN = sl.length - wild.length; if (!wild.length || !realN) continue;
+      const re = lostRe(sl), alts = [];
+      Object.keys(GROUPS).forEach(k => { if (re.test(k)) alts.push(...GROUPS[k]); });
+      if (alts.length) put(j, cur.score + 10 * realN - 1 - wild.reduce((a, c) => a + (c === '*' ? 2 : 1), 0), cur.toks, { type: 'word', alts, len: j - i, lost: true });
+    }
+    if (codes[i] === '_') { put(i + 1, cur.score - 1, cur.toks, { type: 'gap', len: 1 }); continue; }
+    if (isLost(codes[i])) { put(i + 1, cur.score - 2, cur.toks, { type: 'lacuna', len: 1 }); continue; }
+    (BYFIRST[codes[i]] || []).forEach(g => {
+      const c = g[0].codes;
+      if (c.every((x, k) => codes[i + k] === x)) put(i + c.length, cur.score + 10 * c.length - 1, cur.toks, { type: 'word', alts: g, len: c.length });
+    });
+    Object.keys(GROUPS).forEach(k => {
+      const g = GROUPS[k], c = g[0].codes;
+      if (c.length < 2 || i + c.length > n) return;
+      const diff = []; c.forEach((x, m) => { if (codes[i + m] !== x) diff.push(m); });
+      if (diff.length === 1 && !isLost(codes[i + diff[0]])) {
+        const v = sharedValue(codes[i + diff[0]], c[diff[0]]);
+        if (v) put(i + c.length, cur.score + 10 * c.length - 4, cur.toks, { type: 'word', alts: g, len: c.length, fuzzy: { typed: codes[i + diff[0]], expected: c[diff[0]], value: v } });
+      }
+    });
+    /* Ét tegn udeladt: en kendt stavemåde må mangle ét tegn, typisk determinativet, når mindst to skrevne tegn passer. */
+    Object.keys(GROUPS).forEach(k => {
+      const g = GROUPS[k], c = g[0].codes, L = c.length - 1;
+      if (L < 2 || i + L > n) return;
+      for (let m = 0; m < c.length; m++) if (c.every((x, q) => q === m || codes[i + (q > m ? q - 1 : q)] === x)) {
+        const det = g[0].signs[m].f === 'det';
+        put(i + L, cur.score + 10 * L - (det ? 4 : 6), cur.toks, { type: 'word', alts: g, len: L, short: { missing: g[0].signs[m].c, det } });
+        break;
+      }
+    });
+    D.rules.forEach(r => {
+      if (prev && prev.type === 'word' && !prev.rule && prev.alts.some(sp => sp.lem.pos === r.pos && sp.form === 'base') && r.signs.every((x, k) => codes[i + k] === x))
+        put(i + r.signs.length, cur.score + 10 * r.signs.length, cur.toks, { type: 'affix', rule: r, len: r.signs.length });
+    });
+    put(i + 1, cur.score - 5, cur.toks, { type: 'unknown', c: codes[i], len: 1 });
+  }
+  const words = []; let p = 0;
+  best[n].toks.forEach(t => {
+    const at = p, codesOf = codes.slice(p, p + t.len); p += t.len;
+    if (t.type === 'affix') { const w = words[words.length - 1]; w.rule = t.rule; w.codes = w.codes.concat(codesOf); w.alts = w.alts.filter(sp => sp.lem.pos === t.rule.pos && sp.form === 'base'); }
+    else if (t.type === 'word') words.push({ kind: 'word', at, alts: t.alts.slice().sort((a, b) => (b.lem.count || 0) - (a.lem.count || 0)), codes: codesOf, fuzzy: t.fuzzy || null, short: t.short || null, rule: null, lost: !!t.lost, status: t.lost ? 'restored' : undefined });
+    else words.push({ kind: t.type, at, codes: codesOf });
+  });
+  return words;
+}
+function resolve(w, sp) {
+  w.sp = sp; w.lem = sp.lem; w.pos = sp.lem.pos;
+  w.form = w.rule ? w.rule.form : sp.form;
+  w.t = w.rule ? (w.rule.form === 'plural' ? sp.t + 'w' : sp.t + w.rule.affix) : sp.t;
+  return w;
+}
+const isN = w => w.pos === 'noun' || w.pos === 'proper noun';
+const plural = w => w.form === 'plural';
+function np(w, poss) {
+  const g = plural(w) ? (w.lem.pl || w.lem.gloss + 's') : w.lem.gloss;
+  if (poss) return poss + ' ' + g;
+  return (w.lem.art === false || w.pos === 'proper noun') ? g : 'the ' + g;
+}
+function matchPattern(ws) {
+  const P = ws.map(w => isN(w) ? 'N' : ({ adjective: 'ADJ', preposition: 'PREP', verb: 'V', 'suffix pronoun': 'SUF', particle: 'PART' })[w.pos] || '?');
+  const sig = P.join(' ');
+  if (sig === 'N PREP N' || sig === 'N PREP N SUF') {
+    const poss = ws[3] ? ws[3].lem.poss : null;
+    return { code: 'adverbial', roles: ['subject', 'predicate', 'complement', 'possessor'], free: cap(np(ws[0])) + (plural(ws[0]) ? ' are ' : ' is ') + ws[1].lem.gloss + ' ' + np(ws[2], poss) };
+  }
+  if (sig === 'ADJ N' || sig === 'ADJ N SUF') {
+    const poss = ws[2] ? ws[2].lem.poss : null;
+    return { code: 'adjectival', roles: ['predicate', 'subject', 'possessor'], free: cap(np(ws[1], poss)) + (plural(ws[1]) ? ' are ' : ' is ') + ws[0].lem.gloss };
+  }
+  if (sig === 'N N' && ws[1].pos === 'proper noun') return { code: 'apposition', roles: ['head', 'apposition'], free: cap(ws[0].lem.gloss) + ' ' + ws[1].lem.gloss };
+  const m = /^(PART )?V (SUF|N)( N( SUF)?)?$/.exec(sig);
+  if (m) {
+    let i = 0; const part = m[1] ? ws[i++] : null, v = ws[i++], subj = ws[i++], obj = m[3] ? ws[i++] : null, op = m[4] ? ws[i++] : null;
+    if (v.form !== 'sdm_n_f' && v.form !== 'base') return null;
+    const suf = subj.pos === 'suffix pronoun', subjStr = suf ? subj.lem.subj : np(subj);
+    const third = suf ? subj.lem.aux === 'has' : !plural(subj);
+    const verb = v.form === 'sdm_n_f' ? (suf ? subj.lem.aux : (plural(subj) ? 'have' : 'has')) + ' ' + v.lem.pp : (third ? v.lem.s3 : v.lem.gloss);
+    const roles = (part ? ['particle'] : []).concat(['predicate', 'subject']).concat(obj ? ['object'] : []).concat(op ? ['possessor'] : []);
+    const core = subjStr + ' ' + verb + (obj ? ' ' + np(obj, op ? op.lem.poss : null) : '');
+    return { code: v.form === 'sdm_n_f' ? 'perfect' : 'sdm_f', roles, free: part ? cap(part.lem.gloss) + ', ' + core : cap(core) };
+  }
+  return null;
+}
+/* Et tabt ord er en tom plads i sætningen. Mønstrene prøves med pladsen som hver af de mulige ordklasser. */
+const GAPLEM = { id: null, t: '[…]', gloss: '[…]', pl: '[…]', pp: '[…]', s3: '[…]', art: false, senses: ['lost word'] };
+const GAPPOS = ['noun', 'verb', 'adjective', 'preposition'];
+function setGap(g, pos) { g.pos = pos; g.lem = GAPLEM; g.form = 'base'; g.t = '[…]'; }
+function analyse(codes) {
+  const words = segment(codes), real = words.filter(w => w.kind === 'word'), gaps = words.filter(w => w.kind === 'gap');
+  const seq = words.filter(w => w.kind === 'word' || w.kind === 'gap');
+  const complete = real.length > 0 && seq.length === words.length;
+  let pattern = null;
+  const combos = real.reduce((acc, w) => { const out = []; acc.forEach(a => w.alts.forEach(sp => out.push(a.concat([sp])))); return out.slice(0, 16); }, [[]]);
+  const gcombos = gaps.reduce((acc, g) => { const out = []; acc.forEach(a => GAPPOS.forEach(p => out.push(a.concat([p])))); return out.slice(0, 16); }, [[]]);
+  if (complete) outer: for (const c of combos) {
+    real.forEach((w, i) => resolve(w, c[i]));
+    for (const gc of gcombos) { gaps.forEach((g, i) => setGap(g, gc[i])); pattern = matchPattern(seq); if (pattern) break outer; }
+  }
+  if (!pattern) { real.forEach(w => resolve(w, w.alts[0])); gaps.forEach(g => setGap(g, null)); }
+  return { words, real, seq, gaps, complete, pattern };
+}
+const joinT = ws => ws.reduce((s, w) => s + (w.kind !== 'word' ? (s ? ' ' : '') + '…' : ((w.pos === 'suffix pronoun' || !s) ? '' : ' ') + w.t), '');
+const formLabel = f => D.forms[f][S.trad];
+function fuzzy(codes) {
+  const out = [], seen = {};
+  if (codes.some(isLost)) return out;
+  Object.keys(GROUPS).forEach(k => {
+    const g = GROUPS[k], c = g[0].codes; let why = null, rank = 9;
+    if (c.length === codes.length) {
+      const diff = []; c.forEach((x, m) => { if (codes[m] !== x) diff.push(m); });
+      if (diff.length === 1) { const v = sharedValue(codes[diff[0]], c[diff[0]]); if (v) { why = 'One sign replaced by another with the same value: ' + codes[diff[0]] + ' and ' + c[diff[0]] + ' both write ' + tl(v); rank = 0; } else { why = 'One sign is different: ' + codes[diff[0]] + ' where ' + c[diff[0]] + ' is expected'; rank = 3; } }
+    } else if (c.length === codes.length + 1) {
+      for (let m = 0; m < c.length; m++) if (c.filter((x, q) => q !== m).join('-') === codes.join('-')) { why = 'Your input lacks one sign: ' + c[m]; rank = 1; break; }
+    } else if (c.length === codes.length - 1) {
+      for (let m = 0; m < codes.length; m++) if (codes.filter((x, q) => q !== m).join('-') === c.join('-')) { why = 'Your input has one extra sign: ' + codes[m]; rank = 2; break; }
+    }
+    if (why) g.forEach(sp => { if (!seen[sp.lemma + sp.form]) { seen[sp.lemma + sp.form] = 1; out.push({ sp, why, rank }); } });
+  });
+  return out.sort((a, b) => a.rank - b.rank || (b.sp.lem.count || 0) - (a.sp.lem.count || 0)).slice(0, 6);
+}
+
+/* ---------- favoritter og historik ---------- */
+const favKey = f => f.kind + ':' + (f.ref || f.mode + '/' + f.codes.join('-'));
+function isFav(f) { return state.favs.some(x => favKey(x) === favKey(f)); }
+function toggleFav(f) {
+  const k = favKey(f), i = state.favs.findIndex(x => favKey(x) === k);
+  trace('Favorit');
+  if (i >= 0) { state.favs.splice(i, 1); step(['favorite'], 'Rækken slettes. Intet andet påvirkes.'); toast('Removed from favourites'); return false; }
+  state.favs.unshift(Object.assign({ at: ++state.seq }, f));
+  step(['favorite'], 'Ny række: kind = ' + f.kind + ', title og sort_key kopieres ind, så listen kan vises uden andre opslag.');
+  step(['favorite'], f.kind === 'input' ? 'Egen indtastning: saved_mode og saved_mdc gemmes, og der er intet mål. Rækken står alene.' : 'Henvisning til indholdet sættes, så detaljerne altid er nyeste version. Det tastede kopieres også.');
+  toast('Saved to favourites'); return true;
+}
+function addHist(mode, codes, label) {
+  state.hist.unshift({ mode, codes: codes.slice(), quads: mode === 'word' || mode === 'sentence' ? copyQuads(state.quads) : [], label, at: ++state.seq });
+  const cut = state.hist.length - S.hist;
+  if (cut > 0) state.hist.length = S.hist;
+  step(['search_history'], 'Søgningen gemmes med søgetype og den skrevne tekst i Manuel de Codage, så en kvadratopstilling følger med.' + (cut > 0 ? ' Loftet er ' + S.hist + ', så den ældste række slettes.' : ' Loftet er ' + S.hist + '.'));
+}
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => { t.hidden = true; }, 2200); }
+
+/* ---------- visning af resultater ---------- */
+let results = $('#results');
+function show(render, push) {
+  if (push !== false) state.stack.push(render);
+  const back = state.stack.length > 1 ? '<button type="button" class="linkb" data-act="pop">‹ Back</button>' : '';
+  results.innerHTML = back + render();
+  results.scrollTop = 0;
+  afterShow();
+}
+const rerender = () => { if (state.stack.length) show(state.stack[state.stack.length - 1], false); };
+function starBtn(f) { return '<button type="button" class="star" data-fav="' + esc(JSON.stringify(f)) + '" aria-pressed="' + isFav(f) + '" aria-label="Save as favourite">★</button>'; }
+function transBlock(lit, free, guess) {
+  const c = guess ? ' guess-text' : ''; let h = '';
+  if (S.trans !== 'literal') h += '<p class="trn' + c + '">' + (S.trans === 'both' ? '<small>Free</small>' : '') + esc(free) + '</p>';
+  if (S.trans !== 'free') h += '<p class="trn' + c + '">' + (S.trans === 'both' ? '<small>Literal</small>' : '') + esc(lit) + '</p>';
+  return h;
+}
+const det = (title, body) => '<details' + (S.detail === 'full' ? ' open' : '') + '><summary>' + title + '</summary><div>' + body + '</div></details>';
+function signTable(sp, marks, cont) {
+  const order = sp.signs.some(x => x.rp); marks = marks || []; cont = cont || [];
+  return '<table class="t"><thead><tr><th>Sign</th><th>No.</th><th>Function</th><th>Value</th>' + (order ? '<th>Read</th>' : '') + '</tr></thead><tbody>' +
+    sp.signs.map((x, i) => { const v = valuesOf(x.c).find(q => q.f === x.f) || {}, mk = marks.includes(i), ct = cont.includes(i); return '<tr><td>' + (mk || ct ? GW({ codes: [x.c], marks: mk ? [0] : [], cont: ct ? [0] : [], sp: {} }) : G([x.c])) + '</td><td class="mono">' + x.c + '</td><td>' + FUNC[x.f] + (x.comp ? ', complement' : '') + (mk ? '<br><span class="pill g">restored</span>' : (ct ? '<br><span class="pill g">not written</span>' : '')) + '</td><td>' + (v.t ? T(v.t) : esc(v.n || '')) + '</td>' + (order ? '<td>' + (x.rp || i + 1) + '</td>' : '') + '</tr>'; }).join('') + '</tbody></table>' +
+    (order ? '<p class="note">Written order and reading order differ here (honorific transposition).</p>' : '');
+}
+function wordCard(sp, typed, extra) {
+  const l = sp.lem, others = D.spellings.filter(x => x.lemma === sp.lemma && x.id !== sp.id);
+  const fam = l.root ? Object.keys(D.lemmas).map(k => D.lemmas[k]).filter(x => x.root === l.root && x.id !== l.id) : [];
+  const ent = D.entities.find(e => e.lemma === l.id);
+  const sens = D.sentences.filter(s => s.toks.some(t => SP[t.sp].lemma === l.id));
+  const fav = { kind: 'word', ref: l.id, title: l.t, mode: 'word', codes: typed || sp.codes };
+  const dm = extra && extra.fit ? diffMarks(sp, extra.fit) : { rest: [], cont: [] }, marked = dm.rest.length + dm.cont.length > 0;
+  let h = '<div class="rhead"><div class="grow">' + (marked ? GW({ codes: sp.signs.map(x => x.c), marks: dm.rest, cont: dm.cont, sp }) : GS(sp)) + '</div>' + starBtn(fav) + '</div>';
+  h += '<p class="trl">' + T(sp.t) + (l.hom ? ' <span class="pill">' + l.hom + '</span>' : '') + '</p>';
+  h += '<p class="note">' + esc(l.pos) + (l.g ? ', ' + (l.g === 'm' ? 'masculine' : 'feminine') : '') + (sp.form !== 'base' || (extra && extra.rule) ? ' · ' + esc(formLabel(extra && extra.rule ? extra.rule.form : sp.form)) + ' of ' + T(l.t) : '') + (l.vclass ? ' · ' + esc(l.vclass) : '') + '</p>';
+  h += '<ol style="margin:0;padding-left:20px">' + l.senses.map(x => '<li>' + esc(x) + '</li>').join('') + '</ol>';
+  if (extra && extra.rule) h += '<p class="banner">This form is not stored. It was recognised by a rule: ' + esc(formLabel(extra.rule.form)) + ' is marked by ' + extra.rule.signs.join(' ') + ' after a ' + esc(extra.rule.pos) + '.</p>';
+  if (l.alt) h += '<p class="note">Also read ' + T(l.alt) + ' by some scholars.</p>';
+  if (ent) h += det(esc(ent.type) + ': ' + esc(ent.name), '<table class="t"><tbody>' + ent.lines.map(x => '<tr><td>' + esc(x[0]) + '</td><td>' + esc(x[1]) + '</td></tr>').join('') + '</tbody></table>');
+  h += (marked ? '<details open><summary>Signs in this spelling</summary><div>' + signTable(sp, dm.rest, dm.cont) + '</div></details>' : det('Signs in this spelling', signTable(sp)));
+  if (others.length) h += det('Other spellings and forms (' + others.length + ')', others.map(x => '<button type="button" class="rowbtn" data-sp="' + x.id + '">' + GS(x, 'sm') + '<span class="grow">' + T(x.t) + '<small>' + esc(formLabel(x.form)) + (x.primary ? '' : ', variant') + '</small></span></button>').join(''));
+  if (l.parts) h += det('Made of', l.parts.map(k => '<button type="button" class="rowbtn" data-lem="' + k + '"><span class="grow">' + T(D.lemmas[k].t) + '<small>' + esc(D.lemmas[k].senses[0]) + '</small></span></button>').join(''));
+  if (fam.length) h += det('Same root ' + T(l.root), fam.map(x => '<button type="button" class="rowbtn" data-lem="' + x.id + '"><span class="grow">' + T(x.t) + '<small>' + esc(x.senses[0]) + '</small></span></button>').join(''));
+  if (sens.length) h += '<details><summary>Sentences with this word (' + sens.length + ')</summary><div>' + sens.map(s => sentRow(s)).join('') + '</div></details>';
+  h += det('Sources', '<p class="note">Dictionary references would be listed here with volume and page. The prototype has none.</p>');
+  return h;
+}
+const sentRow = s => '<button type="button" class="rowbtn" data-sen="' + s.id + '"><span class="grow">' + T(s.t) + '<small>' + esc(s.free) + ' · ' + esc(s.src.work) + ', ' + esc(s.src.witness) + '</small></span></button>';
+function renderWords(group, typed, fit) {
+  return () => '<p class="eyebrow">' + (group.length > 1 ? group.length + ' words are written this way' : 'Word') + '</p>' +
+    (fit ? '<p class="banner">Opened from a proposal. The highlighted signs are not ones you wrote. Brackets mark signs that fill a loss you entered.</p>' : '') +
+    group.map(sp => wordCard(sp, typed, fit ? { fit } : undefined)).join('<hr style="border:0;border-top:2px solid var(--line);width:100%;margin:2px 0">');
+}
+function renderSign(code) {
+  return () => {
+    const s = SG[code], vals = valuesOf(code), by = state.signSort || 'pos';
+    const uses = []; D.spellings.forEach(sp => sp.signs.forEach((x, i) => { if (canon(x.c) === canon(code)) uses.push({ sp, pos: i + 1, f: x.f }); }));
+    uses.sort((a, b) => by === 'pos' ? a.pos - b.pos || a.sp.t.localeCompare(b.sp.t) : a.f.localeCompare(b.f) || a.pos - b.pos);
+    const variants = D.signs.filter(x => x.base === canon(code) || (s.base && x.c === s.base));
+    let h = '<p class="eyebrow">Sign</p><div class="rhead"><div class="grow">' + G([code]) + '</div>' + starBtn({ kind: 'sign', ref: code, title: code, mode: 'sign', codes: [code] }) + '</div>';
+    h += '<p><span class="mono">' + code + '</span> · ' + esc(s.d) + ' · ' + esc(D.cats[s.cat]) + '</p>';
+    if (s.base) h += '<p class="note">Variant of ' + s.base + '. It has the same values.</p>';
+    h += '<table class="t"><thead><tr><th>Function</th><th>Value</th></tr></thead><tbody>' + vals.map(v => '<tr><td>' + FUNC[v.f] + '</td><td>' + (v.t ? T(v.t) : esc(v.n || '')) + '</td></tr>').join('') + '</tbody></table>';
+    if (variants.length) h += '<p class="note">Related forms: ' + variants.map(v => v.c).join(', ') + '</p>';
+    h += '<div class="rhead"><p class="eyebrow grow">Words with this sign (' + uses.length + ')</p><button type="button" class="linkb" data-act="signsort">Sort by ' + (by === 'pos' ? 'function' : 'position') + '</button></div>';
+    h += uses.map(x => '<button type="button" class="rowbtn" data-sp="' + x.sp.id + '">' + GS(x.sp, 'sm') + '<span class="grow">' + T(x.sp.t) + '<small>position ' + x.pos + ', ' + FUNC[x.f] + ' · ' + esc(x.sp.lem.senses[0]) + '</small></span></button>').join('') || '<p class="empty">No words in the prototype use this sign.</p>';
+    return h;
+  };
+}
+function wordsTable(ws, roles) {
+  return '<table class="t"><thead><tr><th>Word</th><th>Reading</th><th>Analysis</th></tr></thead><tbody>' + ws.map((w, i) => {
+    const role = roles && roles[i] ? '<br><span class="note">' + esc(ROLE[roles[i]] || roles[i]) + '</span>' : '';
+    if (w.kind === 'gap') return '<tr><td>' + G(w.codes, 'sm') + '</td><td><span class="note">lost word</span></td><td>' + (w.pos ? esc(w.pos) + ' (assumed)' : 'unknown') + role + '</td></tr>';
+    return '<tr><td>' + GW(w, 'sm') + '</td><td>' + T(w.t) + '<br><span class="note">' + esc(w.gloss || w.lem.senses[w.sense || 0]) + '</span></td><td>' + esc(w.pos) +
+      (w.form !== 'base' ? ', ' + esc(formLabel(w.form)) : '') + role + (w.status === 'restored' ? '<br><span class="pill g">restored</span>' : '') + '</td></tr>';
+  }).join('') + '</tbody></table>';
+}
+function gline(ws, guess) {
+  return '<div class="gline' + (S.dir === 'rtl' ? ' rtl' : '') + '">' + ws.map(w => w.kind && w.kind !== 'word'
+    ? '<span class="gw">' + G(w.codes) + '<small>' + (w.kind === 'gap' ? 'lost word' : (w.kind === 'lacuna' ? (w.codes[0] === '*' ? 'lost signs' : 'lost') : 'unknown')) + '</small></span>'
+    : '<button type="button" class="gw' + (guess ? ' guess' : '') + (w.status === 'restored' && !w.lost ? ' restw' : '') + '" data-sp="' + w.sp.id + '"' + (w.lost || w.short || w.fuzzy ? ' data-fit="' + baseCodes(w).join(' ') + '"' : '') + '>' + GW(w) + '<small>' + esc(tl(w.t)) + '</small></button>').join('') + '</div>';
+}
+function renderKnown(s, typed, marks, cont) {
+  return () => {
+    const ws = s.toks.map(t => { const sp = SP[t.sp]; return { sp, lem: sp.lem, pos: sp.lem.pos, t: sp.t, form: sp.form, codes: sp.signs.map(x => x.c), sense: t.sense, status: t.status, o: t.wp }; });
+    const written = ws.slice().sort((a, b) => (a.o || 0) - (b.o || 0));
+    marks = marks || []; cont = cont || []; const from = marks.length + cont.length > 0;
+    if (from) { let off = 0; const loc = (l, w) => l.filter(q => q >= off && q < off + w.codes.length).map(q => q - off); ws.map((w, i) => ({ w, o: w.o || i + 1 })).sort((a, b) => a.o - b.o).forEach(x => { x.w.marks = loc(marks, x.w); x.w.cont = loc(cont, x.w); off += x.w.codes.length; }); }
+    const vars = D.sentences.filter(x => x.src.passage === s.src.passage && x.id !== s.id);
+    let h = '<div class="rhead"><p class="eyebrow grow">Known sentence</p>' + starBtn({ kind: 'sentence', ref: s.id, title: s.t, mode: 'sentence', codes: typed || s.codes }) + '</div>';
+    if (from) h += '<p class="banner">Opened from your input. The highlighted signs are not ones you wrote.' + (marks.length ? ' Brackets mark signs that fill a loss you entered.' : '') + (cont.length ? ' The other highlighted signs come from the sentence as it is recorded.' : '') + '</p>';
+    h += gline(s.toks.some(t => t.wp) ? written : ws) + '<p class="trl">' + T(s.t) + '</p>' + transBlock(s.lit, s.free);
+    h += '<p class="note">' + esc(s.src.work) + ', ' + esc(s.src.witness) + ', ' + esc(s.src.line) + '</p>';
+    if (s.toks.some(t => t.wp)) h += '<p class="note">The words are written in a different order than they are read.</p>';
+    h += det('Word by word', '<p class="note">' + esc(D.patterns[s.pattern][S.trad]) + '</p>' + wordsTable(ws, s.toks.map(t => t.role)));
+    h += det('Source', '<table class="t"><tbody><tr><td>Work</td><td>' + esc(s.src.work) + '</td></tr><tr><td>Witness</td><td>' + esc(s.src.witness) + '</td></tr><tr><td>Place</td><td>' + esc(s.src.line) + '</td></tr></tbody></table><p class="note">' + esc(s.src.note) + '</p>');
+    h += det('Other witnesses of this passage (' + vars.length + ')', vars.length ? vars.map(sentRow).join('') : '<p class="note">None. Only one witness has this passage.</p>');
+    return h;
+  };
+}
+function renderProposal(codes, a) {
+  return () => {
+    const gaps = a.gaps, seq = a.seq;
+    const same = a.complete && !gaps.length ? D.sentences.find(s => s.toks.map(t => SP[t.sp].lemma).join(' ') === a.real.map(w => w.lem.id).join(' ')) : null;
+    const similar = a.pattern ? D.sentences.filter(s => s.pattern === a.pattern.code) : [];
+    const fz = a.real.filter(w => w.fuzzy);
+    let h = '<div class="rhead"><p class="eyebrow grow">Not a known sentence</p>' + starBtn({ kind: 'input', title: a.real.length ? joinT(a.words) : codes.join(' '), mode: 'sentence', codes }) + '</div>';
+    if (a.quads && a.quads.length) a.words.forEach(w => { if (w.kind === 'word' && !w.lost) w.quads = a.quads.filter(q => q.at >= w.at && q.at + q.n <= w.at + w.codes.length).map(q => ({ at: q.at - w.at, n: q.n, tree: q.tree })); });
+    h += gline(a.words, true);
+    if (a.real.length) h += '<p class="trl guess-text">' + T(joinT(a.words)) + '</p>';
+    const known = sentenceFits(codes); lemmaFits(a).forEach(f => { if (f.s !== same && !known.some(x => x.s === f.s)) known.push(f); });
+    if (known.length) h += '<p class="eyebrow">' + (known.length > 1 ? 'Known sentences this could be (' + known.length + ')' : 'A known sentence this could be') + '</p>' + known.map(fitSentRow).join('');
+    if (a.pattern) {
+      h += transBlock(seq.map(w => w.kind === 'gap' ? '[…]' : w.lem.gloss + (w.form !== 'base' ? ' (' + formLabel(w.form) + ')' : '')).join(' · '), a.pattern.free, true);
+      h += '<p class="banner">This sentence is not in the database. The reading above is the app\'s proposal from the grammar. It is not an attested translation.' + (a.real.some(w => w.lost) ? ' What is lost inside a word has been restored to make the reading possible.' : '') +
+        (gaps.length ? ' The lost word is left as a gap and is taken to be a ' + gaps.map(g => g.pos).join(' and a ') + ', which is only one possibility.' : '') + '</p>';
+    } else if (a.complete) h += '<p class="banner info">No translation is proposed: the words do not form a complete sentence that the app can analyse. The recognised words are listed below.</p>';
+    else if (a.real.length) h += '<p class="banner info">No translation is proposed: some signs could not be read as words. The recognised words are listed below.</p>';
+    else if (known.length) h += '<p class="banner info">No translation is proposed: none of the signs could be read as a word on its own.</p>';
+    else h += '<p class="banner err">Nothing could be read. None of the signs form a word the app knows, and no known sentence fits.</p>';
+    a.real.filter(w => w.lost).forEach(w => {
+      h += '<p class="note">' + T(w.t) + ' fits if ' + lostText(w.sp, baseCodes(w)) + '. What is restored is shown in brackets. The lost part could also be a word of its own.</p>';
+      const others = w.alts.filter(sp => sp.lem.id !== w.lem.id);
+      if (others.length) h += '<details open><summary>Other words that fit the same place (' + others.length + ')</summary><div>' + others.map(sp => fitRow(sp, baseCodes(w))).join('') + '</div></details>';
+    });
+    a.words.filter(w => w.kind === 'lacuna').forEach(w => {
+      const fits = aroundFits(codes, w.at);
+      if (fits.length) h += '<details open><summary>Words that would fit around the lost sign' + (w.codes[0] === '*' ? 's' : '') + ' (' + fits.length + ')</summary><div>' + fits.map(f => fitRow(f.sp, f.slice)).join('') + '</div></details>';
+    });
+    a.real.filter(w => w.short).forEach(w => { h += '<p class="note">' + T(w.t) + ' is written here without ' + (w.short.det ? 'its determinative ' : '') + w.short.missing + ' (' + esc(SG[w.short.missing].d) + '), which the spelling in the database has.</p>'; });
+    fz.forEach(w => { h += '<p class="note">' + T(w.t) + ' is written with ' + w.fuzzy.typed + ' where the database has ' + w.fuzzy.expected + '. Both write ' + T(w.fuzzy.value) + '.</p>'; });
+    a.real.filter(w => w.rule).forEach(w => { h += '<p class="note">' + T(w.t) + ' was recognised by a rule: ' + esc(formLabel(w.rule.form)) + ' of ' + T(w.lem.t) + '.</p>'; });
+    if (same) h += '<p class="note">The same words occur as a known sentence with a different spelling:</p>' + sentRow(same);
+    if (a.real.length) h += '<details open><summary>Word by word</summary><div>' + (a.pattern ? '<p class="note">' + esc(D.patterns[a.pattern.code][S.trad]) + '</p>' : '') + wordsTable(a.pattern ? seq : a.real, a.pattern ? a.pattern.roles : null) + '</div></details>';
+    if (similar.length) h += det('Known sentences built the same way (' + similar.length + ')', similar.map(sentRow).join(''));
+    return h;
+  };
+}
+/* Ord med huller: stavemåder, hvor alle bevarede tegn står på deres plads, og hullerne dækker resten. */
+function lostFits(codes) {
+  const out = []; if (!codes.some(c => !isLost(c)) || codes.includes('_')) return out;
+  const re = lostRe(codes); Object.keys(GROUPS).forEach(k => { if (re.test(k)) out.push(...GROUPS[k]); });
+  return out.sort((a, b) => (b.lem.count || 0) - (a.lem.count || 0));
+}
+/* Kendte sætninger, som indtastningen kan være hele eller en del af. Bevarede tegn skal stå i samme rækkefølge,
+   et tabt tegn dækker ét tegn, tabte tegn i ukendt antal dækker ét eller flere, og et tabt ord dækker præcis ét helt ord. */
+function sentenceFits(codes) {
+  if (codes.filter(c => !isLost(c)).length < 2) return [];
+  let src = '';
+  codes.forEach((c, i) => {
+    if (i) src += (c === '_' || codes[i - 1] === '_') ? ' ' : '[- ]';
+    src += c === '_' ? '([^ ]+)' : (c === '?' ? '([^- ]+)' : (c === '*' ? '([^- ]+(?:[- ][^- ]+)*?)' : '(' + c + ')'));
+  });
+  const re = new RegExp((codes[0] === '_' ? '(?:^| )' : '(?:^|[- ])') + src + (codes[codes.length - 1] === '_' ? '(?= |$)' : '(?=[- ]|$)'));
+  const out = [];
+  D.sentences.forEach(s => {
+    const m = re.exec(s.wkey); if (!m) return;
+    const parts = [], marks = [];
+    let si = s.wkey.slice(0, m.index + m[0].length - m[0].replace(/^[- ]/, '').length).split(/[- ]/).filter(Boolean).length;
+    const typed = [];
+    codes.forEach((c, i) => { const k = m[i + 1].split(/[- ]/).length; if (isLost(c)) for (let q = 0; q < k; q++) marks.push(si + q); else typed.push(si); si += k; });
+    const cont = s.codes.map((x, q) => q).filter(q => !typed.includes(q) && !marks.includes(q));
+    codes.forEach((c, i) => {
+      if (c === '_') { const t = s.written.find(x => SP[x.sp].key === m[i + 1]); parts.push('the lost word is ' + (t ? T(SP[t.sp].t) : esc(m[i + 1]))); }
+      else if (isLost(c)) { const l = m[i + 1].split(/[- ]/); parts.push((l.length > 1 ? 'the lost signs are ' : 'the lost sign is ') + l.join(', ')); }
+    });
+    out.push({ s, full: m[0].replace(/^[- ]/, '') === s.wkey, parts, marks, cont });
+  });
+  return out.sort((a, b) => (b.full ? 1 : 0) - (a.full ? 1 : 0));
+}
+/* Samme sammenligning på ordniveau: de genkendte ord, i samme form, står i samme rækkefølge i en kendt sætning. Fanger stavemåder, der afviger fra tekstvidnets. */
+function lemmaFits(a) {
+  const out = []; if (!a.complete || a.seq.length < 2) return out;
+  D.sentences.forEach(s => {
+    const L = s.written.map(t => SP[t.sp]);
+    for (let i = 0; i + a.seq.length <= L.length; i++) if (a.seq.every((w, k) => w.kind === 'gap' || w.alts.some(sp => sp.lemma === L[i + k].lemma && (w.rule ? w.rule.form : sp.form) === L[i + k].form))) {
+      const marks = [], cont = []; let off = 0;
+      L.forEach((sp, q) => {
+        const w = a.seq[q - i], n = sp.signs.length, all = sp.signs.map((x, z) => off + z);
+        if (!w) cont.push(...all); else if (w.kind === 'gap') marks.push(...all);
+        else { const d = diffMarks(sp, w.codes); d.rest.forEach(z => marks.push(off + z)); d.cont.forEach(z => cont.push(off + z)); }
+        off += n;
+      });
+      out.push({ s, full: a.seq.length === L.length, parts: a.seq.map((w, k) => w.kind === 'gap' ? 'the lost word is ' + T(L[i + k].t) : null).filter(Boolean), marks, cont }); break;
+    }
+  });
+  return out;
+}
+const fitSentRow = f => '<button type="button" class="rowbtn" data-sen="' + f.s.id + '" data-marks="' + (f.marks || []).join(',') + '" data-cont="' + (f.cont || []).join(',') + '"><span class="grow">' + T(f.s.t) + '<small>' + esc(f.s.free) + ' · ' + esc(f.s.src.work) + ', ' + esc(f.s.src.witness) + '</small><small>' +
+  (f.full ? 'Fits the whole sentence' : 'Your input fits part of this sentence') + (f.parts.length ? ', if ' + f.parts.join(' and ') : '') + '</small></span></button>';
+/* Kendte stavemåder, der ville passe hen over et hul, som står alene i en sætning. */
+function aroundFits(codes, p) {
+  const out = [], seen = {};
+  for (let i = Math.max(0, p - 6); i <= p; i++) for (let j = p + 1; j <= Math.min(codes.length, i + 8); j++) {
+    const sl = codes.slice(i, j); if (sl.includes('_') || !sl.some(c => !isLost(c))) continue;
+    const re = lostRe(sl);
+    Object.keys(GROUPS).forEach(k => { if (re.test(k)) GROUPS[k].forEach(sp => { if (!seen[sp.id]) { seen[sp.id] = 1; out.push({ sp, slice: sl }); } }); });
+  }
+  return out.sort((a, b) => (b.sp.lem.count || 0) - (a.sp.lem.count || 0)).slice(0, 8);
+}
+function lostSigns(sp, slice) {
+  const fill = lostFill(slice, sp) || [], out = []; let p = 0;
+  slice.forEach((c, i) => { const part = sp.signs.slice(p, p + (fill[i] || 0)); p += fill[i] || 0; if (isLost(c)) part.forEach(x => out.push(x.c + ' (' + esc(SG[x.c].d) + ')')); });
+  return out;
+}
+const lostText = (sp, slice) => { const l = lostSigns(sp, slice); return (l.length > 1 ? 'the lost signs are ' : 'the lost sign is ') + l.join(' and '); };
+const fitRow = (sp, slice) => '<button type="button" class="rowbtn" data-sp="' + sp.id + '" data-fit="' + slice.join(' ') + '">' + GW({ lost: true, codes: slice, sp }, 'sm') + '<span class="grow">' + T(sp.t) + ' · ' + esc(sp.lem.senses[0]) + '<small>restores ' + lostSigns(sp, slice).join(' and ') + '</small></span></button>';
+function renderRestored(codes, list) {
+  return () => '<div class="rhead"><p class="eyebrow grow">' + (codes.includes('*') ? 'Lost signs: ' : 'Lost sign: ') + (list.length > 1 ? list.length + ' possible words' : '1 possible word') + '</p>' + starBtn({ kind: 'input', title: codes.join(' '), mode: 'word', codes }) + '</div>' + G(codes) +
+    '<p class="banner">' + (list.length > 1 ? 'These words fit' : 'This word fits') + ' the signs that remain. What is restored is shown in brackets. It is a proposal, not a reading.</p>' + list.map(sp => fitRow(sp, codes)).join('');
+}
+function renderNotFound(codes, list) {
+  const lost = codes.some(isLost);
+  return () => '<div class="rhead"><p class="eyebrow grow">Not in the database</p>' + starBtn({ kind: 'input', title: codes.join(' '), mode: 'word', codes }) + '</div>' + G(codes) +
+    (list.length ? '<p class="banner info">No word is written exactly like this. The closest spellings are listed below.</p><p class="eyebrow">Close spellings</p>' + list.map(x =>
+      '<button type="button" class="rowbtn" data-sp="' + x.sp.id + '" data-fit="' + codes.join(' ') + '">' + GS(x.sp, 'sm') + '<span class="grow">' + T(x.sp.t) + ' · ' + esc(x.sp.lem.senses[0]) + '<small>' + esc(x.why) + '</small></span></button>').join('')
+      : '<p class="banner err">' + (lost ? 'Nothing was found. No word in the database fits the signs that remain around what is lost.' : 'Nothing was found. No word is written like this, and there are no close spellings either.') + '</p>');
+}
+
+
+/* ---------- skærmens tilstand ---------- */
+const phone = $('#phone'), stageEl = $('#stage'), fieldwrap = $('#fieldwrap'), field = $('#field'), ftext = $('#fieldtext'), kbd = $('#kbd'), pagesEl = $('#kbpages'), tabsEl = $('#kbtabs');
+Object.assign(state, { kbOpen: false, searched: false, text: '', view: 'search', panel: 'search', stacks: { search: [], browse: [] }, mstack: { sign: [], word: [], sentence: [], text: [] }, last: { word: null, sentence: null, text: null }, quads: [], lastQ: { word: [], sentence: [] }, browse: { kind: null, wsort: 'cat', secs: [] }, bScroll: 0, drawer: false, sheet: false, listScroll: 0 });
+const PANELS = { search: $('#results'), browse: $('#bresults') };
+const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const INTRO = {
+  word: ['Look up a word', 'Tap the field and write the signs of one word.'],
+  sentence: ['Read a sentence', 'Tap the field and write the signs in order, or use the camera.'],
+  text: ['Search the dictionary', 'By transliteration (nfr), translation (house) or Gardiner number (G17).'],
+};
+const HINT = { word: 'Write the signs of one word and press Search.', sentence: 'Write the signs of the sentence in order and press Search.', text: 'Write a transliteration (nfr), a translation (house) or a Gardiner number (G17) and press Search.' };
+
+/* Feltets plads: midt på skærmen, lige over tastaturet, eller øverst efter den første søgning. */
+function layout() {
+  phone.className = 'phone mode-' + S.mode + (state.searched ? ' searched' : '') + (state.kbOpen ? ' kb-open' : '') + (state.drawer ? ' drawer-open' : '') + (state.sheet ? ' sheet-open' : '') + (layout.ready ? ' ready' : '');
+  if (S.mode === 'sign' || state.view !== 'search') { stageEl.style.setProperty('--rt', '0px'); return; }
+  const fh = field.offsetHeight, sh = stageEl.clientHeight;
+  let y = 10;
+  if (!state.searched) {
+    y = Math.round((sh - fh) / 2);
+    if (state.kbOpen) {
+      const kbTop = phone.getBoundingClientRect().top + phone.clientTop + phone.clientHeight - kbd.offsetHeight;
+      y = Math.min(y, Math.round(kbTop - stageEl.getBoundingClientRect().top - fh - 12));
+    }
+  }
+  fieldwrap.style.setProperty('--fy', y + 'px');
+  stageEl.style.setProperty('--rt', state.searched ? (fh + 20) + 'px' : '0px');
+}
+
+/* Indholdet skal altid kunne ses uden at rulle: først formindskes tegnene, og ved gulvet brydes der til flere linjer. */
+const MINFIT = 0.5;
+function fit() {
+  const el = ftext.querySelector('.ft'); if (!el) return;
+  el.style.fontSize = ''; el.classList.remove('wrap');
+  const avail = ftext.clientWidth; if (!avail || el.offsetWidth <= avail) return;
+  const base = parseFloat(getComputedStyle(el).fontSize); let k = avail / el.offsetWidth;
+  if (k < MINFIT) { el.style.fontSize = (base * MINFIT).toFixed(2) + 'px'; el.classList.add('wrap'); return; }
+  for (let i = 0; i < 6; i++) { el.style.fontSize = (base * k).toFixed(2) + 'px'; if (el.offsetWidth <= avail) break; k *= 0.98; }
+}
+function renderField() {
+  const caret = state.kbOpen ? '<i class="caret"></i>' : '', text = S.mode === 'text';
+  const body = text ? esc(state.text) : seqHTML(state.buf, state.quads);
+  field.classList.toggle('nocam', text); $('#cam').hidden = text;
+  ftext.innerHTML = body || state.kbOpen
+    ? '<span class="ft ' + (text ? 'txt' : 'gl' + (S.dir === 'rtl' ? ' rtl' : '')) + '">' + body + caret + '</span>'
+    : '<span class="ph">' + (text ? 'Tap to search' : 'Tap to write') + '</span>';
+  field.setAttribute('aria-label', (text ? 'Search text' : 'Hieroglyph input') + ': ' + (text ? state.text || 'empty' : state.buf.join(' ') || 'empty'));
+  field.setAttribute('aria-expanded', state.kbOpen);
+  fit(); layout();
+}
+
+/* ---------- tastatur ---------- */
+const PAGE = 20;
+const CATLIST = Object.keys(D.cats).filter(c => D.signs.some(s => s.cat === c));
+const KBP = [];
+['common'].concat(CATLIST).forEach(c => {
+  const keys = c === 'common' ? D.common : D.signs.filter(s => s.cat === c).map(s => s.c), n = Math.ceil(keys.length / PAGE);
+  for (let p = 0; p < n; p++) KBP.push({ cat: c, p, n, keys: keys.slice(p * PAGE, p * PAGE + PAGE) });
+});
+const TROWS = [['ꜣ', 'ỉ', 'ꜥ', 'ḥ', 'ḫ', 'ẖ', 'š', 'ḳ', 'ṯ', 'ḏ'], '1234567890'.split(''), 'qwertyuiop'.split(''), 'asdfghjkl'.split(''), 'zxcvbnm.-'.split('')];
+let kbIdx = 0;
+function buildKb() {
+  tabsEl.innerHTML = ['common'].concat(CATLIST).map(c => '<button type="button" data-tab="' + c + '" aria-pressed="false" aria-label="' + (c === 'common' ? 'Most used signs' : c + ', ' + esc(D.cats[c])) + '">' + (c === 'common' ? '★ Common' : c) + '</button>').join('');
+  pagesEl.innerHTML = KBP.map(pg => '<div class="kb-page">' + pg.keys.map(c => '<button type="button" class="key" data-k="' + c + '" aria-label="' + c + ', ' + esc(SG[c].d) + '"><span class="gl">' + SG[c].ch + '</span><small>' + c + '</small></button>').join('') + '</div>').join('');
+  $('#kbrows').innerHTML = TROWS.map((r, i) => '<div class="kb-row' + (i ? '' : ' sp') + '">' + r.map(ch => '<button type="button" data-ch="' + ch + '">' + ch + '</button>').join('') + '</div>').join('');
+}
+function kbSync() {
+  const w = pagesEl.clientWidth; if (!w) return;
+  kbIdx = Math.max(0, Math.min(KBP.length - 1, Math.round(pagesEl.scrollLeft / w)));
+  const pg = KBP[kbIdx];
+  $('#kbcat').textContent = (pg.cat === 'common' ? 'Most used signs' : pg.cat + ' · ' + D.cats[pg.cat]) + (pg.n > 1 ? ' · page ' + (pg.p + 1) + ' of ' + pg.n : '');
+  $('#kbdots').innerHTML = pg.n > 1 ? Array.from({ length: pg.n }, (x, i) => '<i' + (i === pg.p ? ' class="on"' : '') + '></i>').join('') : '';
+  tabsEl.querySelectorAll('button').forEach(b => {
+    const on = b.dataset.tab === pg.cat;
+    if (on && b.getAttribute('aria-pressed') !== 'true') tabsEl.scrollTo({ left: b.offsetLeft - (tabsEl.clientWidth - b.offsetWidth) / 2, behavior: calm ? 'auto' : 'smooth' });
+    b.setAttribute('aria-pressed', on);
+  });
+}
+function kbGo(i, smooth) { pagesEl.scrollTo({ left: i * pagesEl.clientWidth, behavior: smooth && !calm ? 'smooth' : 'auto' }); if (!smooth) kbSync(); }
+function setKb(on) {
+  if (S.mode === 'sign') on = false;
+  const text = S.mode === 'text', first = $('#kfirst');
+  $('#kb-sign').hidden = text; $('#kb-text').hidden = !text;
+  first.innerHTML = text ? 'Space' : '<span class="lac" aria-hidden="true">▨</span><i class="more" aria-hidden="true">⋯</i>'; first.dataset.act = text ? 'space' : 'lacuna';
+  first.setAttribute('aria-label', text ? 'Space' : 'Lost: insert one lost sign. Hold for more kinds of loss');
+  $('#kquad').hidden = text;
+  setLostPop(false); setQuadPop(false);
+  state.kbOpen = on; kbd.inert = !on;
+  renderField();
+  if (!text) kbGo(kbIdx, false);
+  if (on && phone.getBoundingClientRect().bottom > window.innerHeight) phone.scrollIntoView({ block: 'end', behavior: calm ? 'auto' : 'smooth' });
+}
+/* Hold Lost inde, som man holder e inde for é og è: et valg mellem ét tabt tegn, tabte tegn i ukendt antal og, under Sentence, et tabt ord. */
+const kfirst = $('#kfirst'), lostpop = $('#lostpop');
+let lpTimer = null, lpHeld = false;
+function setLostPop(on) {
+  if (on) lostpop.innerHTML = [['?', 'One sign'], ['*', 'Signs, number unknown']].concat(S.mode === 'sentence' ? [['_', 'Word']] : [])
+    .map(o => '<button type="button" role="menuitem" data-lost="' + o[0] + '"><span class="gl sm">' + lacHTML(o[0]) + '</span><small>' + o[1] + '</small></button>').join('');
+  else lostpop.innerHTML = '';
+  lostpop.hidden = !on; kfirst.setAttribute('aria-expanded', on);
+}
+function addLost(c) { state.buf.push(c); setLostPop(false); renderField(); }
+
+/* ---------- kvadrater: faste former for de sidst skrevne tegn ---------- */
+const QV = (...k) => ({ t: 'v', k }), QHZ = (...k) => ({ t: 'h', k });
+const QUADS = { 2: [QV(0, 1), QHZ(0, 1)], 3: [QV(0, 1, 2), QV(QHZ(0, 1), 2), QV(0, QHZ(1, 2)), QHZ(QV(0, 1), 2), QHZ(0, QV(1, 2))], 4: [{ t: 'g', k: [[0, 1], [2, 3]] }, { t: 'g', cm: 1, k: [[0, 2], [1, 3]] }] };
+const copyQuads = q => q.map(x => ({ at: x.at, n: x.n, tree: x.tree }));
+/* Hvor mange af de sidste tegn kan stilles op: en kvadrat, der står sidst, kan laves om; ellers tælles frie tegn bagfra, højst fire. */
+function quadTail() {
+  const L = state.buf.length, q = state.quads.find(x => x.at + x.n === L);
+  if (q) return { n: q.n, quad: q };
+  let n = 0;
+  for (let i = L - 1; i >= 0 && n < 4; i--) { if (isLost(state.buf[i]) || state.quads.some(x => i >= x.at && i < x.at + x.n)) break; n++; }
+  return { n, quad: null };
+}
+function setQuadPop(on) {
+  const pop = $('#quadpop');
+  if (on) {
+    measureInk();
+    const tl2 = quadTail(), L = state.buf.length;
+    let h = '<p class="qhead">Arrange the last signs in one square</p>';
+    if (tl2.n < 2) h += '<p class="note">Write at least two signs first, then choose here how they stand together. They are still read in the order you wrote them.</p>';
+    else {
+      for (let n = 2; n <= tl2.n; n++) h += '<p class="eyebrow">Last ' + n + ' signs</p><div class="qopts">' + QUADS[n].map((tree, i) => { const cs = state.buf.slice(L - n); return '<button type="button" role="menuitem" data-quad="' + n + '.' + i + '" aria-label="' + esc(mdcOf(cs, tree)) + '"><span class="gl">' + quadSVG(cs, tree) + '</span></button>'; }).join('') + '</div>';
+      if (tl2.quad) h += '<button type="button" class="secondary" data-act="unquad">Back to a plain row</button>';
+    }
+    pop.innerHTML = h;
+  } else pop.innerHTML = '';
+  pop.hidden = !on; $('#kquad').setAttribute('aria-expanded', on);
+}
+function dropQuads(from) { state.quads = state.quads.filter(x => x.at + x.n <= from); }
+function applyQuad(n, i) {
+  const L = state.buf.length, cs = state.buf.slice(L - n), tree = QUADS[n][i];
+  dropQuads(L - n); state.quads.push({ at: L - n, n, tree });
+  setQuadPop(false); renderField();
+  trace('Kvadrat: ' + mdcOf(cs, tree));
+  step([], 'De sidste ' + n + ' tegn stilles op i én kvadrat. Rækkefølgen er uændret: ' + cs.join(', ') + '.');
+  step(['search_history', 'favorite'], 'Opstillingen er kun en del af den skrevne tekst og gemmes som Manuel de Codage: ' + mdcOf(cs, tree) + '. Søgenøglen er den samme som uden kvadrat, så søgningen læser tegnene som normalt.');
+}
+/* Delete: står der en kvadrat sidst, opløses den først, og tegnene bliver stående på række. Først næste tryk sletter et tegn. */
+function popSign() { const L = state.buf.length; if (state.quads.some(x => x.at + x.n === L)) return dropQuads(L - 1); state.buf.pop(); }
+function holdLost() { lpHeld = true; setLostPop(true); }
+kfirst.addEventListener('pointerdown', e => { if (S.mode === 'text' || e.button) return; lpHeld = false; clearTimeout(lpTimer); lpTimer = setTimeout(holdLost, 450); });
+kfirst.addEventListener('pointerleave', () => { if (!lpHeld) clearTimeout(lpTimer); });
+['pointerup', 'pointercancel'].forEach(ev => window.addEventListener(ev, e => {
+  clearTimeout(lpTimer); if (!lpHeld) return;
+  const el = ev === 'pointerup' ? document.elementFromPoint(e.clientX, e.clientY) : null, opt = el && el.closest('[data-lost]');
+  if (opt) addLost(opt.dataset.lost);
+  setTimeout(() => { lpHeld = false; }, 350);
+}));
+kfirst.addEventListener('contextmenu', e => { e.preventDefault(); if (S.mode === 'text') return; clearTimeout(lpTimer); holdLost(); setTimeout(() => { lpHeld = false; }, 350); });
+kfirst.addEventListener('keydown', e => { if (e.key === 'ArrowUp' && S.mode !== 'text') { e.preventDefault(); e.stopPropagation(); setLostPop(true); lostpop.querySelector('button').focus(); } });
+
+/* Træk med musen svarer til et swipe med fingeren. Efter et træk må slippet ikke tælle som et tryk på en tast. */
+let suppressClick = false;
+function dragScroll(el, snap) {
+  let d = null;
+  el.addEventListener('pointerdown', e => { if (e.pointerType === 'mouse' && e.button === 0) d = { x: e.clientX, left: el.scrollLeft, moved: false }; });
+  window.addEventListener('pointermove', e => {
+    if (!d) return; const dx = e.clientX - d.x;
+    if (!d.moved && Math.abs(dx) > 6) { d.moved = true; el.classList.add('dragging'); }
+    if (d.moved) el.scrollLeft = d.left - dx;
+  });
+  window.addEventListener('pointerup', e => {
+    if (!d) return; const s = d; d = null; if (!s.moved) return;
+    suppressClick = true; setTimeout(() => { suppressClick = false; }, 80);
+    if (!snap) { el.classList.remove('dragging'); return; }
+    const w = el.clientWidth, dx = e.clientX - s.x, from = Math.round(s.left / w);
+    const to = Math.max(0, Math.min(KBP.length - 1, from + (dx < -30 ? 1 : dx > 30 ? -1 : 0)));
+    el.scrollTo({ left: to * w, behavior: calm ? 'auto' : 'smooth' });
+    setTimeout(() => { el.classList.remove('dragging'); kbSync(); }, calm ? 0 : 420);
+  });
+}
+
+/* ---------- tegnlisten (Sign) ---------- */
+function signListHTML(prefix) {
+  return '<div class="signlist">' + CATLIST.map((c, ci) => '<section id="' + (prefix === 'cat-' ? prefix + c : prefix + ci) + '"><h3 class="cathead"><span class="mono">' + c + '</span>' + esc(D.cats[c]) + '</h3>' +
+    D.signs.filter(s => s.cat === c).map(s => {
+      const vals = valuesOf(s.c).filter(v => v.t).map(v => tl(v.t)).filter((v, i, a) => a.indexOf(v) === i);
+      return '<button type="button" class="srow" data-sign="' + s.c + '">' + G([s.c]) + '<span class="grow"><span class="mono">' + s.c + '</span>' + (vals.length ? ' · <span class="tl">' + esc(vals.join(', ')) + '</span>' : '') + '<small>' + esc(s.d) + '</small></span><span class="chev" aria-hidden="true">›</span></button>';
+    }).join('') + '</section>').join('') + '</div>';
+}
+const renderSignList = () => signListHTML('cat-');
+/* Boksene i et resultat: sammenfoldet fra start, og et tryk folder ud eller sammen. Hvad der er foldet ud, huskes for den enkelte side, så det står der endnu, når man går tilbage. */
+const NOTES = new WeakMap();
+let curNotes = new Set();
+function foldBanners() {
+  const top = state.stack[state.stack.length - 1];
+  curNotes = top ? (NOTES.get(top) || NOTES.set(top, new Set()).get(top)) : new Set();
+  results.querySelectorAll('.banner').forEach((b, i) => {
+    if (b.classList.contains('err')) return;   /* "intet fundet" er altid åben og kan ikke foldes sammen */
+    const open = curNotes.has(i);
+    b.dataset.note = i; b.setAttribute('role', 'button'); b.tabIndex = 0;
+    b.classList.toggle('folded', !open); b.setAttribute('aria-expanded', open);
+  });
+}
+function toggleBanner(b) {
+  if (b.classList.contains('err')) return;
+  const i = Number(b.dataset.note), open = b.classList.contains('folded');
+  if (open) curNotes.add(i); else curNotes.delete(i);
+  b.classList.toggle('folded', !open); b.setAttribute('aria-expanded', open);
+}
+function afterShow() {
+  foldBanners();
+  if (state.panel === 'browse') {
+    const list = state.stack.length === 2;
+    results.classList.toggle('blist', list); $('#bcats').hidden = !list;
+    if (list) { buildBcats(); results.scrollTop = state.bScroll; syncBcats(); }
+    return;
+  }
+  const list = S.mode === 'sign' && state.stack.length === 1;
+  results.classList.toggle('list', list); $('#catindex').hidden = !list;
+  if (list) results.scrollTop = state.listScroll;
+}
+/* Listens plads huskes, før man går videre til en infoside eller en anden fane. */
+function saveScroll() {
+  if (state.view !== state.panel) return;
+  if (state.panel === 'browse') { if (state.stack.length === 2) state.bScroll = results.scrollTop; }
+  else if (S.mode === 'sign' && state.stack.length === 1) state.listScroll = results.scrollTop;
+}
+
+/* ---------- gennemsyn (Browse) ---------- */
+const primSp = l => D.spellings.find(x => x.lemma === l.id && x.primary) || D.spellings.find(x => x.lemma === l.id);
+const firstLetter = s => Array.from(s.toLowerCase()).find(ch => ch in RANK) || '';
+function renderBrowseHome() {
+  const nw = Object.keys(D.lemmas).length;
+  return '<div class="bhome" role="group" aria-label="Dictionary">' +
+    '<button type="button" class="bigbtn" data-browse="signs">' + G(['G17', 'N35', 'D21']) + '<span class="grow"><b>Signs</b><small>' + D.signs.length + ' signs in ' + CATLIST.length + ' categories</small></span><span class="chev" aria-hidden="true">›</span></button>' +
+    '<button type="button" class="bigbtn" data-browse="words">' + GS(SP.nfr_c || D.spellings[0]) + '<span class="grow"><b>Words</b><small>' + nw + ' words, by category or alphabet</small></span><span class="chev" aria-hidden="true">›</span></button></div>';
+}
+function wordListHTML() {
+  const by = state.browse.wsort, groups = {};
+  Object.keys(D.lemmas).forEach(k => { const l = D.lemmas[k], sp = primSp(l); if (!sp) return; const key = by === 'cat' ? SG[sp.signs[0].c].cat : firstLetter(l.t); (groups[key] = groups[key] || []).push({ l, sp }); });
+  const keys = (by === 'cat' ? CATLIST : D.letters).filter(k => groups[k]);
+  state.browse.secs = keys.map(k => by === 'cat' ? { label: k, name: D.cats[k] } : { label: tl(k), name: 'Words beginning with ' + tl(k), tl: true });
+  return '<div class="sortrow"><p class="eyebrow grow">' + Object.keys(D.lemmas).length + ' words · ' + (by === 'cat' ? 'by category of the first sign, then A–Z' : 'A–Z in Egyptological order') + '</p><button type="button" class="secondary" data-act="wsort">' + (by === 'cat' ? 'Show A–Z' : 'Show by category') + '</button></div>' +
+    '<div class="signlist">' + keys.map((k, ki) => '<section id="bsec-' + ki + '"><h3 class="cathead">' + (by === 'cat' ? '<span class="mono">' + k + '</span>' + esc(D.cats[k]) : '<span class="tl">' + esc(tl(k)) + '</span>') + '</h3>' +
+      groups[k].sort((a, b) => sortKey(a.l.t).localeCompare(sortKey(b.l.t)) || (a.l.hom || 0) - (b.l.hom || 0)).map(x =>
+        '<button type="button" class="srow w" data-lem="' + x.l.id + '"><span class="grow">' + T(x.l.t) + (x.l.hom ? ' <span class="pill">' + x.l.hom + '</span>' : '') + '<span class="pos">' + esc(x.l.pos) + '</span><small>' + esc(x.l.senses[0]) + '</small></span>' + GS(x.sp, 'sm') + '<span class="chev" aria-hidden="true">›</span></button>').join('') + '</section>').join('') + '</div>';
+}
+function renderBrowseList() {
+  if (state.browse.kind === 'words') return wordListHTML();
+  state.browse.secs = CATLIST.map(c => ({ label: c, name: D.cats[c] }));
+  return signListHTML('bsec-');
+}
+function buildBcats() {
+  $('#bcats').innerHTML = state.browse.secs.map((s, i) => '<button type="button" data-bcat="' + i + '" aria-pressed="false" aria-label="' + esc(s.name) + '">' + (s.tl ? '<span class="tl">' + esc(s.label) + '</span>' : esc(s.label)) + '</button>').join('');
+}
+function syncBcats() {
+  const el = $('#bcats'); if (el.hidden) return;
+  let cur = 0; state.browse.secs.forEach((s, i) => { const sec = $('#bsec-' + i); if (sec && sec.offsetTop <= results.scrollTop + 6) cur = i; });
+  el.querySelectorAll('button').forEach((b, i) => {
+    if (i === cur && b.getAttribute('aria-pressed') !== 'true') el.scrollTo({ left: b.offsetLeft - (el.clientWidth - b.offsetWidth) / 2, behavior: calm ? 'auto' : 'smooth' });
+    b.setAttribute('aria-pressed', i === cur);
+  });
+}
+function openBrowse(kind) {
+  state.browse.kind = kind; state.bScroll = 0; state.stack.length = 1;
+  trace('Gennemsyn: ' + (kind === 'signs' ? 'tegn' : 'ord'));
+  if (kind === 'signs') { step(['sign_category', 'term_translation'], 'Kategorierne hentes i rækkefølge med navn på brugerens sprog.'); step(['sign', 'sign_code', 'sign_value'], 'Alle tegn hentes sorteret efter kategori og nummer.'); }
+  else { step(['lemma', 'sense_translation'], 'Alle opslagsord hentes med første betydning på brugerens sprog.'); step(['spelling', 'spelling_sign', 'sign'], 'Hvert ords hovedstavemåde giver det første tegn, og tegnets kategori bestemmer gruppen.'); step(['lemma'], 'Inden for gruppen sorteres der på translit_sort, som følger den ægyptologiske bogstavrækkefølge.'); }
+  show(renderBrowseList);
+}
+function openSign(code) {
+  trace('Tegn: ' + code);
+  step(['sign', 'sign_value', 'sign_value_stage'], 'Tegnets funktioner og lydværdier hentes.');
+  step(['spelling_sign', 'spelling', 'word_form', 'lemma'], 'Alle stavemåder med tegnet findes via indekset på tegn, med plads og funktion.');
+  saveScroll();
+  if (state.panel === 'search' && S.mode === 'sign') addHist('sign', [code]);
+  show(renderSign(code));
+}
+
+/* ---------- søgning ---------- */
+function runSearch() {
+  if (S.mode === 'text') {
+    const q = state.text.normalize('NFC').trim();
+    if (!q) { toast('Write something to search for first'); return; }
+    state.stack.length = 0; state.searched = true; state.last.text = state.text; setKb(false);
+    textSearch(q); addHist('text', q); return;
+  }
+  const codes = state.buf.map(c => c === '?' ? '?' : canon(c));
+  if (!codes.length) { toast('Write at least one sign first'); return; }
+  state.stack.length = 0; state.searched = true; state.last[S.mode] = state.buf.slice(); state.lastQ[S.mode] = copyQuads(state.quads); setKb(false);
+  trace('Søgning: ' + ({ word: 'ord', sentence: 'sætning' })[S.mode] + ', ' + state.buf.join(' '));
+  step(['sign'], 'Varianter erstattes af grundtegn, og tegnene bliver til søgenøglen ' + codes.join('-') + '.' + (state.quads.length ? ' Kvadraterne indgår ikke i nøglen. De ændrer kun, hvordan tegnene står.' : ''));
+  addHist(S.mode, state.buf);
+  if (S.mode === 'word') {
+    const lost = codes.some(isLost), g = !lost && GROUPS[codes.join('-')];
+    if (g) {
+      step(['spelling'], 'Opslag på sign_key: ' + g.length + (g.length > 1 ? ' rækker. Samme tegnfølge skriver flere ord.' : ' række.'));
+      step(['word_form', 'lemma', 'sense', 'sense_translation'], 'Ordform, opslagsord og betydninger hentes på brugerens sprog.');
+      show(renderWords(g, state.buf)); return;
+    }
+    if (lost) {
+      const fits = lostFits(codes);
+      step(['spelling_sign', 'spelling'], 'Noget er tabt, så der kan ikke slås op på hele søgenøglen. I stedet søges stavemåder, hvor de bevarede tegn står på deres pladser, og hullet dækker ' + (codes.includes('*') ? 'et eller flere tegn: ' : 'præcis ét tegn: ') + fits.length + ' fundet.');
+      if (fits.length) { step(['word_form', 'lemma', 'sense_translation'], 'Hver mulighed vises som forslag med det udfyldte tegn markeret. Intet gemmes som læsning.'); show(renderRestored(codes, fits)); return; }
+    } else step(['spelling'], 'Opslag på sign_key: ingen rækker.');
+    const a = analyse(codes);
+    if (a.real.length === 1 && a.words.length === 1 && (a.real[0].rule || a.real[0].fuzzy || a.real[0].lost)) {
+      const w = a.real[0];
+      if (w.lost) step(['spelling_sign', 'spelling'], 'Et kendt ord passer på de bevarede tegn, når det tabte tegn udfyldes.');
+      if (w.rule) step(['inflection_rule', 'inflection_rule_sign'], 'Resten efter et kendt ord passer på en bøjningsregel: ' + w.rule.form + '.');
+      else if (w.fuzzy) step(['sign_value'], 'Ét tegn afviger, men har samme lydværdi som det forventede.');
+      show(() => '<p class="eyebrow">' + (w.lost ? 'Lost sign restored' : (w.rule ? 'Recognised by rule' : 'Close spelling')) + '</p>' + (w.lost ? '<p class="banner">This word fits if ' + lostText(w.sp, baseCodes(w)) + '. It is a proposal, not a reading.</p>' : '') + (w.fuzzy ? '<p class="banner">Written with ' + w.fuzzy.typed + ' where the database has ' + w.fuzzy.expected + '. Both write ' + esc(tl(w.fuzzy.value)) + '.</p>' : '') + wordCard(w.sp, state.buf, { rule: w.rule, fit: w.lost ? baseCodes(w) : null }));
+      return;
+    }
+    step(['spelling_sign', 'sign_value'], 'Nærliggende stavemåder søges: ét tegn udskiftet, manglende eller for meget.');
+    show(renderNotFound(codes, fuzzy(codes))); return;
+  }
+  const hit = D.sentences.find(s => s.key === codes.join('-'));
+  if (hit) {
+    step(['sentence'], 'Opslag på sign_key: 1 række. Sætningen er kendt.');
+    step(['sentence_reading', 'sentence_token'], 'Standardlæsningen og dens ord hentes i rækkefølge.');
+    step(['spelling', 'word_form', 'lemma', 'sense_translation'], 'Hvert ord følges til sit opslagsord og sin betydning.');
+    step(['sentence_translation'], 'Oversættelserne hentes: bogstavelig og fri.');
+    step(['witness', 'work', 'text_line', 'passage'], 'Kilden og andre tekstvidner med samme passage slås op.');
+    show(renderKnown(hit, state.buf)); return;
+  }
+  step(['sentence'], 'Opslag på sign_key: ingen rækker. Appen deler selv tegnene op.');
+  const a = analyse(codes); a.quads = copyQuads(state.quads);
+  step(['spelling'], 'Opdeling efter længste kendte stavemåde: ' + a.words.map(w => w.kind === 'word' ? w.t : (w.kind === 'gap' ? '[tabt ord]' : (w.kind === 'lacuna' ? '[tabt]' : '[ukendt ' + w.codes[0] + ']'))).join(' | ') + '.');
+  if (a.real.some(w => w.lost)) step(['spelling_sign', 'spelling'], 'Et tabt tegn står sammen med bevarede tegn. En stavemåde, hvor de bevarede tegn passer på deres pladser, bruges som udfyldning: ' + a.real.filter(w => w.lost).map(w => w.t).join(', ') + '.');
+  if (a.gaps.length) step(['sentence_pattern', 'pattern_slot'], 'Et tabt ord står som en tom plads. Mønstrene prøves med pladsen som navneord, verbum, adjektiv og præposition.');
+  if (a.real.some(w => w.rule)) step(['inflection_rule', 'inflection_rule_sign'], 'Et tegn efter et ord passer på en bøjningsregel og læses som en form, ikke som et selvstændigt ord.');
+  if (a.real.some(w => w.fuzzy)) step(['sign_value'], 'En stavemåde afviger med ét tegn, der har samme lydværdi.');
+  if (a.real.some(w => w.short)) step(['spelling_sign', 'sign_function'], 'En stavemåde passer, når ét tegn udelades: ' + a.real.filter(w => w.short).map(w => w.t + ' uden ' + w.short.missing + (w.short.det ? ' (determinativ)' : '')).join(', ') + '.');
+  if (a.pattern) { step(['sentence_pattern', 'pattern_slot', 'pattern_label'], 'Ordklasserne passer på mønstret ' + a.pattern.code + '. Skabelonen fyldes ud.'); step([], 'Resultatet vises som forslag. Intet gemmes i sentence.'); }
+  else step(['sentence_pattern', 'pattern_slot'], 'Intet mønster passer. Kun de genkendte ord vises.');
+  const known = sentenceFits(codes); lemmaFits(a).forEach(f => { if (!known.some(x => x.s === f.s)) known.push(f); });
+  if (known.length) step(['sentence_token', 'spelling_sign', 'sentence'], 'Indtastningen sammenlignes også med kendte sætninger: de bevarede tegn skal stå i samme rækkefølge, et tabt tegn dækker ét tegn, og et tabt ord dækker ét helt ord. ' + known.length + ' passer: ' + known.map(f => f.s.t).join('; ') + '.');
+  show(renderProposal(codes, a));
+}
+function openSpelling(id, fit) { const sp = SP[id]; saveScroll(); trace('Åbner ord'); step(['spelling', 'word_form', 'lemma', 'sense_translation'], 'Ordet slås op fra et tryk i resultatet.'); if (fit) step([], 'Ordet er åbnet fra et forslag. De tegn, brugeren ikke selv har skrevet, er fremhævet. Markeringen findes kun på skærmen og gemmes ikke.'); show(renderWords([sp], null, fit)); }
+function openLemma(id) { const sp = D.spellings.find(x => x.lemma === id && x.primary) || D.spellings.find(x => x.lemma === id); if (sp) openSpelling(sp.id); }
+function openSentence(id, marks, cont) { saveScroll(); trace('Åbner sætning'); step(['sentence', 'sentence_reading', 'sentence_token', 'sentence_translation'], 'Sætningen slås op fra et tryk i resultatet.'); if (marks || cont) step([], 'Sætningen er åbnet fra et forslag. De tegn, brugeren ikke selv har skrevet, er fremhævet: udfyldte huller i klammer, resten af sætningen uden.'); show(renderKnown(SEN[id], null, marks, cont)); }
+function textSearch(q) {
+  const f = fold(q), low = q.toLowerCase();
+  const signs = D.signs.filter(s => s.c.toLowerCase().startsWith(low) || s.d.toLowerCase().includes(low));
+  const lems = Object.keys(D.lemmas).map(k => D.lemmas[k]).filter(l => (f && fold(l.t).startsWith(f)) || (l.alt && f && fold(l.alt).startsWith(f)) || l.senses.some(x => x.toLowerCase().includes(low)))
+    .sort((a, b) => sortKey(a.t).localeCompare(sortKey(b.t)));
+  trace('Tekstsøgning: ' + q);
+  step(['sign_code'], 'Gardiner-nummer: ' + signs.length + ' tegn.');
+  step(['lemma', 'lemma_reading'], 'Translitteration uden specialtegn (translit_search = ' + (f || 'tom') + '): fundet sammen med oversættelser.');
+  step(['sense_translation'], 'Fuldtekstsøgning i oversættelser. I alt ' + lems.length + ' ord.');
+  show(() => (signs.length ? '<p class="eyebrow">Signs</p>' + signs.map(s => '<button type="button" class="rowbtn" data-sign="' + s.c + '">' + G([s.c], 'sm') + '<span class="grow"><span class="mono">' + s.c + '</span><small>' + esc(s.d) + '</small></span></button>').join('') : '') +
+    (lems.length ? '<p class="eyebrow">Words, in Egyptological order</p>' + lems.map(l => '<button type="button" class="rowbtn" data-lem="' + l.id + '"><span class="grow">' + T(l.t) + '<small>' + esc(l.senses[0]) + '</small></span></button>').join('') : '') +
+    (!signs.length && !lems.length ? '<p class="banner err">Nothing matches. The prototype only knows ' + Object.keys(D.lemmas).length + ' words.</p>' : ''));
+}
+/* Hver søgetype har sin egen seneste søgning med felt og resultat. Det, der er skrevet uden at søge, gemmes ikke ved skift. */
+function setMode(m) {
+  saveScroll();
+  S.mode = m; document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m));
+  state.stack = state.mstack[m];
+  if (m === 'text') state.text = state.last.text || ''; else if (m !== 'sign') { state.buf = (state.last[m] || []).slice(); state.quads = copyQuads(state.lastQ[m] || []); }
+  if (m !== 'sign') $('#intro').innerHTML = '<b>' + INTRO[m][0] + '</b><span>' + INTRO[m][1] + '</span>';
+  setKb(state.kbOpen && m !== 'sign');
+  if (state.stack.length) {
+    if (m !== 'sign') { trace('Skift til ' + cap(m)); step([], 'Den seneste søgning i denne søgetype vises igen, som den stod. Intet slås op på ny, og intet nyt gemmes i historikken.'); }
+    rerender();
+  } else if (m === 'sign') {
+    trace('Tegnliste');
+    step(['sign_category', 'term_translation'], 'Kategorierne hentes i rækkefølge med navn på brugerens sprog.');
+    step(['sign', 'sign_code', 'sign_value'], 'Alle tegn hentes sorteret efter kategori og nummer, med Gardiner-nummer og lydværdier.');
+    show(renderSignList);
+  } else { results.innerHTML = state.searched ? '<p class="empty">' + HINT[m] + '</p>' : ''; afterShow(); }
+}
+
+/* ---------- foto (simuleret) ---------- */
+const cc = (c, st) => st === 'restored' ? 'guess' : (c >= .85 ? 'ok' : (c >= .6 ? 'warn' : 'bad'));
+const pct = c => Math.round(c * 100) + '%';
+function scanSigns(sc) { return sc.words.map((w, wi) => w.signs.map((x, si) => state.scanEdits[sc.id + wi + '.' + si] || x.c)); }
+function renderPhoto() {
+  const el = $('#photo');
+  if (!state.scan) {
+    el.innerHTML = '<p class="note">Here the app would open the camera or the gallery and ask whether the photo should be kept. The prototype cannot read a real photo, so choose one of two samples to see what recognition returns.</p><p class="eyebrow">Sample photos</p>' +
+      D.scans.map(s => '<button type="button" class="rowbtn" data-scan="' + s.id + '">' + G(s.words[0].signs.map(x => x.c), 'sm') + '<span class="grow">' + esc(s.title) + '<small>' + esc(s.sub) + '</small></span></button>').join('');
+    return;
+  }
+  const sc = D.scans.find(s => s.id === state.scan), rtl = sc.dir === 'rtl', signs = scanSigns(sc);
+  const edited = Object.keys(state.scanEdits).some(k => k.indexOf(sc.id) === 0);
+  let h = '<button type="button" class="linkb" data-act="scanback">‹ Samples</button>';
+  h += '<div class="slab"><span class="gl' + (rtl ? ' rtl' : '') + '">' + sc.words.map(w => (w.cart ? '<span class="cart">' : '') + w.signs.map(x => '<span' + (x.status !== 'intact' ? ' class="dmg"' : '') + '>' + SG[x.c].ch + '</span>').join('') + (w.cart ? '</span>' : '')).join(' ') + '</span></div>';
+  h += '<p class="note">' + esc(sc.title) + ' · read ' + (rtl ? 'right to left' : 'left to right') + (S.conf ? ' · <span class="conf c-' + cc(sc.conf) + '">sentence ' + pct(sc.conf) + '</span>' : '') + '</p>';
+  h += '<p class="eyebrow">Digital reading. Tap a word.</p><div class="words">' + sc.words.map((w, wi) => {
+    const g = GROUPS[signs[wi].map(canon).join('-')];
+    return '<button type="button" class="wchip" data-sw="' + wi + '" aria-pressed="' + (state.scanWord === wi) + '">' + (w.cart ? '<span class="cart">' : '') + '<span class="gl sm' + (rtl ? ' rtl' : '') + '">' + signs[wi].map(c => SG[c].ch).join('') + '</span>' + (w.cart ? '</span>' : '') +
+      '<span class="tl">' + (g ? esc(tl(g[0].t)) : '?') + '</span>' + (S.conf ? '<span class="conf c-' + cc(w.conf) + '">' + pct(w.conf) + '</span><span class="bar"><i class="b-' + cc(w.conf) + '" style="width:' + pct(w.conf) + '"></i></span>' : '') + '</button>';
+  }).join('') + '</div>';
+  const w = sc.words[state.scanWord];
+  h += '<p class="eyebrow">Signs in the selected word</p><div>' + w.signs.map((x, si) => {
+    const k = sc.id + state.scanWord + '.' + si, now = state.scanEdits[k] || x.c;
+    return '<div class="signrow">' + G([now]) + '<div><span class="mono">' + now + '</span> ' + (state.scanEdits[k] ? '<span class="pill">changed by you</span>' : (S.conf ? '<span class="conf c-' + cc(x.conf, x.status) + '">' + pct(x.conf) + '</span> ' : '') + (x.status !== 'intact' ? '<span class="pill' + (x.status === 'restored' ? ' g' : '') + '">' + x.status + '</span>' : '')) +
+      (x.alts.length ? '<div class="alts" style="margin-top:4px">' + x.alts.map(a => '<button type="button" data-alt="' + k + '|' + a[0] + '" aria-pressed="' + (now === a[0]) + '"><span class="gl sm">' + SG[a[0]].ch + '</span>' + a[0] + (S.conf ? ' ' + pct(a[1]) : '') + '</button>').join('') + '</div>' : '') + '</div></div>';
+  }).join('') + '</div>';
+  if (S.conf) h += '<div class="legend"><span class="c-ok">■ sure</span><span class="c-warn">■ uncertain</span><span class="c-bad">■ doubtful</span><span class="c-guess">■ restored by the app</span></div>';
+  h += '<div style="display:flex;flex-wrap:wrap;gap:8px"><button type="button" class="primary" data-act="scanlook">Look up this reading</button><button type="button" class="secondary" data-act="scansuggest"' + (edited ? '' : ' disabled') + '>Send correction</button></div>';
+  if (!edited) h += '<p class="note">Is a sign wrong? Pick another candidate above, then send the correction.</p>';
+  el.innerHTML = h;
+}
+
+/* ---------- gemt, indstillinger, lag ---------- */
+/* Historik: de seneste søgninger med det, der blev søgt på. Tegnene vises med deres opstilling, og under dem står det samme som tekst. */
+const HLABEL = { sign: 'Sign', word: 'Word', sentence: 'Sentence', text: 'Text' };
+const LOSTTXT = { '?': '▨', '*': '▨⋯', '_': '[⋯]' };
+function histText(x) {
+  const out = []; let i = 0;
+  while (i < x.codes.length) { const q = (x.quads || []).find(k => k.at === i); if (q) { out.push(mdcOf(x.codes.slice(i, i + q.n), q.tree)); i += q.n; } else { out.push(LOSTTXT[x.codes[i]] || x.codes[i]); i++; } }
+  return out.join('-');
+}
+function renderHist() {
+  $('#hist').innerHTML = '<p class="note">The last ' + S.hist + ' searches are kept. Tap one to run it again.</p>' + (state.hist.length ? state.hist.map((x, i) =>
+    '<button type="button" class="rowbtn hrow" data-hist="' + i + '"><span class="grow">' + (x.mode === 'text' ? '<span class="htxt">' + esc(x.codes) + '</span>'
+      : G(x.codes, 'sm', x.quads) + '<small class="mono">' + esc(histText(x)) + '</small>') + '</span><span class="pill">' + HLABEL[x.mode] + '</span></button>').join('') : '<p class="empty">No searches yet.</p>');
+}
+/* Opstillingen, der gemmes med en favorit: brugerens egne kvadrater, når det gemte er det, der blev søgt på; ellers den gemte stavemådes opstilling. */
+function favQuads(f) {
+  if (f.kind === 'sign') return [];
+  const mine = state.last[S.mode], own = state.view === 'search' && state.panel === 'search' && mine && f.codes.length === mine.length && f.codes.every((c, i) => c === mine[i]);
+  if (own && (f.kind === 'input' || state.lastQ[S.mode].length)) return copyQuads(state.lastQ[S.mode]);
+  if (f.kind === 'word') { const g = GROUPS[f.codes.map(canon).join('-')]; return g ? copyQuads(g[0].quads) : []; }
+  if (f.kind === 'sentence' && SEN[f.ref]) { const out = []; let off = 0; SEN[f.ref].written.forEach(x => { const sp = SP[x.sp]; sp.quads.forEach(q => out.push({ at: q.at + off, n: q.n, tree: q.tree })); off += sp.signs.length; }); return out; }
+  return [];
+}
+function renderSaved() {
+  const el = $('#saved');
+  const list = state.favs.slice().sort((a, b) => state.favSort === 'new' ? b.at - a.at : (sortKey(a.title) || a.title.toLowerCase()).localeCompare(sortKey(b.title) || b.title.toLowerCase()));
+  el.innerHTML = '<div class="rhead"><p class="eyebrow grow">' + list.length + ' saved</p><button type="button" class="linkb" data-act="favsort">Sort: ' + (state.favSort === 'new' ? 'newest first' : 'alphabetical') + '</button></div>' +
+    (list.length ? list.map(f => '<div class="rhead"><button type="button" class="rowbtn hrow" data-favopen="' + esc(favKey(f)) + '"><span class="grow">' + G(f.codes, 'sm', f.quads) +
+      '<small>' + (f.kind === 'sign' ? '<span class="mono">' + esc(f.title) + '</span>' : T(f.title)) + '</small></span><span class="pill">' + ({ sign: 'sign', word: 'word', sentence: 'known sentence', input: 'your own input' })[f.kind] + '</span></button><button type="button" class="ibtn" data-favdel="' + esc(favKey(f)) + '" aria-label="Remove favourite">✕</button></div>').join('')
+      : '<p class="empty">Nothing saved yet. Press ★ on a result to keep it. Your own input can be saved too, even when it is not in the database.</p>');
+}
+const OPT = {
+  detail: ['Detail level', [['basic', 'Basic'], ['full', 'Full analysis']], 'Everything is in the database either way. This only decides what is open at first.'],
+  trans: ['Translation', [['free', 'Free'], ['literal', 'Literal'], ['both', 'Both']], ''],
+  trad: ['Grammar terms', [['gardiner', 'Gardiner'], ['standard', 'Standard theory'], ['allen', 'Allen']], 'The same form has a different name in each tradition.'],
+  scheme: ['Transliteration', [['gardiner', 'Gardiner (ỉ, ḳ)'], ['tla', 'TLA (j, q)'], ['mdc', 'MdC (ASCII)']], ''],
+  dir: ['Writing direction', [['ltr', 'Left to right'], ['rtl', 'Right to left']], 'Right to left mirrors the signs, as on the monuments.'],
+  conf: ['Confidence on photos', [['true', 'Show'], ['false', 'Hide']], ''],
+};
+function renderSettings() {
+  $('#settings').innerHTML = Object.keys(OPT).map(k => '<div class="field"><label for="set-' + k + '">' + OPT[k][0] + '</label><select id="set-' + k + '" data-set="' + k + '">' +
+    OPT[k][1].map(o => '<option value="' + o[0] + '"' + (String(S[k]) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select>' + (OPT[k][2] ? '<small>' + OPT[k][2] + '</small>' : '') + '</div>').join('');
+}
+/* Historikken er en anden rude i samme skuffe: skuffen vokser til hele skærmen og tilbage igen. */
+function setDrawerHist(on) {
+  state.drawerHist = on;
+  $('#drawer').classList.toggle('hist', on); $('#dset').inert = on; $('#dhist').inert = !on;
+  $('#drawer').setAttribute('aria-label', on ? 'History' : 'Settings');
+  if (on) { renderHist(); trace('Historik'); step(['search_history'], 'De seneste ' + S.hist + ' søgninger hentes, nyeste først, med søgetype og den skrevne tekst.'); }
+  else $('#histcount').textContent = state.hist.length ? String(state.hist.length) : '';
+}
+function setOverlay(which) {
+  if (which) setKb(false);
+  state.drawer = which === 'drawer'; state.sheet = which === 'sheet'; setDrawerHist(false);
+  $('#drawer').inert = !state.drawer; $('#sheet').inert = !state.sheet;
+  $('#menubtn').setAttribute('aria-expanded', state.drawer);
+  if (state.drawer) { renderSettings(); $('#histcount').textContent = state.hist.length ? String(state.hist.length) : ''; }
+  if (state.sheet) { state.scan = null; renderPhoto(); }
+  layout();
+}
+function setView(v) {
+  saveScroll();
+  state.view = v; if (state.kbOpen) setKb(false);
+  ['search', 'browse', 'saved'].forEach(x => { $('#v-' + x).hidden = x !== v; });
+  document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === v));
+  if (v === 'saved') renderSaved();
+  else {
+    if (v !== state.panel) { state.stacks[state.panel] = state.stack; state.panel = v; state.stack = state.stacks[v]; results = PANELS[v]; }
+    if (v === 'browse' && !state.stack.length) { trace('Dictionary'); step([], 'Appen åbner her og viser kun de to valg, tegn eller ord. Intet hentes endnu.'); show(renderBrowseHome); }
+    else rerender();
+  }
+  renderField();
+}
+function load(mode, input, quads) {
+  setOverlay(null); setView('search'); setMode(mode);
+  if (mode === 'sign') { if (state.stack.length > 1) { state.stack.length = 1; rerender(); } return openSign(input[0]); }
+  if (mode === 'text') state.text = input; else { state.buf = input.slice(); state.quads = quads ? copyQuads(quads) : []; }
+  renderField(); runSearch();
+}
+function restart() {
+  setOverlay(null); setView('search');
+  state.stacks = { search: [], browse: [] }; PANELS.browse.innerHTML = '';
+  state.mstack = { sign: [], word: [], sentence: [], text: [] }; state.last = { word: null, sentence: null, text: null }; state.quads = []; state.lastQ = { word: [], sentence: [] };
+  Object.assign(state, { buf: [], text: '', stack: state.stacks.search, listScroll: 0, searched: false, scan: null, scanWord: 0, scanEdits: {}, saved: 'fav', bScroll: 0 });
+  state.browse.kind = null;
+  kbIdx = 0; setMode('sentence'); setView('browse');
+  trace('Appen er genstartet');
+  step(['user_setting', 'favorite', 'search_history'], 'Indstillinger, favoritter og historik ligger i databasen og er der stadig. Kun skærmens tilstand er nulstillet: appen åbner i Dictionary, og søgefeltet står i midten igen.');
+}
+function refresh() { saveScroll(); renderField(); rerender(); }
+
+/* ---------- hændelser ---------- */
+document.addEventListener('click', e => {
+  if (suppressClick) { suppressClick = false; return; }
+  if (lpHeld) return;
+  if (!lostpop.hidden && !e.target.closest('#lostpop')) setLostPop(false);
+  const qp = $('#quadpop'), onQuad = e.target.closest('#kquad');
+  if (!qp.hidden && !e.target.closest('#quadpop') && !onQuad) setQuadPop(false);
+  if (onQuad) return setQuadPop(qp.hidden);
+  const t = e.target, b = t.closest('button');
+  if (b && b.id === 'restart') return restart();
+  const ex = t.closest('[data-ex]');
+  if (ex) { const x = EX[Number(ex.dataset.ex)]; load(x[2], x[3]); phone.scrollIntoView({ block: 'nearest', behavior: calm ? 'auto' : 'smooth' }); return; }
+  if (!t.closest('#phone')) return;
+  const inKb = !!t.closest('#kbd'), inField = !!t.closest('#field');
+  const keepKb = b && b.dataset.mode && b.dataset.mode !== 'sign';   /* skift mellem Word, Sentence og Text lader tastaturet stå */
+  if (state.kbOpen && !inKb && !inField && !keepKb) setKb(false);
+  const note = t.closest('.banner');
+  if (note && !b) return toggleBanner(note);
+  if (!b) {
+    if (t.id === 'scrim') setOverlay(null);
+    else if (inField && !state.kbOpen) setKb(true);
+    return;
+  }
+  const d = b.dataset;
+  if (b.id === 'cam') return setOverlay('sheet');
+  if (b.id === 'menubtn') return setOverlay('drawer');
+  if (d.mode) return setMode(d.mode);
+  if (d.view) return setView(d.view);
+  if (d.tab) return kbGo(KBP.findIndex(p => p.cat === d.tab), true);
+  if (d.lost) return addLost(d.lost);
+  if (d.quad) { const p = d.quad.split('.').map(Number); return applyQuad(p[0], p[1]); }
+  if (d.browse) return openBrowse(d.browse);
+  if (d.bcat) { results.scrollTop = $('#bsec-' + d.bcat).offsetTop; return syncBcats(); }
+  if (d.k) { state.buf.push(d.k); return renderField(); }
+  if (d.ch) { state.text += d.ch; return renderField(); }
+  if (d.cat) { results.scrollTop = $('#cat-' + d.cat).offsetTop; return; }
+  if (d.sp) return openSpelling(d.sp, d.fit ? d.fit.split(' ') : null);
+  if (d.lem) return openLemma(d.lem);
+  if (d.sen) { const nums = v => v ? v.split(',').map(Number) : null; return openSentence(d.sen, nums(d.marks), nums(d.cont)); }
+  if (d.sign) return openSign(d.sign);
+  if (d.fav) { const f = JSON.parse(d.fav); f.quads = favQuads(f); b.setAttribute('aria-pressed', toggleFav(f)); return; }
+  if (d.favopen) { const f = state.favs.find(x => favKey(x) === d.favopen); trace('Åbner favorit'); return load(f.mode, f.codes, f.quads); }
+  if (d.favdel) { state.favs = state.favs.filter(x => favKey(x) !== d.favdel); trace('Favorit'); step(['favorite'], 'Rækken slettes.'); return renderSaved(); }
+  if (d.hist) { const x = state.hist[Number(d.hist)]; return load(x.mode, x.codes, x.quads); }
+  if (d.scan) { state.scan = d.scan; state.scanWord = 0; trace('Foto: ' + d.scan); step(['scan', 'scan_line'], 'Billedet og den aflæste linje gemmes med samlet sikkerhed.'); step(['scan_word', 'scan_word_candidate'], 'Tegnene samles til ord, hvert med sin sikkerhed og alternative bud.'); step(['scan_sign', 'scan_sign_candidate', 'scan_group'], 'Hvert tegn har placering, sikkerhed, status og bud. En kartouche er en ramme om en gruppe.'); return renderPhoto(); }
+  if (d.sw) { state.scanWord = Number(d.sw); return renderPhoto(); }
+  if (d.alt) { const p = d.alt.split('|'), sc = D.scans.find(s => p[0].indexOf(s.id) === 0), orig = sc.words[Number(p[0].slice(sc.id.length).split('.')[0])].signs[Number(p[0].split('.')[1])].c; if (p[1] === orig) delete state.scanEdits[p[0]]; else state.scanEdits[p[0]] = p[1]; return renderPhoto(); }
+  switch (d.act) {
+    case 'back': if (S.mode === 'text') state.text = Array.from(state.text).slice(0, -1).join(''); else popSign(); return renderField();
+    case 'clear': state.buf = []; state.quads = []; state.text = ''; return renderField();
+    case 'unquad': dropQuads(state.buf.length - 1); setQuadPop(false); return renderField();
+    case 'lacuna': state.buf.push('?'); return renderField();
+    case 'space': state.text += ' '; return renderField();
+    case 'search': return runSearch();
+    case 'closeover': return setOverlay(null);
+    case 'history': return setDrawerHist(true);
+    case 'histback': return setDrawerHist(false);
+    case 'pop': state.stack.pop(); return rerender();
+    case 'wsort': state.browse.wsort = state.browse.wsort === 'cat' ? 'abc' : 'cat'; state.bScroll = 0; trace('Gennemsyn: ord'); step(['lemma'], state.browse.wsort === 'cat' ? 'Samme ord, nu grupperet efter første tegns kategori og derefter sorteret på translit_sort.' : 'Samme ord, nu kun sorteret på translit_sort og grupperet efter første bogstav.'); return rerender();
+    case 'signsort': state.signSort = state.signSort === 'func' ? 'pos' : 'func'; return rerender();
+    case 'favsort': state.favSort = state.favSort === 'new' ? 'az' : 'new'; return renderSaved();
+    case 'scanback': state.scan = null; return renderPhoto();
+    case 'scanlook': { const sc = D.scans.find(s => s.id === state.scan); return load('sentence', scanSigns(sc).reduce((a, w) => a.concat(w), [])); }
+    case 'scansuggest': {
+      const n = Object.keys(state.scanEdits).filter(k => k.indexOf(state.scan) === 0).length; state.sugg++;
+      trace('Rettelse sendt'); step(['suggestion'], 'Ny række med status "new" og en beskåret kopi af billedet.'); step(['suggestion_item'], n + ' punkt(er): udsnittets placering, appens bud og dit forslag. Punktet peger ikke på scanningen.'); step([], 'Rettelsen venter på godkendelse. Intet i indholdet ændres endnu.');
+      return toast('Correction queued for review (' + n + ' sign' + (n > 1 ? 's' : '') + ')');
+    }
+  }
+});
+document.addEventListener('change', e => {
+  const k = e.target.dataset && e.target.dataset.set; if (!k) return;
+  S[k] = k === 'conf' ? e.target.value === 'true' : (k === 'hist' ? Number(e.target.value) : e.target.value);
+  if (k === 'hist' && state.hist.length > S.hist) state.hist.length = S.hist;
+  trace('Indstilling ændret'); step(['user_setting'], OPT[k][0] + ' gemmes på brugeren. Den lokale gæst har sin egen række.');
+  refresh();
+});
+/* Et rigtigt tastatur virker også, mens skærmtastaturet er fremme. */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if (state.drawer && state.drawerHist) return setDrawerHist(false); if (state.drawer || state.sheet) return setOverlay(null); if (state.kbOpen) return setKb(false); return; }
+  if (!state.kbOpen) {
+    const act = document.activeElement, go = e.key === 'Enter' || e.key === ' ';
+    if (go && act === field) { e.preventDefault(); setKb(true); }
+    else if (go && act && act.classList.contains('banner')) { e.preventDefault(); toggleBanner(act); }
+    return;
+  }
+  if (e.ctrlKey || e.metaKey || e.altKey || e.key === 'Tab') return;
+  if (e.key === 'Enter') { e.preventDefault(); return runSearch(); }
+  if (e.key === 'Backspace') { e.preventDefault(); if (S.mode === 'text') state.text = Array.from(state.text).slice(0, -1).join(''); else popSign(); return renderField(); }
+  if (S.mode === 'text' && e.key.length === 1) { e.preventDefault(); state.text += e.key; renderField(); }
+});
+document.addEventListener('keyup', e => { if (state.kbOpen && S.mode === 'text' && e.key === ' ') e.preventDefault(); });
+let ticking = false;
+pagesEl.addEventListener('scroll', () => { if (ticking) return; ticking = true; requestAnimationFrame(() => { ticking = false; kbSync(); }); });
+dragScroll(pagesEl, true); dragScroll(tabsEl, false); dragScroll($('#bcats'), false);
+let bticking = false;
+PANELS.browse.addEventListener('scroll', () => { if (bticking) return; bticking = true; requestAnimationFrame(() => { bticking = false; if (state.view === 'browse' && state.stack.length === 2) syncBcats(); }); });
+phone.addEventListener('scroll', () => { phone.scrollTop = 0; phone.scrollLeft = 0; });
+window.addEventListener('resize', () => { fit(); layout(); kbGo(kbIdx, false); });
+
+/* ---------- sidepanel ---------- */
+const EX = [
+  ['Sætninger i databasen'],
+  ['mk pḥ.n.n ẖnw', 'Den skibbrudne sømand, linje 2-3', 'sentence', SEN.S1.codes],
+  ['rꜥ m pt', 'findes i to tekstvidner', 'sentence', SEN.S2.codes],
+  ['ḥtp dỉ nsw', 'skrevet i en anden rækkefølge, end det læses', 'sentence', SEN.S5.codes],
+  ['Sætninger, appen ikke kender'],
+  ['sḏm.n.f', 'formen genkendes af en regel', 'sentence', ['F21', 'G17', 'N35', 'I9']],
+  ['nfr prw', 'opdeles og får et forslag', 'sentence', ['F35', 'O1', 'Z1', 'Z2']],
+  ['mk pḥ.n.n ẖnw med Z7', 'ét tegn skrevet anderledes', 'sentence', ['G17', 'D36', 'V31', 'Q3', 'F22', 'D54', 'N35', 'N35', 'Z2', 'F26', 'N35', 'W24', 'Z7', 'O1']],
+  ['rꜥ m ▨', 'med et tabt tegn', 'sentence', ['D21', 'D36', 'N5', 'Z1', 'G17', '?']],
+  ['▨ m i en sætning', 'tabt tegn udfyldes: sḏm.n.f', 'sentence', ['?', 'G17', 'N35', 'I9']],
+  ['rꜥ m [tabt ord]', 'læses med en tom plads', 'sentence', ['D21', 'D36', 'N5', 'Z1', 'G17', '_']],
+  ['[tabt ord] pḥ ▨', 'brudstykke af en kendt sætning findes', 'sentence', ['_', 'Q3', 'F22', '?']],
+  ['[tabt ord] pḥ uden D54', 'determinativ udeladt, ordet genkendes alligevel', 'sentence', ['_', 'Q3', 'F22']],
+  ['Lang indtastning', 'tegnene formindskes og brydes til flere linjer', 'sentence', SEN.S1.codes.concat(SEN.S2.codes, SEN.S5.codes, SEN.S4.codes, SEN.S3.codes)],
+  ['Ord'],
+  ['ḥm', 'to ord skrives ens', 'word', ['U36', 'Z1']],
+  ['nṯrw', 'flertal, der ikke er gemt', 'word', ['R8', 'Z1', 'Z2']],
+  ['nfrw med Z7', 'ukendt stavemåde, samme lydværdi', 'word', ['F35', 'Z7', 'Z2']],
+  ['pt uden determinativ', 'et tegn mangler', 'word', ['Q3', 'X1']],
+  ['▨ m', 'tabt tegn: sḏm foreslås', 'word', ['?', 'G17']],
+  ['▨ Z1', 'tabt tegn: flere ord passer', 'word', ['?', 'Z1']],
+  ['▨⋯ Z1', 'tabte tegn i ukendt antal', 'word', ['*', 'Z1']],
+  ['Mn-ḫpr-Rꜥ', 'kongenavn i kartouche', 'word', ['N5', 'Y5', 'L1']],
+  ['Tegn og tekst'],
+  ['G17', 'uglen og ordene den indgår i', 'sign', ['G17']],
+  ['hm', 'tekstsøgning uden specialtegn finder ḥm', 'text', 'hm'],
+];
+$('#examples').innerHTML = EX.map((x, i) => x.length === 1 ? '<p class="exgroup">' + x[0] + '</p>' : '<button type="button" data-ex="' + i + '"><b>' + esc(x[0]) + '</b><span>' + esc(x[1]) + '</span></button>').join('');
+$('#catindex').innerHTML = CATLIST.map(c => '<button type="button" data-cat="' + c + '" aria-label="' + c + ', ' + esc(D.cats[c]) + '">' + c + '</button>').join('');
+$('#facts').innerHTML = [
+  D.signs.length + ' tegn, ' + Object.keys(D.lemmas).length + ' ord, ' + D.spellings.length + ' stavemåder og ' + D.sentences.length + ' sætninger. Indholdet er lagt ind til afprøvning og er ikke fagligt kontrolleret.',
+  'Stavemåderne er almindelige ordbogsformer. Den skibbrudne sømand er hieratisk, så hieroglyfferne er en omskrift.',
+  'Oversættelsesforslag til ukendte sætninger dannes af fire enkle mønstre. Den rigtige analyse bliver langt større.',
+  'Hver kategori har kun få tegn her, så kun Common fylder to sider på tastaturet. Et swipe videre fra en kategoris sidste side fører til den næste kategori.',
+  'Under Text vises et tastatur tegnet på skærmen. I den rigtige app er det telefonens eget tastatur med en ekstra række til specialtegnene. Et rigtigt tastatur kan også bruges her, mens feltet er aktivt.',
+  'Hold Lost inde for at vælge mellem ét tabt tegn, tabte tegn i ukendt antal og, under Sentence, et tabt ord. Højreklik gør det samme med mus.',
+  'Fotos er simulerede. Prototypen kan ikke læse et billede.',
+  'Kvadrater: skriv tegnene, og tryk på kvadratknappen ved siden af Lost for at stille de sidste to til fire tegn op. Søgningen læser dem stadig i den skrevne rækkefølge. Historik og favoritter husker opstillingen.',
+  'Ikke med: frit placerede tegn, indtastning af kartouche, lodret skrift, konto og synkronisering.',
+  'Favoritter, historik og indstillinger ligger kun i denne fane og forsvinder, når siden genindlæses.',
+].map(x => '<li>' + esc(x) + '</li>').join('');
+
+/* ---------- kun i den installerbare webapp ---------- */
+const STORE = 'hiero-proto-v1';
+function persist() { try { localStorage.setItem(STORE, JSON.stringify({ S, favs: state.favs, hist: state.hist, seq: state.seq })); } catch (e) {} }
+/* Androids tilbageknap: så længe der er noget at gå tilbage til i appen, ligger der ét ekstra trin i browserens historik, som knappen bruger op. */
+function canBack() { return !lostpop.hidden || !$('#quadpop').hidden || state.kbOpen || state.drawer || state.sheet || state.view !== 'browse' || state.stack.length > 1; }
+function doBack() {
+  if (!lostpop.hidden) return setLostPop(false);
+  if (!$('#quadpop').hidden) return setQuadPop(false);
+  if (state.kbOpen) return setKb(false);
+  if (state.drawer && state.drawerHist) return setDrawerHist(false);
+  if (state.sheet && state.scan) { state.scan = null; return renderPhoto(); }
+  if (state.drawer || state.sheet) return setOverlay(null);
+  if (state.view !== 'saved' && state.stack.length > 1) { state.stack.pop(); return rerender(); }
+  if (state.view !== 'browse') return setView('browse');
+}
+let backGuard = false, backDrop = false;
+function syncBack() {
+  if (!backGuard && canBack()) { history.pushState({ app: 1 }, ''); backGuard = true; }
+  else if (backGuard && !backDrop && !canBack()) { backDrop = true; history.back(); }
+}
+if (APP) {
+  try {
+    const d = JSON.parse(localStorage.getItem(STORE) || 'null');
+    if (d) { Object.keys(d.S || {}).forEach(k => { if (k !== 'mode' && k !== 'hist' && k in S) S[k] = d.S[k]; }); state.favs = d.favs || []; state.hist = (d.hist || []).slice(0, S.hist); state.seq = d.seq || 0; }
+  } catch (e) {}
+  let pt = null;
+  ['click', 'change', 'keydown'].forEach(ev => document.addEventListener(ev, () => { clearTimeout(pt); pt = setTimeout(persist, 250); setTimeout(syncBack, 0); }));
+  window.addEventListener('pagehide', persist);
+  window.addEventListener('popstate', () => { if (backDrop) { backDrop = false; backGuard = false; return; } backGuard = false; doBack(); syncBack(); });
+  if ('serviceWorker' in navigator) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
+
+buildKb(); setMode('sentence'); setView('browse');   /* appen åbner i Dictionary */
+requestAnimationFrame(() => requestAnimationFrame(() => { layout.ready = true; layout(); }));
+/* Når skrifttypen er hentet, måles tegnene igen, så kvadraterne står rigtigt. */
+const remeasure = () => { measureInk(); renderField(); rerender(); };
+if (document.fonts && document.fonts.load) document.fonts.load('32px ' + FAM, D.signs.map(s => s.ch).join('')).then(remeasure, () => {});
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasure);
+window.__app = { load, restart, S, state, analyse, D, sortKey, INK, QUADS, quadSVG, canBack };
+})();
+</script>
+
+</body>
+</html>
