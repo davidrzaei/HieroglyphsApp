@@ -3134,7 +3134,17 @@ if (APP) {
   ['click', 'change', 'keydown'].forEach(ev => document.addEventListener(ev, () => { clearTimeout(pt); pt = setTimeout(persist, 250); setTimeout(syncBack, 0); }));
   window.addEventListener('pagehide', persist);
   window.addEventListener('popstate', () => { if (backDrop) { backDrop = false; backGuard = false; return; } backGuard = false; doBack(); syncBack(); });
-  if ('serviceWorker' in navigator) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  /* Ny udgave: når appen åbnes eller kommer frem igen, ser den efter en ny sw.js. Findes der en, overtager den, og siden genindlæses én gang med de nye filer. */
+  if ('serviceWorker' in navigator) {
+    const hadSW = !!navigator.serviceWorker.controller; let reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadSW && !reloaded) { reloaded = true; persist(); location.reload(); } });
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {
+        reg.update().catch(() => {});
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) reg.update().catch(() => {}); });
+      }).catch(() => {});
+    });
+  }
 }
 
 buildKb(); setMode('sentence'); setView('browse');   /* appen åbner i Dictionary */
