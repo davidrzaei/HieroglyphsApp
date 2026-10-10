@@ -103,6 +103,7 @@ button:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px s
 .rest::before,.rest::after{font-family:var(--body);font-size:.62em;vertical-align:.25em;color:var(--guess)}
 .rest::before{content:"["} .rest::after{content:"]"}
 .cart{display:inline-block;border:2px solid var(--ink);border-radius:999px;padding:0 9px}
+
 /* ---------- telefonen ---------- */
 .phone{width:100%;max-width:404px;height:820px;margin-inline:auto;border:10px solid var(--phone);border-radius:38px;background:var(--surface);overflow:hidden;overflow:clip;display:flex;flex-direction:column;position:relative}
 @media (max-width:480px){.phone{border-width:3px;border-radius:18px;height:760px;height:clamp(600px,calc(100dvh - 16px),760px);--kh:52px}}
@@ -126,6 +127,7 @@ button:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px s
 .seg button{flex:1;border:0;background:var(--surface);padding:7px 4px;font-size:.86rem;font-weight:500;border-right:1px solid var(--line)}
 .seg button:last-child{border-right:0}
 .seg button[aria-pressed="true"]{background:var(--lapis);color:var(--on-lapis)}
+
 /* søgeområdet: resultater nederst, feltet frit ovenpå */
 #stage{flex:1;min-height:0;position:relative}
 .results{position:absolute;left:0;right:0;bottom:0;top:var(--rt,0px);overflow-y:auto;padding:12px 14px 14px;display:flex;flex-direction:column;gap:12px}
@@ -158,6 +160,7 @@ svg.quad text.sel{fill:var(--lapis);stroke:var(--lapis);stroke-width:45}
 #cam:hover{color:var(--lapis);background:var(--surface)}
 .ready #fieldwrap{transition:transform .32s var(--ease)}
 .ready #intro{transition:opacity .2s,visibility .2s}
+
 /* resultater */
 .results>*,.pad>*{flex-shrink:0}
 .empty{color:var(--muted);font-size:.92rem}
@@ -227,6 +230,7 @@ details.own{border-top:1px dashed var(--line)}
 details.own>summary{font-weight:500;font-size:.86rem;color:var(--muted)}
 .primary{border:0;background:var(--lapis);color:var(--on-lapis);border-radius:9px;padding:8px 14px;font-weight:600}
 .secondary{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:7px 12px;font-size:.9rem}
+
 /* tegnlisten under Sign: kategorier som i en telefonbog */
 .signlist section{display:flex;flex-direction:column}
 .cathead{position:sticky;top:0;z-index:1;background:var(--surface);padding:10px 0 6px;border-bottom:2px solid var(--ink);font-family:var(--body);font-size:.8rem;font-weight:600;letter-spacing:.02em;display:flex;gap:10px;align-items:baseline}
@@ -241,6 +245,7 @@ details.own>summary{font-weight:500;font-size:.86rem;color:var(--muted)}
 #catindex{position:absolute;right:4px;top:50%;transform:translateY(-50%);z-index:2;display:flex;flex-direction:column;gap:0;background:var(--key);border:1px solid var(--line);border-radius:999px;padding:6px 3px}
 #catindex button{border:0;background:none;font-family:var(--mono);font-size:.72rem;font-weight:500;width:30px;height:24px;border-radius:999px;padding:0;color:var(--lapis)}
 #catindex button:hover{background:var(--lapis-soft)}
+
 /* gennemsyn: valg mellem tegn og ord, liste med kategoristribe i bunden */
 #bstage{flex:1;min-height:0;position:relative}
 .results.blist{padding:0 14px 14px}
@@ -284,6 +289,7 @@ details.own>summary{font-weight:500;font-size:.86rem;color:var(--muted)}
 .sortmenu button:hover,.sortmenu button:focus-visible{background:var(--lapis-soft)}
 #bcats{flex:none;padding:9px 10px;border-top:1px solid var(--line);background:var(--key)}
 .bcats button .tl{font-size:1rem}
+
 /* tastatur: lag i bunden, kun fremme mens feltet er aktivt */
 .kbd{position:absolute;left:0;right:0;bottom:0;z-index:4;border-top:1px solid var(--line);background:var(--key);padding:6px 8px 10px;display:flex;flex-direction:column;gap:6px;transform:translateY(104%);user-select:none;-webkit-user-select:none}
 .ready .kbd{transition:transform .3s var(--ease)}
@@ -408,6 +414,7 @@ table.numt td:nth-child(n+2),table.numt th:nth-child(n+2){text-align:right}
 .quadpop .gl{font-size:1.7rem;line-height:1}
 .kb-act .quadpop .secondary{height:38px;align-self:flex-start;padding:0 12px}
 .lostpop small{font-size:.68rem;line-height:1.15;color:var(--muted);text-align:center}
+
 /* bundmenu, skuffe, ark */
 /* Fanerne ligger et niveau over siden: samme farve som siden, men med en hårfin skygge opad. Den valgte fane har en mørkere tone, som glider fra fane til fane. */
 .tabs{display:grid;grid-template-columns:repeat(3,1fr);background:var(--tabbar);flex:none;position:relative;z-index:2;box-shadow:0 -1px 0 var(--line),0 -2px 6px rgba(0,0,0,.07)}
@@ -489,6 +496,7 @@ table.numt td:nth-child(n+2),table.numt th:nth-child(n+2){text-align:right}
 .field select{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--surface);width:100%;min-width:0}
 .field small{color:var(--muted);font-size:.78rem}
 .toast{position:absolute;left:14px;right:14px;bottom:74px;background:var(--ink);color:var(--surface);border-radius:10px;padding:10px 14px;font-size:.9rem;z-index:9;text-align:center;pointer-events:none;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+
 /* foto */
 .slab{border-radius:10px;padding:18px 14px;background:var(--key);border:1px solid var(--line);display:flex;justify-content:center}
 .slab .gl{font-size:2.3rem;letter-spacing:2px}
@@ -536,6 +544,7 @@ details.scanbox[open]>summary::after{transform:rotate(-135deg);margin-top:4px}
 .scsign .alts button{align-items:center;padding:3px 9px 3px 6px}
 .scsign .alts small{display:block;color:var(--muted);font-size:.72rem}
 .scanword{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--key);display:flex;flex-direction:column;gap:4px}
+
 /* sidepanel */
 .side{display:flex;flex-direction:column;gap:22px;min-width:0}
 .side section{display:flex;flex-direction:column;gap:8px;min-width:0}
@@ -3157,6 +3166,5 @@ window.__app = { load, restart, renderField, renderRecent, S, state, analyse, D,
 })();
 </script>
 
-</body></html>
 </body>
 </html>
