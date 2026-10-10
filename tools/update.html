@@ -1,0 +1,59 @@
+<!-- Opdatering: knap under Settings, der ser efter en ny udgave med det samme. Findes der en, genindlæses appen med den. -->
+<style>
+.updbox{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:12px}
+.updbox .secondary{align-self:flex-start;min-height:40px}
+.updbox .ust{color:var(--muted);font-size:.84rem;min-height:1.3em}
+</style>
+<script>
+(function () {
+  const VERSION = /*VERSION*/'';
+  const host = document.getElementById('settings');
+  if (!host) return;
+  const label = v => { const d = new Date(String(v).slice(0, 10) + 'T12:00:00'); return isNaN(d) ? v : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); };
+  let busy = false, status = '';
+  function add() {
+    if (host.querySelector('.updbox') || !host.children.length) return;
+    const box = document.createElement('div');
+    box.className = 'field updbox';
+    box.innerHTML = '<label>App version</label><small>' + (VERSION ? 'Version of ' + label(VERSION) : '') + '</small>' +
+      '<button type="button" class="secondary" data-upd="check">Check for updates</button><small class="ust" role="status" aria-live="polite"></small>';
+    box.querySelector('.ust').textContent = status;
+    box.querySelector('button').disabled = busy;
+    host.appendChild(box);
+  }
+  function say(msg, done) {
+    status = msg; if (done) busy = false;
+    const el = host.querySelector('.updbox .ust'); if (el) el.textContent = msg;
+    const b = host.querySelector('.updbox button'); if (b) b.disabled = busy;
+  }
+  new MutationObserver(add).observe(host, { childList: true });
+  add();
+  /* Når en ny udgave har taget over, genindlæser appens egen kode siden. Sker det ikke, gør knappen det selv. */
+  const reloadSoon = () => setTimeout(() => location.reload(), 2500);
+  function follow(sw) {
+    say('Installing the new version…');
+    const on = () => { if (sw.state === 'activated') { say('Restarting with the new version…'); reloadSoon(); } else if (sw.state === 'redundant') say('The update failed. Try again later.', true); };
+    sw.addEventListener('statechange', on); on();
+  }
+  host.addEventListener('click', async e => {
+    if (!e.target.closest('[data-upd="check"]') || busy) return;
+    busy = true; say('Checking…');
+    if (!('serviceWorker' in navigator)) { say('Reloading…'); location.reload(); return; }
+    try {
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (!reg) { say('Reloading…'); location.reload(); return; }
+      if (reg.waiting) { follow(reg.waiting); return; }
+      if (reg.installing) { follow(reg.installing); return; }
+      let found = null;
+      const onFound = () => { found = reg.installing; };
+      reg.addEventListener('updatefound', onFound);
+      await reg.update();
+      reg.removeEventListener('updatefound', onFound);
+      const sw = found || reg.installing || reg.waiting;
+      if (sw) follow(sw); else say('You have the newest version.', true);
+    } catch (err) {
+      say(navigator.onLine === false ? 'You are offline. Connect to the internet and try again.' : 'Could not check for updates. Try again later.', true);
+    }
+  });
+})();
+</script>

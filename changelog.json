@@ -1,5 +1,12 @@
 [
   {
+    "version": "2026-10-10.3",
+    "items": [
+      "Settings has a Check for updates button, so you can get a new version straight away.",
+      "Fixed: the app again stores itself on the phone, so it opens without internet and updates itself."
+    ]
+  },
+  {
     "version": "2026-10-10.2",
     "title": "The whole dictionary",
     "items": [
