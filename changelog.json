@@ -1,0 +1,19 @@
+[
+  {
+    "version": "2026-10-10",
+    "items": [
+      "After an update, this window shows what has changed."
+    ]
+  },
+  {
+    "version": "2026-10-06",
+    "title": "New version of the app",
+    "items": [
+      "A menu with History, Help and Settings (the button at the top right).",
+      "Recently used signs on the keyboard.",
+      "Hold a finger on what you have written to magnify it and move the cursor.",
+      "Sort menus in the Dictionary and in Saved.",
+      "The app now updates itself when a new version is published."
+    ]
+  }
+]

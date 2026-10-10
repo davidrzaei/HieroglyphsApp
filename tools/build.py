@@ -5,14 +5,15 @@
 
 Hovedet fra den nuværende index.html (lokale skrifttyper, manifest, ikoner) og
 webapp-stilene bevares. Prototypens indhold sættes ind, APP slås til, koden til
-automatisk opdatering sættes ind, og cachenavnet i sw.js skiftes, så telefoner
-henter den nye udgave.
+automatisk opdatering og nyhedsvinduet (changelog.json) sættes ind, og
+cachenavnet i sw.js skiftes, så telefoner henter den nye udgave.
 """
-import hashlib, re, sys
+import hashlib, json, re, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 INDEX, SW = ROOT / 'index.html', ROOT / 'sw.js'
+CHANGELOG, NEWS = ROOT / 'changelog.json', ROOT / 'tools' / 'changelog.html'
 
 REGISTER = "  if ('serviceWorker' in navigator) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });\n"
 AUTO_UPDATE = """  /* Ny udgave: når appen åbnes eller kommer frem igen, ser den efter en ny sw.js. Findes der en, overtager den, og siden genindlæses én gang med de nye filer. */
@@ -56,7 +57,12 @@ def main():
         sys.exit('Fandt ikke registreringen af sw.js i prototypen')
     body = body.replace(REGISTER, AUTO_UPDATE)
 
-    out = head + styles.rstrip() + '\n\n' + webapp + '</head>\n<body class="app">\n' + body + '\n</body>\n</html>\n'
+    log = json.loads(CHANGELOG.read_text(encoding='utf-8'))
+    if [e['version'] for e in log] != sorted((e['version'] for e in log), reverse=True):
+        sys.exit('changelog.json skal stå med den nyeste udgave først')
+    news = NEWS.read_text(encoding='utf-8').replace('/*CHANGELOG*/[]', json.dumps(log, ensure_ascii=False).replace('</', '<\\/'))
+
+    out = head + styles.rstrip() + '\n\n' + webapp + '</head>\n<body class="app">\n' + body + '\n' + news + '</body>\n</html>\n'
     INDEX.write_text(out, encoding='utf-8')
 
     version = hashlib.sha1(out.encode('utf-8')).hexdigest()[:10]
