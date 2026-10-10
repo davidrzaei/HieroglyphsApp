@@ -1,5 +1,14 @@
 [
   {
+    "version": "2026-10-10.2",
+    "title": "The whole dictionary",
+    "items": [
+      "The app now uses the full database: 5,364 signs, 31,643 words and 47,087 sentences from 7,405 texts.",
+      "The first start downloads the dictionary once (about 66 MB, so Wi-Fi is a good idea). After that it opens from the copy on your phone, also without internet.",
+      "Signs from Unicode's extended list are now shown with the NewGardiner font."
+    ]
+  },
+  {
     "version": "2026-10-10",
     "items": [
       "After an update, this window shows what has changed."

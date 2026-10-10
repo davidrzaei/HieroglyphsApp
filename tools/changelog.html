@@ -30,7 +30,7 @@
   const fresh = seen ? LOG.filter(e => e.version > seen) : (used ? LOG.slice(0, 1) : []);
   if (!fresh.length) { mark(); return; }
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-  const date = v => { const d = new Date(v + 'T12:00:00'); return isNaN(d) ? v : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); };
+  const date = v => { const d = new Date(v.slice(0, 10) + 'T12:00:00'); return isNaN(d) ? v : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); };
   document.getElementById('newsbody').innerHTML = fresh.map(e =>
     '<section><h3>' + esc(date(e.version)) + (e.title ? ' · ' + esc(e.title) : '') + '</h3><ul>' + e.items.map(i => '<li>' + esc(i) + '</li>').join('') + '</ul></section>').join('');
   const box = document.getElementById('news'), ok = document.getElementById('newsok');

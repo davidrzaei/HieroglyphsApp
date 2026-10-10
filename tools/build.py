@@ -46,7 +46,8 @@ def main():
 
     head = cur[:cur.index('<title>Hieroglyphs</title>') + len('<title>Hieroglyphs</title>\n')]
     webapp = cut(cur, '<style>\n/* Webapp:', '</head>', 'webapp-stilene i index.html')
-    styles = cut(proto, '<style>\n/* Layout:', '<div class="wrap">', 'prototypens stilark')
+    fonts = proto.find('fonts.googleapis.com')
+    styles = cut(proto[fonts:] if fonts >= 0 else proto, '<style>\n', '<div class="wrap">', 'prototypens stilark')
     body = proto[proto.index('<div class="wrap">'):]
     body = re.sub(r'\s*</body>\s*</html>\s*$', '\n', body)
 
@@ -56,6 +57,8 @@ def main():
     if REGISTER not in body:
         sys.exit('Fandt ikke registreringen af sw.js i prototypen')
     body = body.replace(REGISTER, AUTO_UPDATE)
+    # Webappen bruger sin egen kopi af SQLite først, så den ikke afhænger af et CDN og virker uden net.
+    body = re.sub(r'const SQLITE_URLS = \[("https://[^"]+"), ("vendor/[^"]+")\];', r'const SQLITE_URLS = [\2, \1];', body)
 
     log = json.loads(CHANGELOG.read_text(encoding='utf-8'))
     if [e['version'] for e in log] != sorted((e['version'] for e in log), reverse=True):
@@ -66,8 +69,14 @@ def main():
     INDEX.write_text(out, encoding='utf-8')
 
     version = hashlib.sha1(out.encode('utf-8')).hexdigest()[:10]
+    # Filerne, appen gemmer til brug uden net. Databasen (data/) gemmer appen selv i IndexedDB.
+    files = ['./', 'index.html', 'manifest.webmanifest'] + sorted(
+        f.relative_to(ROOT).as_posix() for d in ('icons', 'fonts', 'vendor') for f in (ROOT / d).rglob('*')
+        if f.is_file() and f.suffix in ('.png', '.woff2', '.ttf', '.mjs', '.wasm'))
     sw = SW.read_text(encoding='utf-8')
-    SW.write_text(re.sub(r'hiero-proto-[0-9a-f]+', 'hiero-proto-' + version, sw), encoding='utf-8')
+    sw = re.sub(r'hiero-proto-[0-9a-f]+', 'hiero-proto-' + version, sw)
+    sw = re.sub(r'const FILES = \[.*?\];', lambda m: 'const FILES = [ ' + ', '.join(json.dumps(f) for f in files) + ' ];', sw, flags=re.S)
+    SW.write_text(sw, encoding='utf-8')
     print('index.html bygget, cache hiero-proto-' + version)
 
 
