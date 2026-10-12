@@ -38,6 +38,8 @@
   ok.addEventListener('click', close);
   box.addEventListener('click', e => { if (e.target === box) close(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !box.hidden) close(); });
-  box.hidden = false; ok.focus();
+  /* Vinduet vises først, når ordbogen er åbnet og appen står klar, ikke oven på startskærmen. */
+  const show = () => setTimeout(() => { box.hidden = false; ok.focus(); }, 400);
+  if (window.__appReady) show(); else window.addEventListener('app-ready', show, { once: true });
 })();
 </script>

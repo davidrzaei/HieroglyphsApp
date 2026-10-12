@@ -1,0 +1,36 @@
+<!-- Startskærmen, mens ordbogen hentes og åbnes: midt på skærmen, et ankh-tegn, en tydelig bjælke med procent, og en løbende bjælke i trinene uden procent. Tastaturet holdes skjult, til appen er klar. -->
+<style>
+.booting .kbd{visibility:hidden}
+#bresults:has(.boot){justify-content:center}
+.boot{flex:1;justify-content:center;align-items:center;text-align:center;gap:14px;padding:24px 10px 40px}
+.boot::before{content:"\132F9";font-family:var(--glyph);font-size:4.2rem;line-height:1;color:var(--lapis);-webkit-text-stroke:.02em currentColor;margin-bottom:6px}
+.boot .eyebrow{margin:0}
+.boot .banner{width:100%;max-width:320px;display:flex;flex-direction:column;gap:8px;border:0;background:none;padding:0;color:var(--ink);font-size:.92rem}
+.boot .banner b{font-family:var(--display);font-size:1.35rem;font-weight:700;line-height:1.25}
+.boot .bt{order:3;text-align:left;color:var(--muted);font-variant-numeric:tabular-nums;min-height:1.4em}
+.boot .bar{order:2;display:block;position:relative;height:8px;margin:6px 0 0;border-radius:999px;background:var(--line);overflow:visible}
+.boot .bar i{height:100%;border-radius:999px;background:var(--lapis);min-width:8px}
+.boot .bar::after{content:attr(aria-valuenow) "%";position:absolute;right:0;top:calc(100% + 8px);font-size:.92rem;font-weight:600;color:var(--lapis);font-variant-numeric:tabular-nums}
+/* trin uden procent: en kort bjælke, der løber frem og tilbage */
+.boot .banner.info:not(:has(.bar))::after{content:"";order:2;position:static;display:block;width:100%;height:8px;margin-top:6px;border:0;border-radius:999px;opacity:1;transform:none;
+  background:linear-gradient(90deg,transparent 0 35%,var(--lapis) 35% 65%,transparent 65%) 0 0/250% 100% no-repeat,var(--line);animation:bootrun 1.3s ease-in-out infinite}
+@keyframes bootrun{0%{background-position:100% 0,0 0}100%{background-position:0 0,0 0}}
+@media (prefers-reduced-motion: reduce){.boot .banner.info:not(:has(.bar))::after{animation:none;background:var(--line)}}
+.boot>.note{max-width:30ch;font-size:.82rem}
+.boot .banner.err{max-width:320px;border:1px solid var(--err-line);background:var(--err-soft);color:var(--err);padding:10px 12px;border-radius:10px;font-size:.9rem}
+.boot .primary{align-self:center;padding:10px 22px}
+</style>
+<script>
+(function () {
+  /* Mens ordbogen åbnes, har siden klassen booting. Andre dele (nyhedsvinduet) venter på hændelsen app-ready. */
+  const root = document.documentElement;
+  const B = () => window.__boot;
+  if (!B() || B().phase === 'ready') { window.__appReady = true; return; }
+  root.classList.add('booting');
+  const t = setInterval(() => {
+    if (!B() || B().phase !== 'ready') return;
+    clearInterval(t); root.classList.remove('booting');
+    window.__appReady = true; window.dispatchEvent(new Event('app-ready'));
+  }, 150);
+})();
+</script>

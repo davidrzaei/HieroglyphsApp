@@ -1,5 +1,12 @@
 [
   {
+    "version": "2026-10-12.2",
+    "items": [
+      "A clearer start screen while the dictionary downloads and opens, with progress in percent.",
+      "This window now waits until the app is ready."
+    ]
+  },
+  {
     "version": "2026-10-12",
     "title": "Read from a photo",
     "items": [

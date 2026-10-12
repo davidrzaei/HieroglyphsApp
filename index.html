@@ -4613,6 +4613,42 @@ boot();
 })();
 </script>
 
+<!-- Startskærmen, mens ordbogen hentes og åbnes: midt på skærmen, et ankh-tegn, en tydelig bjælke med procent, og en løbende bjælke i trinene uden procent. Tastaturet holdes skjult, til appen er klar. -->
+<style>
+.booting .kbd{visibility:hidden}
+#bresults:has(.boot){justify-content:center}
+.boot{flex:1;justify-content:center;align-items:center;text-align:center;gap:14px;padding:24px 10px 40px}
+.boot::before{content:"\132F9";font-family:var(--glyph);font-size:4.2rem;line-height:1;color:var(--lapis);-webkit-text-stroke:.02em currentColor;margin-bottom:6px}
+.boot .eyebrow{margin:0}
+.boot .banner{width:100%;max-width:320px;display:flex;flex-direction:column;gap:8px;border:0;background:none;padding:0;color:var(--ink);font-size:.92rem}
+.boot .banner b{font-family:var(--display);font-size:1.35rem;font-weight:700;line-height:1.25}
+.boot .bt{order:3;text-align:left;color:var(--muted);font-variant-numeric:tabular-nums;min-height:1.4em}
+.boot .bar{order:2;display:block;position:relative;height:8px;margin:6px 0 0;border-radius:999px;background:var(--line);overflow:visible}
+.boot .bar i{height:100%;border-radius:999px;background:var(--lapis);min-width:8px}
+.boot .bar::after{content:attr(aria-valuenow) "%";position:absolute;right:0;top:calc(100% + 8px);font-size:.92rem;font-weight:600;color:var(--lapis);font-variant-numeric:tabular-nums}
+/* trin uden procent: en kort bjælke, der løber frem og tilbage */
+.boot .banner.info:not(:has(.bar))::after{content:"";order:2;position:static;display:block;width:100%;height:8px;margin-top:6px;border:0;border-radius:999px;opacity:1;transform:none;
+  background:linear-gradient(90deg,transparent 0 35%,var(--lapis) 35% 65%,transparent 65%) 0 0/250% 100% no-repeat,var(--line);animation:bootrun 1.3s ease-in-out infinite}
+@keyframes bootrun{0%{background-position:100% 0,0 0}100%{background-position:0 0,0 0}}
+@media (prefers-reduced-motion: reduce){.boot .banner.info:not(:has(.bar))::after{animation:none;background:var(--line)}}
+.boot>.note{max-width:30ch;font-size:.82rem}
+.boot .banner.err{max-width:320px;border:1px solid var(--err-line);background:var(--err-soft);color:var(--err);padding:10px 12px;border-radius:10px;font-size:.9rem}
+.boot .primary{align-self:center;padding:10px 22px}
+</style>
+<script>
+(function () {
+  /* Mens ordbogen åbnes, har siden klassen booting. Andre dele (nyhedsvinduet) venter på hændelsen app-ready. */
+  const root = document.documentElement;
+  const B = () => window.__boot;
+  if (!B() || B().phase === 'ready') { window.__appReady = true; return; }
+  root.classList.add('booting');
+  const t = setInterval(() => {
+    if (!B() || B().phase !== 'ready') return;
+    clearInterval(t); root.classList.remove('booting');
+    window.__appReady = true; window.dispatchEvent(new Event('app-ready'));
+  }, 150);
+})();
+</script>
 <!-- Nyheder: første gang appen åbnes efter en opdatering, vises de punkter i changelog.json, man ikke har set. -->
 <style>
 .news{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));background:var(--scrim)}
@@ -4634,7 +4670,7 @@ boot();
 </div>
 <script>
 (function () {
-  const LOG = [{"version": "2026-10-12", "title": "Read from a photo", "items": ["The camera button now really recognises the signs in a photo, on the phone and without internet. Two example photos are included to try it.", "Better sentence reading: the app chooses words by how they are used in the known texts.", "Words show example sentences, other spellings grouped by form, and where the information comes from, with a link to the source.", "Names show the most important facts (for kings: dynasty and years). \"Did you mean\" suggests a similar sign when nothing is found.", "An updated dictionary. It is downloaded again once (about 66 MB)."]}, {"version": "2026-10-10.3", "items": ["Settings has a Check for updates button, so you can get a new version straight away.", "Fixed: the app again stores itself on the phone, so it opens without internet and updates itself."]}, {"version": "2026-10-10.2", "title": "The whole dictionary", "items": ["The app now uses the full database: 5,364 signs, 31,643 words and 47,087 sentences from 7,405 texts.", "The first start downloads the dictionary once (about 66 MB, so Wi-Fi is a good idea). After that it opens from the copy on your phone, also without internet.", "Signs from Unicode's extended list are now shown with the NewGardiner font."]}, {"version": "2026-10-10", "items": ["After an update, this window shows what has changed."]}, {"version": "2026-10-06", "title": "New version of the app", "items": ["A menu with History, Help and Settings (the button at the top right).", "Recently used signs on the keyboard.", "Hold a finger on what you have written to magnify it and move the cursor.", "Sort menus in the Dictionary and in Saved.", "The app now updates itself when a new version is published."]}];
+  const LOG = [{"version": "2026-10-12.2", "items": ["A clearer start screen while the dictionary downloads and opens, with progress in percent.", "This window now waits until the app is ready."]}, {"version": "2026-10-12", "title": "Read from a photo", "items": ["The camera button now really recognises the signs in a photo, on the phone and without internet. Two example photos are included to try it.", "Better sentence reading: the app chooses words by how they are used in the known texts.", "Words show example sentences, other spellings grouped by form, and where the information comes from, with a link to the source.", "Names show the most important facts (for kings: dynasty and years). \"Did you mean\" suggests a similar sign when nothing is found.", "An updated dictionary. It is downloaded again once (about 66 MB)."]}, {"version": "2026-10-10.3", "items": ["Settings has a Check for updates button, so you can get a new version straight away.", "Fixed: the app again stores itself on the phone, so it opens without internet and updates itself."]}, {"version": "2026-10-10.2", "title": "The whole dictionary", "items": ["The app now uses the full database: 5,364 signs, 31,643 words and 47,087 sentences from 7,405 texts.", "The first start downloads the dictionary once (about 66 MB, so Wi-Fi is a good idea). After that it opens from the copy on your phone, also without internet.", "Signs from Unicode's extended list are now shown with the NewGardiner font."]}, {"version": "2026-10-10", "items": ["After an update, this window shows what has changed."]}, {"version": "2026-10-06", "title": "New version of the app", "items": ["A menu with History, Help and Settings (the button at the top right).", "Recently used signs on the keyboard.", "Hold a finger on what you have written to magnify it and move the cursor.", "Sort menus in the Dictionary and in Saved.", "The app now updates itself when a new version is published."]}];
   const SEEN = 'hiero-news-seen', STORE = 'hiero-proto-v1';
   if (!LOG.length) return;
   const latest = LOG[0].version;
@@ -4653,7 +4689,9 @@ boot();
   ok.addEventListener('click', close);
   box.addEventListener('click', e => { if (e.target === box) close(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !box.hidden) close(); });
-  box.hidden = false; ok.focus();
+  /* Vinduet vises først, når ordbogen er åbnet og appen står klar, ikke oven på startskærmen. */
+  const show = () => setTimeout(() => { box.hidden = false; ok.focus(); }, 400);
+  if (window.__appReady) show(); else window.addEventListener('app-ready', show, { once: true });
 })();
 </script>
 <!-- Opdatering: knap under Settings, der ser efter en ny udgave med det samme. Findes der en, genindlæses appen med den. -->
@@ -4664,7 +4702,7 @@ boot();
 </style>
 <script>
 (function () {
-  const VERSION = "2026-10-12";
+  const VERSION = "2026-10-12.2";
   const host = document.getElementById('settings');
   if (!host) return;
   const label = v => { const d = new Date(String(v).slice(0, 10) + 'T12:00:00'); return isNaN(d) ? v : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); };
