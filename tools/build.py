@@ -16,7 +16,6 @@ ROOT = Path(__file__).resolve().parent.parent
 INDEX, SW = ROOT / 'index.html', ROOT / 'sw.js'
 CHANGELOG, NEWS, UPDATE = ROOT / 'changelog.json', ROOT / 'tools' / 'changelog.html', ROOT / 'tools' / 'update.html'
 
-REGISTER = "  if ('serviceWorker' in navigator) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });\n"
 AUTO_UPDATE = """  /* Ny udgave: når appen åbnes eller kommer frem igen, ser den efter en ny sw.js. Findes der en, overtager den, og siden genindlæses én gang med de nye filer. */
   if ('serviceWorker' in navigator) {
     const hadSW = !!navigator.serviceWorker.controller; let reloaded = false;
@@ -55,9 +54,11 @@ def main():
     if '/*APPMODE*/false' not in body:
         sys.exit('Fandt ikke /*APPMODE*/false i prototypen')
     body = body.replace('/*APPMODE*/false', 'true')
-    if REGISTER not in body:
-        sys.exit('Fandt ikke registreringen af sw.js i prototypen')
-    body = body.replace(REGISTER, AUTO_UPDATE)
+    # Prototypens linje, der registrerer sw.js, byttes ud med koden til automatisk opdatering.
+    reg = re.compile(r"^  if \('serviceWorker' in navigator\)[^\n]*register\('sw\.js'\)[^\n]*\n", re.M)
+    if len(reg.findall(body)) != 1:
+        sys.exit('Fandt ikke præcis én registrering af sw.js i prototypen')
+    body = reg.sub(lambda m: AUTO_UPDATE, body)
     # Webappen bruger sin egen kopi af SQLite først, så den ikke afhænger af et CDN og virker uden net.
     body = re.sub(r'const SQLITE_URLS = \[("https://[^"]+"), ("vendor/[^"]+")\];', r'const SQLITE_URLS = [\2, \1];', body)
 
@@ -72,9 +73,10 @@ def main():
 
     version = hashlib.sha1(out.encode('utf-8')).hexdigest()[:10]
     # Filerne, appen gemmer til brug uden net. Databasen (data/) gemmer appen selv i IndexedDB.
+    keep = {'icons': ('.png',), 'fonts': ('.woff2', '.ttf'), 'vendor': ('.mjs', '.wasm'), 'photo': ('.js', '.json', '.bin', '.png')}
     files = ['./', 'index.html', 'manifest.webmanifest'] + sorted(
-        f.relative_to(ROOT).as_posix() for d in ('icons', 'fonts', 'vendor') for f in (ROOT / d).rglob('*')
-        if f.is_file() and f.suffix in ('.png', '.woff2', '.ttf', '.mjs', '.wasm'))
+        f.relative_to(ROOT).as_posix() for d, ext in keep.items() if (ROOT / d).is_dir() for f in (ROOT / d).rglob('*')
+        if f.is_file() and f.suffix in ext)
     sw = SW.read_text(encoding='utf-8')
     sw = re.sub(r'hiero-proto-[0-9a-f]+', 'hiero-proto-' + version, sw)
     sw = re.sub(r'const FILES = \[.*?\];', lambda m: 'const FILES = [ ' + ', '.join(json.dumps(f) for f in files) + ' ];', sw, flags=re.S)

@@ -1,5 +1,16 @@
 [
   {
+    "version": "2026-10-12",
+    "title": "Read from a photo",
+    "items": [
+      "The camera button now really recognises the signs in a photo, on the phone and without internet. Two example photos are included to try it.",
+      "Better sentence reading: the app chooses words by how they are used in the known texts.",
+      "Words show example sentences, other spellings grouped by form, and where the information comes from, with a link to the source.",
+      "Names show the most important facts (for kings: dynasty and years). \"Did you mean\" suggests a similar sign when nothing is found.",
+      "An updated dictionary. It is downloaded again once (about 66 MB)."
+    ]
+  },
+  {
     "version": "2026-10-10.3",
     "items": [
       "Settings has a Check for updates button, so you can get a new version straight away.",

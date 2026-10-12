@@ -572,6 +572,37 @@ ul{margin:0;padding-left:20px}
 .loupe{position:absolute;z-index:9;width:164px;height:74px;border-radius:37px;background:var(--surface);border:1px solid var(--line);box-shadow:0 8px 22px rgba(0,0,0,.3);overflow:hidden;pointer-events:none}
 .loupe .lin{position:absolute;left:0;top:0;transform-origin:0 0;white-space:nowrap}
 .loupe .caret,.loupe-on .caret{animation:none!important}
+/* G2: herkomst og små mærker (forklaret i Help). Diskrete: samme grå som .note, ingen nye farver. */
+.mk{font-size:.72rem;font-weight:400;font-style:italic;color:var(--muted);white-space:nowrap;letter-spacing:.01em;text-transform:none}
+.mtm{font-size:.56rem;font-weight:600;letter-spacing:.04em;color:var(--muted);margin-left:2px;vertical-align:super;line-height:0;font-style:normal}
+.linkbtn{border:0;background:none;padding:0;font:inherit;color:var(--lapis);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.srcline a{color:var(--lapis);text-underline-offset:2px}
+.trmark .pill{margin-right:4px}
+details.orig{border-top:1px dashed var(--line)}
+details.orig>summary{font-weight:500;font-size:.86rem;color:var(--muted)}
+.sense-hi{font-weight:600}
+.ucode{display:inline-block;font-family:var(--mono);font-size:.38em;line-height:1.25;border:1px solid currentColor;border-radius:3px;padding:.05em .3em;margin:0 .08em;vertical-align:.45em;-webkit-text-stroke:0;font-weight:500;white-space:nowrap}
+.vmark{font-family:var(--body);font-size:.32em;font-weight:600;color:var(--muted);vertical-align:super;-webkit-text-stroke:0;margin-left:.05em}
+.fgroup{margin-top:4px}
+.alsoin .linkbtn{text-align:left}
+.sugform{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:var(--surface)}
+.sugform textarea{font:inherit;font-size:.9rem;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--surface);color:var(--ink);min-height:64px;resize:vertical}
+.sugform .btns{display:flex;flex-wrap:wrap;gap:8px}
+.toast.undo{pointer-events:auto;display:flex;align-items:center;justify-content:center;gap:14px}
+.toast.undo button{border:0;background:none;color:inherit;font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:2px;padding:2px 4px}
+.srcsec p{font-size:.86rem;line-height:1.4}
+.srcsec a{color:var(--lapis);text-underline-offset:2px;overflow-wrap:anywhere}
+.photoin{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.photoin input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.photoimg{position:relative;width:fit-content;max-width:100%;margin:0 auto;border-radius:10px;border:1px solid var(--line);background:var(--key);overflow:hidden;line-height:0;flex:none}
+.photoimg img{display:block;max-width:100%;max-height:240px;width:auto;height:auto}
+.rowbtn img.thumb{width:76px;height:30px;object-fit:cover;object-position:left center;border-radius:4px;border:1px solid var(--line);flex:none;background:#fff}
+.photoimg i{position:absolute;border:1.5px solid var(--ok);border-radius:2px}
+.photoimg i.warn{border-color:var(--warn)} .photoimg i.bad{border-color:var(--bad)} .photoimg i.on{box-shadow:0 0 0 2px var(--lapis)}
+.edits{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.edits .secondary{padding:3px 10px;font-size:.8rem}
+.ohead h2 .pill{vertical-align:middle;margin-left:4px;font-family:var(--body)}
+.pill.lvl{white-space:normal;text-align:center}
 @media (prefers-reduced-motion: reduce){.ready #fieldwrap,.ready .kbd,.ready .drawer,.ready .dpane,.ready .sheet,.ready .scrim,.ready #intro,.ready #menubtn svg,.ready .page,.ready .tabind{transition:none}}
 /* Indlæsning af databasen: samme sprog som Dictionary-forsiden (eyebrow, banner.info, bar) */
 .boot{display:flex;flex-direction:column;gap:10px;padding-top:6px}
@@ -679,6 +710,7 @@ body.app #menubtn{top:calc(8px + env(safe-area-inset-top))}
               <button type="button" class="drow" data-act="history"><span class="grow">History</span><small id="histcount"></small><span class="chev" aria-hidden="true">›</span></button>
               <button type="button" class="drow" data-act="help"><span class="grow">Help</span><small>colours, marks, keys</small><span class="chev" aria-hidden="true">›</span></button>
               <button type="button" class="drow" data-act="settings"><span class="grow">Settings</span><span class="chev" aria-hidden="true">›</span></button>
+              <button type="button" class="drow" data-act="sources"><span class="grow">Sources and licence</span><small>where the data comes from</small><span class="chev" aria-hidden="true">›</span></button>
             </div>
             <p class="who">Guest. Data is kept on this device only.</p>
           </div>
@@ -694,9 +726,13 @@ body.app #menubtn{top:calc(8px + env(safe-area-inset-top))}
             <div class="ohead"><button type="button" class="iconbtn" data-act="paneback" aria-label="Back to the menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><h2>Settings</h2></div>
             <div class="pad" id="settings"></div>
           </div>
+          <div class="dpane sub" id="dsrc" inert>
+            <div class="ohead"><button type="button" class="iconbtn" data-act="paneback" aria-label="Back to the menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><h2>Sources and licence</h2></div>
+            <div class="pad" id="sources"></div>
+          </div>
         </aside>
         <div class="sheet" id="sheet" role="dialog" aria-label="Photo" inert>
-          <div class="ohead"><h2>Read from a photo</h2><button type="button" class="iconbtn" data-act="closeover" aria-label="Close photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+          <div class="ohead"><h2>Read from a photo <span class="pill g">Experimental</span></h2><button type="button" class="iconbtn" data-act="closeover" aria-label="Close photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
           <div class="pad" id="photo"></div>
         </div>
         <div class="loupe" id="loupe" aria-hidden="true" hidden><div class="lin"></div></div>
@@ -871,7 +907,7 @@ async function boot() {
     mark('open');
     bootProgress('Preparing the dictionary', 'Signs, keyboards and word keys', null); await frame();
     BOOT.sqlite = sqlite3.version.libVersion; BOOT.dbBytes = bytes.length;
-    start(db, {});
+    start(db, { capi: C });
     mark('ready'); BOOT.phase = 'ready';
     BOOT.wasmBytes = sqlite3.wasm.heap8u().length;
     if (performance.memory) BOOT.jsHeap = performance.memory.usedJSHeapSize;
@@ -933,8 +969,30 @@ function makeDB(db, opt) {
   const POS = codes('part_of_speech', 'pos_id', 'parent_pos_id'), GENDER = codes('gender', 'gender_id'), NUMBER = codes('gram_number', 'number_id'), PERSON = codes('person', 'person_id');
   const VCLASS = codes('verb_class', 'verb_class_id'), ROLE = codes('syntactic_role', 'role_id'), STATUS = codes('preservation_status', 'status_id', 'is_guess, is_written');
   const RELT = codes('relation_type', 'relation_type_id'), ETYPE = codes('entity_type', 'entity_type_id'), TITUL = codes('titulary_name_type', 'titulary_type_id', 'in_cartouche');
+  const GENRE = codes('genre', 'genre_id'), STAGE = codes('language_stage', 'stage_id'), PERIOD = codes('period', 'period_id');
   const DIRS = codes('direction', 'direction_id', 'is_rtl'), SCRIPT = codes('script_type', 'script_type_id'), OBJT = codes('object_type', 'object_type_id'), TRANST = codes('translation_type', 'type_id');
-  const SOURCES = {}; rows('SELECT source_id, abbreviation, full_citation, kind, license, license_url, changes_note, url FROM source').forEach(r => { SOURCES[r[0]] = { id: r[0], abbr: r[1], citation: N(r[2]), kind: r[3], license: r[4], licenseUrl: r[5], changes: N(r[6]), url: r[7] }; });
+  const SOURCES = {}; rows('SELECT source_id, abbreviation, full_citation, kind, license, license_url, changes_note, url FROM source WHERE is_deleted=0 ORDER BY source_id').forEach(r => { SOURCES[r[0]] = { id: r[0], abbr: r[1], citation: N(r[2]), kind: r[3], license: r[4], licenseUrl: r[5], changes: N(r[6]), url: r[7] }; });
+  /* G2: oversættelsers herkomst. Maskinoversat = kilde af slagsen 'machine' og ikke godkendt; kladde = appens egen liste ('own') og ikke godkendt.
+     Originalen er rækken på et andet sprog end engelsk fra en kilde, der ikke er maskinoversættelse (i dag tysk fra AED). */
+  const LANGCODE = {}; Object.keys(LANG).forEach(c => { LANGCODE[LANG[c]] = c; });
+  let DNAMES = null; try { DNAMES = new Intl.DisplayNames(['en'], { type: 'language' }); } catch (e) { DNAMES = null; }
+  const LANGFIX = { en: 'English', de: 'German', da: 'Danish', fr: 'French', it: 'Italian', es: 'Spanish', nl: 'Dutch' };
+  const langName = code => { let n = null; try { n = DNAMES ? DNAMES.of(code) : null; } catch (e) { n = null; } return n && n !== code ? n : (LANGFIX[code] || code); };
+  const SRCSHORT = { AED: 'Thesaurus Linguae Aegyptiae (AED)', MT: 'machine translation', OWN: "the app's own list", Unikemet: 'Unicode (Unikemet)' };
+  const srcName = id => { const s = SOURCES[id]; return s ? (SRCSHORT[s.abbr] || s.abbr) : ''; };
+  const isMT = (src, verified) => !!(SOURCES[src] && SOURCES[src].kind === 'machine' && !verified);
+  const isDraft = (src, verified) => !!(SOURCES[src] && SOURCES[src].kind === 'own' && !verified);
+  /* rows: [language_id, tekst, source_id, is_verified] -> { text, lang, mt, draft, untranslated, orig: { text, lang, langName, source, sourceName } } */
+  /* AED skriver "keine Übersetzung vorhanden", hvor kilden ingen oversættelse har (125 sætninger); maskinoversættelsen af den sætning er ingen oversættelse */
+  const NOTR = /^\s*(keine übersetzung vorhanden|no translation available)\.?\s*$/i;
+  function pickTr(list) {
+    if (list) list = list.filter(x => !NOTR.test(String(x[1] || '')));
+    if (!list || !list.length) return null;
+    const en = list.find(x => x[0] === EN), o = list.find(x => x[0] !== EN && !(SOURCES[x[2]] && SOURCES[x[2]].kind === 'machine'));
+    const main = en || o || list[0], lang = LANGCODE[main[0]] || String(main[0]);
+    const orig = o && o !== main && N(o[1]) !== N(main[1]) ? { text: N(o[1]), lang: LANGCODE[o[0]] || String(o[0]), langName: langName(LANGCODE[o[0]] || String(o[0])), source: o[2], sourceName: srcName(o[2]) } : null;
+    return { text: N(main[1]), lang, langName: langName(lang), mt: isMT(main[2], main[3]), draft: isDraft(main[2], main[3]), source: main[2], untranslated: lang !== 'en', orig };
+  }
 
   /* ---- ordklasser: databasens 38 klasser lagt sammen til motorens få (motoren sammenligner ordklassen som engelsk tekst) ---- */
   const COARSE = { noun: 'noun', substantive_fem: 'noun', substantive_masc: 'noun', undefined_substantive_masc: 'noun', epithet_title: 'noun', epith_god: 'noun', epith_king: 'noun', title: 'noun',
@@ -1092,7 +1150,9 @@ function makeDB(db, opt) {
     if (l.g === 'c') l.g = null;
     /* betydninger på engelsk, ellers på originalsproget */
     const ss = rows('SELECT s.sense_id, s.sense_order, s.frequency, s.is_computed, en.text, en.gloss, en.source_id, en.is_verified, de.text FROM sense s LEFT JOIN sense_translation en ON en.sense_id=s.sense_id AND en.language_id=? LEFT JOIN sense_translation de ON de.sense_id=s.sense_id AND de.language_id=? WHERE s.lemma_id=? AND s.is_deleted=0 ORDER BY s.sense_order', [EN, DE, id]);
-    l.senseRows = ss.map(x => ({ id: x[0], order: x[1], freq: x[2] || 0, computed: !!x[3], text: N(x[4] || x[8] || ''), gloss: x[5] ? N(x[5]) : null, source: x[6], verified: !!x[7], lang: x[4] ? 'en' : 'de', orig: N(x[8] || '') }));
+    const allTr = new Map(); if (ss.length) rows('SELECT sense_id, language_id, text, source_id, is_verified FROM sense_translation WHERE sense_id IN (' + idList(ss.map(x => x[0])) + ')').forEach(x => { const a = allTr.get(x[0]); const v = [x[1], x[2], x[3], x[4]]; if (a) a.push(v); else allTr.set(x[0], [v]); });
+    l.senseRows = ss.map(x => { const tr = pickTr(allTr.get(x[0]) || []);
+      return { id: x[0], order: x[1], freq: x[2] || 0, computed: !!x[3], text: N(x[4] || x[8] || ''), gloss: x[5] ? N(x[5]) : null, source: x[6], verified: !!x[7], lang: x[4] ? 'en' : 'de', orig: N(x[8] || ''), tr }; });
     l.senses = l.senseRows.map(x => x.text).filter(Boolean); if (!l.senses.length) l.senses = ['(no meaning recorded)'];
     l.senseIds = l.senseRows.map(x => x.id);
     /* glossen til skabelonerne: den hyppigste betydnings glosse; ellers første glosse; ellers betydningen renset; ellers det i klammer */
@@ -1141,9 +1201,10 @@ function makeDB(db, opt) {
   function group(key) {
     if (!key || !KEYS.has(key)) return null;
     if (GRP.has(key)) return GRP.get(key);
-    const ids = col('SELECT sp.spelling_id FROM spelling sp WHERE sp.sign_key=? AND sp.is_deleted=0 ORDER BY (sp.is_primary IS NULL), sp.attestation_count DESC, sp.spelling_id', [key]);
-    const seen = new Set(), out = [];
-    ids.forEach(i => { const sp = spelling(i); if (!sp) return; const k = sp.lemma + '|' + sp.form; if (seen.has(k)) return; seen.add(k); out.push(sp); });
+    const ids = rows('SELECT sp.spelling_id, sp.attestation_count FROM spelling sp WHERE sp.sign_key=? AND sp.is_deleted=0 ORDER BY (sp.is_primary IS NULL), sp.attestation_count DESC, sp.spelling_id', [key]);
+    const seen = new Map(), out = [];
+    /* kc/kids (F): how often the source writes this word in this form with exactly these signs (all spellings with the key, any layout) */
+    ids.forEach(([i, n]) => { const sp = spelling(i); if (!sp) return; const k = sp.lemma + '|' + sp.form, r = seen.get(k); if (r) { r.kc += n || 0; r.kids.push(i); return; } sp.kc = n || 0; sp.kids = [i]; seen.set(k, sp); out.push(sp); });
     const g = out.length ? out : null; GRP.set(key, g); return g;
   }
   function mainSpellingId(lemmaId) {
@@ -1159,6 +1220,10 @@ function makeDB(db, opt) {
     const sp = { id: sid, bare: true, lemma: l.id, lem: l, form: 'base', t: l.t, signs: [], codes: [], key: '', quads: [], primary: 1, cart: 0, mdc: '' };
     SPL.set(sid, sp); return sp;
   }
+  /* ordets stavemåder med formen (til "andre stavemåder" grupperet efter form, beslutning 6-7) */
+  const spellingFormsOfLemma = lemmaId => { const l = lemma(lemmaId); if (!l) return [];
+    return rows('SELECT sp.spelling_id, wf.is_base, wf.gram_form_id, wf.number_id, wf.gender_id, sp.is_primary FROM spelling sp JOIN word_form wf USING(form_id) WHERE wf.lemma_id=? AND sp.is_deleted=0 ORDER BY (wf.is_base IS NULL), wf.form_id, (sp.is_primary IS NULL), sp.attestation_count DESC, sp.spelling_id', [Number(lemmaId)])
+      .map(r => ({ id: r[0], form: fcode(r[1], r[2], r[3], r[4], l.pos), primary: !!r[5] })); };
   const spellingsOfLemma = lemmaId => col('SELECT sp.spelling_id FROM spelling sp JOIN word_form wf USING(form_id) WHERE wf.lemma_id=? AND sp.is_deleted=0 ORDER BY (wf.is_base IS NULL), wf.form_id, (sp.is_primary IS NULL), sp.attestation_count DESC, sp.spelling_id', [Number(lemmaId)]);
   /* ord i ordbogen læst som en bestemt lydfølge (translit_search er den løse nøgle; den præcise sammenlignes bagefter) */
   function formsByLoose(loose) {
@@ -1172,37 +1237,50 @@ function makeDB(db, opt) {
 
   /* ---- sætninger ---- */
   const sentenceIdByKey = key => key ? val('SELECT sentence_id FROM sentence WHERE sign_key=? AND is_deleted=0 ORDER BY sentence_id LIMIT 1', [key]) : null;
-  const WORK = new Map(), WIT = new Map(), LINE = new Map();
+  const WORK = new Map(), WIT = new Map(), LINE = new Map(), PLACE = new Map();
+  /* et sted med navn og det større sted, det ligger i (place.parent_id) */
+  function placeOf(eid) {
+    if (PLACE.has(eid)) return PLACE.get(eid);
+    const r = one('SELECT ne.name_term_id, pl.modern_name, pl.parent_id, pne.name_term_id FROM named_entity ne LEFT JOIN place pl ON pl.entity_id=ne.entity_id LEFT JOIN named_entity pne ON pne.entity_id=pl.parent_id WHERE ne.entity_id=?', [eid]);
+    const x = r ? { id: eid, name: term(r[0]), modern: r[1] ? N(r[1]) : null, parent: r[3] != null ? term(r[3]) : null, parentId: r[2] } : null;
+    PLACE.set(eid, x); return x;
+  }
   function work(id) {
     if (WORK.has(id)) return WORK.get(id);
     const r = one('SELECT w.work_id, w.code, w.title_term_id, w.genre_id, w.stage_id, w.genre_is_computed, w.stage_is_computed FROM work w WHERE w.work_id=?', [id]);
-    const x = r ? { id: r[0], code: r[1], title: term(r[2]) || r[1], titleTerm: r[2], genre: r[3], stage: r[4] } : { id, title: '' };
+    const tt = r ? pickTr(rows('SELECT language_id, label, source_id, is_verified FROM term_translation WHERE term_id=? ORDER BY language_id', [r[2]])) : null;
+    const x = r ? { id: r[0], code: r[1], title: (tt && tt.text) || r[1], titleTr: tt, titleTerm: r[2], genre: GENRE.byId[r[3]] ? GENRE.byId[r[3]].label : null, genreComputed: !!r[5],
+      stage: STAGE.byId[r[4]] ? STAGE.byId[r[4]].label : null, stageComputed: !!r[6] } : { id, title: '' };
     WORK.set(id, x); return x;
   }
   function witness(id) {
     if (WIT.has(id)) return WIT.get(id);
     const r = one('SELECT witness_id, work_id, siglum, object_type_id, script_type_id, stage_id, stage_is_computed, stage_basis, findspot_id, period_id, dynasty_id, king_id, year_from, year_to FROM witness WHERE witness_id=?', [id]);
-    const x = r ? { id: r[0], work: r[1], siglum: N(r[2]), object: OBJT.byId[r[3]] ? OBJT.byId[r[3]].label : null, script: SCRIPT.byId[r[4]] ? SCRIPT.byId[r[4]].code : null, scriptLabel: SCRIPT.byId[r[4]] ? SCRIPT.byId[r[4]].label : null, stage: r[5], findspot: r[8] } : { id, siglum: '' };
+    const x = r ? { id: r[0], work: r[1], siglum: N(r[2]), object: OBJT.byId[r[3]] ? OBJT.byId[r[3]].label : null, script: SCRIPT.byId[r[4]] ? SCRIPT.byId[r[4]].code : null, scriptLabel: SCRIPT.byId[r[4]] ? SCRIPT.byId[r[4]].label : null,
+      stage: STAGE.byId[r[5]] ? STAGE.byId[r[5]].label : null, stageComputed: !!r[6], stageBasis: r[7] ? String(r[7]).split(',').map(b => b.trim()).filter(b => b && b !== 'source') : [],
+      findspot: r[8], place: r[8] != null ? placeOf(r[8]) : null, period: PERIOD.byId[r[9]] ? PERIOD.byId[r[9]].label : null, dynasty: r[10] != null ? term(val('SELECT term_id FROM dynasty WHERE dynasty_id=?', [r[10]])) : null,
+      king: r[11] != null ? term(val('SELECT name_term_id FROM named_entity WHERE entity_id=?', [r[11]])) : null, years: r[12] != null ? yrs(r[12], r[13]) : null } : { id, siglum: '' };
     WIT.set(id, x); return x;
   }
   function line(id) {
     if (LINE.has(id)) return LINE.get(id);
     const r = one('SELECT line_id, line_label, sort_order, direction_id, direction_is_computed FROM text_line WHERE line_id=?', [id]);
-    const x = r ? { id: r[0], label: N(r[1]), sort: r[2], dir: DIRS.byId[r[3]] ? DIRS.byId[r[3]].code : null, dirComputed: !!r[4] } : { id, label: '' };
+    const x = r ? { id: r[0], label: N(r[1]), sort: r[2], dir: DIRS.byId[r[3]] ? DIRS.byId[r[3]].code : null, rtl: !!(DIRS.byId[r[3]] && DIRS.byId[r[3]].extra[0]), dirComputed: !!r[4] } : { id, label: '' };
     LINE.set(id, x); return x;
   }
   const NOTE = { hieratic: 'The source is written in hieratic. The hieroglyphs are a modern transcription.' };
   /* en sætnings hoved: nok til en række i en liste */
   function sentenceLite(id) {
     id = Number(id); if (SENL.has(id)) return SENL.get(id);
-    const r = one('SELECT s.sentence_id, s.work_id, s.witness_id, s.passage_id, s.sort_order, s.mdc, s.sign_key, rd.reading_id, rd.translit, rd.translit_search FROM sentence s JOIN sentence_reading rd ON rd.sentence_id=s.sentence_id AND rd.is_default=1 WHERE s.sentence_id=?', [id]);
+    const r = one('SELECT s.sentence_id, s.work_id, s.witness_id, s.passage_id, s.sort_order, s.mdc, s.sign_key, rd.reading_id, rd.translit, rd.translit_search, s.passage_is_computed FROM sentence s JOIN sentence_reading rd ON rd.sentence_id=s.sentence_id AND rd.is_default=1 WHERE s.sentence_id=?', [id]);
     if (!r) { SENL.set(id, null); return null; }
     const tr = rows('SELECT st.language_id, st.type_id, st.text, st.source_id, st.is_verified FROM sentence_translation st WHERE st.reading_id=? ORDER BY st.is_default IS NULL, st.translation_id', [r[7]]);
-    const pick = type => tr.find(x => x[1] === type && x[0] === EN) || tr.find(x => x[1] === type);
-    const free = pick(TRANST.byCode.free ? TRANST.byCode.free.id : 1) || tr[0], lit = pick(TRANST.byCode.literal ? TRANST.byCode.literal.id : 2);
+    const ofType = type => tr.filter(x => x[1] === type).map(x => [x[0], x[2], x[3], x[4]]);
+    const fId = TRANST.byCode.free ? TRANST.byCode.free.id : 1, lId = TRANST.byCode.literal ? TRANST.byCode.literal.id : 2;
+    const free = pickTr(ofType(fId)) || pickTr(tr.map(x => [x[0], x[2], x[3], x[4]])), lit = pickTr(ofType(lId));
     const w = work(r[1]), wi = witness(r[2]);
-    const s = { id, readingId: r[7], t: N(r[8]), ts: r[9], key: r[6], mdc: r[5], free: free ? N(free[2]) : '', freeLang: free ? (free[0] === EN ? 'en' : (free[0] === DE ? 'de' : 'other')) : null, freeSource: free ? free[3] : null,
-      litText: lit ? N(lit[2]) : null, translations: tr.map(x => ({ lang: x[0] === EN ? 'en' : (x[0] === DE ? 'de' : String(x[0])), type: TRANST.byId[x[1]] ? TRANST.byId[x[1]].code : x[1], text: N(x[2]), source: x[3], verified: !!x[4] })),
+    const s = { id, readingId: r[7], t: N(r[8]), ts: r[9], key: r[6], mdc: r[5], free: free ? free.text : '', tr: free, trLit: lit, freeLang: free ? free.lang : null,
+      litText: lit ? lit.text : null, passageComputed: !!r[10],
       src: { work: w.title, witness: wi.siglum, line: '', passage: r[3], note: NOTE[wi.script] || '', sort: r[4], workId: r[1], witnessId: r[2], script: wi.script, object: wi.object } };
     SENL.set(id, s); return s;
   }
@@ -1220,7 +1298,7 @@ function makeDB(db, opt) {
       if (!sp) {      /* ordet har ingen gemt stavemåde: en stavemåde for netop dette ord i sætningen */
         const sid = 'tok:' + s.readingId + '.' + x[0], codesW = x[11] ? x[11].split('-') : (written ? ['?'] : []);
         sp = SPL.get(sid) || { id: sid, tok: true, formId: x[2], mdc: N(x[10] || x[12] || ''), key: codesW.join('-'), primary: 0, cart: 0, lemma: lem.id, lem, gf: x[16] != null ? GF[x[16]] : null,
-          form: x[2] != null ? fcode(x[19], x[16], x[18], x[17], lem.pos) : 'base', t: x[15] != null ? N(x[15]) : (x[13] ? N(x[13]) : '…'), signs: codesW.map(c => ({ c, f: null, rp: null, comp: 0 })), codes: codesW, raw: x[12] ? N(x[12]) : null, diplomatic: x[13] ? N(x[13]) : null };
+          form: x[2] != null ? fcode(x[19], x[16], x[18], x[17], lem.pos) : 'base', t: x[15] != null ? N(x[15]) : (x[13] ? N(x[13]) : '…'), signs: codesW.map(c => ({ c, f: null, rp: null, comp: 0 })), codes: codesW, raw: x[12] ? N(x[12]) : null, diplomatic: x[13] ? N(x[13]) : null, unenc: !x[11] && st.code === 'unencoded' };
         sp.quads = opt.quads && x[10] ? opt.quads(N(x[10]), codesW.length) : [];
         SPL.set(sid, sp);
       }
@@ -1232,7 +1310,7 @@ function makeDB(db, opt) {
     });
     const L = lines.map(line).filter(l => l.label), lab = L.map(l => l.label);
     s.src.line = lab.length > 1 ? 'lines ' + lab[0] + '–' + lab[lab.length - 1] : (lab.length ? 'line ' + lab[0] : '');
-    s.lines = L; s.dir = L.length && L[0].dir ? L[0].dir : null;
+    s.lines = L; s.dir = L.length && L[0].dir ? L[0].dir : null; s.rtl = L.length > 0 && L[0].rtl; s.dirComputed = L.length > 0 && L[0].dirComputed;
     s.pattern = null;
     s.written = s.toks.filter(t => t.written).map((t, i) => ({ t, o: t.wp || t.pos })).sort((a, b) => a.o - b.o).map(x => x.t);
     s.codes = s.written.reduce((a, t) => a.concat(t.spo.codes), []);
@@ -1293,6 +1371,64 @@ function makeDB(db, opt) {
     return rows('SELECT rd.sentence_id, t.position FROM word_form wf JOIN sentence_token t ON t.form_id=wf.form_id JOIN sentence_reading rd ON rd.reading_id=t.reading_id WHERE wf.lemma_id IN (' + idList(lemmaIds) + ') ORDER BY rd.sentence_id LIMIT ?', [limit || 2000]);
   }
 
+  /* ---- corpus model (F): word and word-pair counts from sentence_token, built once at run time like temp.skey (D3); the file is not
+     changed. Ids: lemma_id; 0 = a written word without a lemma (lacuna); BOSL/EOSL = start/end of a sentence. Counts follow the written
+     words in order (the stream the engine sees). exclude(sentenceIds) takes sentences out (harness: leave-key-out) and returns undo. */
+  const LM = { ready: false, ms: 0, SH: 32768, N: 0, V: 0, BOSL: 0, EOSL: 0, U: null, LS: null, NS: null, B: new Map(), H: null, T: null, SPD: new Map(), EXCL: new Set(), CARD: null };
+  function lmStream(readingIds, from, to) {      /* reading_id -> [[lemma, spelling_id], ...] in written order (only written words) */
+    const out = new Map(); let cur = null, rid = -1;
+    const st = db.prepare('SELECT t.reading_id, t.status_id, t.spelling_id, wf.lemma_id FROM sentence_token t LEFT JOIN word_form wf ON wf.form_id=t.form_id' +
+      (readingIds ? ' WHERE t.reading_id IN (' + idList(readingIds) + ')' : ' WHERE t.reading_id BETWEEN ' + Number(from) + ' AND ' + Number(to)) + ' ORDER BY t.reading_id, t.position');
+    const C = opt.capi, P = st.pointer, gi = C ? (i => C.sqlite3_column_int(P, i)) : (i => st.get(i) || 0), nul = C ? (i => C.sqlite3_column_type(P, i) === 5) : (i => st.get(i) == null);
+    try {
+      while (st.step()) {
+        const r = gi(0), s = STATUS.byId[gi(1)]; if (s && s.extra[1] === 0) continue;
+        if (r !== rid) { rid = r; cur = []; out.set(r, cur); }
+        cur.push([gi(3), nul(2) ? null : gi(2)]);
+      }
+    } finally { st.finalize(); }
+    return out;
+  }
+  function lmAdd(seq, d) {
+    let p = LM.BOSL;
+    for (let i = 0; i <= seq.length; i++) {
+      const l = i < seq.length ? seq[i][0] : LM.EOSL, k = p * LM.SH + l, v = (LM.B.get(k) || 0) + d;
+      if (i < seq.length) { LM.U[l] += d; LM.N += d; if (seq[i][1] != null) { LM.LS[l] += d; if (d < 0) LM.SPD.set(seq[i][1], (LM.SPD.get(seq[i][1]) || 0) - d); else { const z = (LM.SPD.get(seq[i][1]) || 0) - d; if (z > 0) LM.SPD.set(seq[i][1], z); else LM.SPD.delete(seq[i][1]); } } }
+      LM.H[p] += d;
+      if (v) { if (v === d && d > 0) LM.T[p]++; LM.B.set(k, v); } else { LM.B.delete(k); LM.T[p]--; }      /* T: how many different words follow p */
+      p = l;
+    }
+  }
+  /* built in slices of reading ids (the page calls step() when idle; build() finishes at once when the engine needs it) */
+  function lmStep(n) {
+    if (LM.ready) return true;
+    const t = Date.now();
+    if (!LM.U) {
+      const V = (val('SELECT max(lemma_id) FROM lemma') || 0) + 3;
+      LM.V = val('SELECT COUNT(*) FROM lemma WHERE is_deleted=0'); LM.BOSL = V - 2; LM.EOSL = V - 1; LM.SH = V <= 32768 ? 32768 : 65536;
+      LM.U = new Int32Array(V); LM.LS = new Int32Array(V); LM.NS = new Int32Array(V); LM.H = new Int32Array(V); LM.T = new Int32Array(V);
+      LM.next = 0; LM.max = val('SELECT max(reading_id) FROM sentence_reading') || 0;
+      rows('SELECT wf.lemma_id, COUNT(*) FROM spelling sp JOIN word_form wf USING(form_id) WHERE sp.is_deleted=0 GROUP BY wf.lemma_id').forEach(r => { LM.NS[r[0]] = r[1]; });
+      LM.CARD = val("SELECT l.lemma_id FROM lemma l JOIN part_of_speech p USING(pos_id) WHERE p.code='cardinal' ORDER BY l.attestation_count DESC LIMIT 1");
+    }
+    const to = LM.next + (n || 3000) - 1;
+    lmStream(null, LM.next, to).forEach(seq => lmAdd(seq, 1));
+    LM.next = to + 1;
+    if (LM.next > LM.max) LM.ready = true;
+    LM.ms += Date.now() - t;
+    return LM.ready;
+  }
+  function lmBuild() { while (!lmStep(50000)); return LM; }
+  LM.step = lmStep;
+  LM.build = lmBuild;
+  LM.big = (p, l) => LM.B.get(p * LM.SH + l) || 0;
+  LM.exclude = sentenceIds => {
+    lmBuild(); const ids = sentenceIds.map(Number).filter(x => !LM.EXCL.has(x)); if (!ids.length) return () => {};
+    const rids = col('SELECT reading_id FROM sentence_reading WHERE is_default=1 AND sentence_id IN (' + idList(ids) + ')'), seqs = lmStream(rids);
+    seqs.forEach(seq => lmAdd(seq, -1)); ids.forEach(x => LM.EXCL.add(x));
+    return () => { seqs.forEach(seq => lmAdd(seq, 1)); ids.forEach(x => LM.EXCL.delete(x)); };
+  };
+
   /* ---- tegnets brug ---- */
   function signUses(code, offset, limit, by) {      /* stavemåder med tegnet (og dets varianter): [spelling_id, position, funktion] */
     const ids = [Number(code)].concat(col('SELECT sign_id FROM sign WHERE base_sign_id=?', [Number(code)]));
@@ -1324,14 +1460,17 @@ function makeDB(db, opt) {
         const k = one('SELECT k.dynasty_id, d.dynasty_no, d.term_id, p.term_id FROM king k JOIN dynasty d USING(dynasty_id) LEFT JOIN period p ON p.period_id=d.period_id WHERE k.entity_id=?', [r[0]]);
         if (k) lines.push(['Dynasty', term(k[2]) + (k[3] ? ', ' + term(k[3]) : '')]);
         const rg = one('SELECT year_from, year_to FROM reign WHERE king_id=? ORDER BY is_default IS NULL LIMIT 1', [r[0]]);
-        if (rg) lines.push(['Reign', 'c. ' + yr(rg[0]) + '–' + yr(rg[1])]);
+        if (rg) lines.push(['Reign', 'c. ' + yrs(rg[0], rg[1])]);
       }
       if (type === 'place') { const p = one('SELECT pl.modern_name, pp.entity_id FROM place pl LEFT JOIN place pp ON pp.entity_id=pl.parent_id WHERE pl.entity_id=?', [r[0]]); if (p && p[0]) lines.push(['Modern name', N(p[0])]); if (p && p[1]) lines.push(['Part of', term(val('SELECT name_term_id FROM named_entity WHERE entity_id=?', [p[1]]))]); }
-      x = { id: r[0], type: cap0(ETYPE.byId[r[1]] ? ETYPE.byId[r[1]].label : 'Name'), name: term(r[2]), lines };
+      const get = k => { const l = lines.find(q => q[0] === k); return l ? l[1] : null; };
+      x = { id: r[0], code: type, type: cap0(ETYPE.byId[r[1]] ? ETYPE.byId[r[1]].label : 'Name'), name: term(r[2]), lines, nameType: r[3] != null && TITUL.byId[r[3]] ? TITUL.byId[r[3]].label : null,
+        dynasty: get('Dynasty'), reign: get('Reign'), partOf: get('Part of') };
     }
     ENT.set(lemmaId, x); return x;
   }
   function yr(y) { return y < 0 ? (-y) + ' BCE' : y + ' CE'; }
+  function yrs(a, b) { if (b == null || b === a) return yr(a); return (a < 0) === (b < 0) ? Math.abs(a) + '–' + yr(b) : yr(a) + '–' + yr(b); }
   function cap0(s) { s = String(s || ''); return s.charAt(0).toUpperCase() + s.slice(1); }
   const rootLemmas = (rootId, except) => rootId == null ? [] : col('SELECT lemma_id FROM lemma WHERE root_id=? AND lemma_id<>? ORDER BY translit_sort, homonym_no LIMIT 200', [rootId, Number(except) || 0]);
   const relatedLemmas = lemmaId => rows('SELECT lr.to_lemma_id, rt.code FROM lemma_relation lr JOIN relation_type rt USING(relation_type_id) WHERE lr.from_lemma_id=? UNION SELECT lr.from_lemma_id, rt.code FROM lemma_relation lr JOIN relation_type rt USING(relation_type_id) WHERE lr.to_lemma_id=?', [Number(lemmaId), Number(lemmaId)]).map(r => ({ id: r[0], type: r[1] }));
@@ -1362,6 +1501,39 @@ function makeDB(db, opt) {
     if (!words.length) return [];
     return rows('SELECT DISTINCT en.lemma_id, f.label FROM fts_term f JOIN named_entity ne ON ne.name_term_id=f.term_id JOIN entity_name en ON en.entity_id=ne.entity_id WHERE fts_term MATCH ? LIMIT ?', ['label:(' + ftsQuery(words) + ')', limit || 200]).map(r => ({ lemmaId: r[0], label: N(r[1]) }));
   }
+
+  /* ---- G2: eksempelsætninger, rekonstruerede stavemåder, kildelinks, formsøskende, navnealiaser ---- */
+  const lemmaExamples = lemmaId => col('SELECT sentence_id FROM lemma_example WHERE lemma_id=? ORDER BY rank_no', [Number(lemmaId)]);
+  /* kun til eksempelsætninger (beslutning 2): formens foretrukne stavemåde, ellers ordets hovedstavemåde */
+  function reconstructedSpelling(formId, lemmaId) {
+    const id = (formId != null ? val('SELECT spelling_id FROM spelling WHERE form_id=? AND is_primary=1 AND is_deleted=0', [Number(formId)]) : null) || (lemmaId != null ? mainSpellingId(lemmaId) : null);
+    return id != null ? spelling(id) : null;
+  }
+  const LINKS = {}; rows('SELECT source_id, table_name, url_pattern, key_prefix FROM source_link').forEach(r => { (LINKS[r[1]] = LINKS[r[1]] || []).push({ source: r[0], pattern: r[2], prefix: r[3] }); });
+  /* et ords, en teksts eller en sætnings adresse hos kilden (åbnes kun i brugerens browser) */
+  function extLink(table, rowId) {
+    const L = LINKS[table]; if (!L || rowId == null) return null;
+    for (const k of L) {
+      const key = val('SELECT external_key FROM external_id WHERE table_name=? AND row_id=? AND source_id=? ORDER BY sub_position LIMIT 1', [table, Number(rowId), k.source]);
+      if (key == null) continue;
+      const bare = k.prefix && String(key).startsWith(k.prefix) ? String(key).slice(k.prefix.length) : String(key);
+      return { url: k.pattern.replace('{key}', encodeURIComponent(bare)), key: bare, source: k.source, sourceName: srcName(k.source), license: SOURCES[k.source] ? SOURCES[k.source].license : null };
+    }
+    return null;
+  }
+  /* tegn med samme Unicode-formgruppe (kun til "mente du", når intet findes) */
+  const SHAPE = new Map(); SIGNS.forEach(x => { if (x.shape) push(SHAPE, x.shape, x.c); });
+  SHAPE.forEach(a => a.sort((p, q) => (SG[p].shapeOrder || 0) - (SG[q].shapeOrder || 0)));
+  const shapeSiblings = c => { const s0 = SG[c]; return s0 && s0.shape ? (SHAPE.get(s0.shape) || []).filter(x => x !== c) : []; };
+  /* navnes andre former (Amenophis -> Amenhotep); resultatet viser hovednavnet */
+  const aliasFold = q => String(q).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/-/g, ' ').replace(/[^a-z0-9 ]+/g, '').replace(/\s+/g, ' ').trim();
+  function searchAliases(q, limit) {
+    const f = aliasFold(q); if (f.length < 2) return [];
+    return rows('SELECT ea.alias, ea.entity_id, ne.name_term_id, (SELECT en.lemma_id FROM entity_name en WHERE en.entity_id=ea.entity_id ORDER BY en.is_primary IS NULL, en.entity_name_id LIMIT 1), ea.alias_search=? FROM entity_alias ea JOIN named_entity ne ON ne.entity_id=ea.entity_id AND ne.is_deleted=0 WHERE ea.alias_search>=? AND ea.alias_search<? ORDER BY ea.alias_search=? DESC, length(ea.alias_search) LIMIT ?', [f, f, nextChar(f), f, limit || 40])
+      .map(r => ({ alias: N(r[0]), entityId: r[1], name: term(r[2]), lemmaId: r[3], exact: !!r[4] }));
+  }
+  const plainLabel = f => { const L = GFLABEL[FBACK[f] || f]; return L && L.plain ? L.plain : null; };
+  const TRADS = rows('SELECT g.code, g.term_id, g.is_default FROM grammar_tradition g').map(r => ({ code: r[0], label: term(r[1]), isDefault: !!r[2] }));
 
   /* ---- ordlisten i Dictionary: alle ord med hovedstavemåde og første tegn; bygges én gang ---- */
   let WL = null;
@@ -1401,9 +1573,10 @@ function makeDB(db, opt) {
     lemma, spelling, group, mainSpelling, mainSpellingId, bareSpelling, spellingsOfLemma, formsByLoose, lemmasByLoose, UNKNOWN, SPL, LEM, SEN, GRP,
     sentence, sentenceLite, sentenceIdByKey, nextSentenceId, passageOthers, work, witness, line,
     auxStep, auxReady, AUX, sentencesWithRun, sentencesWithSigns, sentencesBeginningWith, sentencesEndingWith, sentencesByTranslit,
-    lemmaSentenceCount, lemmaSentences, formSentences, lemmaTokens,
+    lemmaSentenceCount, lemmaSentences, formSentences, lemmaTokens, LM,
     signUses, signUseCount, detLemmas, detCount, DETF, LOGF, entityOf, rootLemmas, relatedLemmas,
     lemmasByTranslitPrefix, compoundsWith, suffixSpellings, searchSenses, searchSentences, searchNames, wordIndex, wordDets,
+    spellingFormsOfLemma, pickTr, langName, srcName, isMT, isDraft, placeOf, lemmaExamples, reconstructedSpelling, extLink, shapeSiblings, searchAliases, aliasFold, plainLabel, TRADS, GENRE, STAGE,
   };
 }
 /* ---------- motoren uden skærm (kan også køre i Node) ----------
@@ -1411,7 +1584,7 @@ function makeDB(db, opt) {
    er tynde lag over datalagets mellemlager, så motorens kode kan blive, som den var. */
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
-const DB = makeDB(RAWDB, { quads: (mdc, n) => parseMdc(mdc, n), timing: !!(typeof DBOPT !== 'undefined' && DBOPT.timing) });
+const DB = makeDB(RAWDB, { quads: (mdc, n) => parseMdc(mdc, n), timing: !!(typeof DBOPT !== 'undefined' && DBOPT.timing), capi: typeof DBOPT !== 'undefined' && DBOPT ? DBOPT.capi : null });
 
 /* ---------- data og indeks ---------- */
 const SG = DB.SG, canon = DB.canon, valuesOf = DB.valuesOf;
@@ -1453,7 +1626,7 @@ const FUNC = { uni: 'uniliteral', bi: 'biliteral', tri: 'triliteral', multi: 'mu
 const ROLE = { negation: 'negation', attribute: 'attribute', demonstrative: 'demonstrative', quantifier: 'quantifier', genitive: 'genitive marker', preposition: 'preposition', pobject: 'object of the preposition', number: 'number', particle: 'particle', predicate: 'predicate', subject: 'subject', object: 'object', complement: 'complement', possessor: 'possessor', head: 'head noun', apposition: 'apposition' };
 
 /* ---------- tilstand ---------- */
-const S = { mode: 'sentence', detail: 'basic', lang: 'en', trans: 'free', trad: 'gardiner', scheme: 'gardiner', dir: 'ltr', conf: true, hist: 50 };
+const S = { mode: 'sentence', detail: 'basic', lang: 'en', trans: 'free', trad: 'gardiner', scheme: 'gardiner', dir: 'ltr', layout: 'source', conf: true, hist: 50 };
 const state = { buf: [], stack: [], favs: [], hist: [], favSort: 'new', favRev: false, signSort: 'pos', saved: 'fav', scan: null, scanWord: 0, scanEdits: {}, seq: 0, sugg: 0 };
 
 /* ---------- translitteration ----------
@@ -1635,71 +1808,120 @@ function nameWord(codes, type, at) {
   return Object.assign(base, { alts: [SP[id]], nameGuess: SP[id].name.rd });
 }
 const ECOUNT = { segment: 0, segMs: 0 };
+/* ---------- F: corpus probabilities (DB.LM, built at run time from sentence_token) ----------
+   A reading of a line is a path of words; its score is the log probability of the words (word after word: lemma pairs, smoothed
+   with the lemma's own frequency) times the probability that the word is written with exactly these signs (spelling counts), plus a
+   penalty for every way the input departs from a stored spelling (a lost, replaced or left-out sign, a reading by sound, a rule). */
+const LMW = { K: 1, WB: 2, A: 2, UNK: -16, UNKG: -13, LAC: 0, GAP: 0, FUZ: -6, SHORT: -6, SHORTDET: -5, PHON: -9, PHONX: -2, LOST: -6, NUM: -1, AFF: -4,
+  ALTS: 16, BEAM: 8, PATSLACK: 6, COSTW: 1 };      /* tuned on the DEV sample (harness/tune.mjs); see NOTES.md, section F */
+const LMR = () => { const L = DB.LM; if (!L.ready) L.build(); return L; };
+const lidOf = sp => typeof sp.lemma === 'number' ? sp.lemma : (sp.num !== undefined ? (DB.LM.CARD || 0) : 0);
+function lpB(L, p, l) {      /* ln P(word l | word p before it): pairs, smoothed with the word's own frequency (Witten-Bell: the more different words follow p, the more weight the frequency gets) */
+  const pu = l === L.EOSL ? L.H[L.BOSL] / (L.N + 1) : (L.U[l] + 0.5) / (L.N + 0.5 * L.V), w = LMW.WB * L.T[p] + LMW.K;
+  return Math.log((L.big(p, l) + w * pu) / (L.H[p] + w));
+}
+function lpS(L, sp) {      /* ln P(these signs | the word in this form) */
+  if (sp.kc === undefined || typeof sp.lemma !== 'number') return 0;
+  let c = sp.kc; if (L.SPD.size) sp.kids.forEach(i => { c -= L.SPD.get(i) || 0; });
+  return Math.log((Math.max(0, c) + LMW.A) / (Math.max(0, L.LS[sp.lemma]) + LMW.A * Math.max(1, L.NS[sp.lemma])));
+}
 function segmentCore(codes) {
-  const t0 = Date.now(), n = codes.length, best = new Array(n + 1).fill(null); best[0] = { score: 0, toks: [] };
-  const put = (j, score, toks, tok) => { const b = best[j]; if (!b || score > b.score || (score === b.score && toks.length + 1 < b.toks.length)) best[j] = { score, toks: toks.concat([tok]) }; };
+  const t0 = Date.now(), n = codes.length, L = LMR();
   const KEYS = DB.KEYS, MAXL = DB.MAXLEN, g0 = k => GROUPS[k] || [];
+  /* 1. the possible words from each position (as before; each with a penalty instead of the old points) */
+  const EG = Array.from({ length: n }, () => []), edge = (i, x) => { x.at = i; EG[i].push(x); };
   for (let i = 0; i < n; i++) {
-    const cur = best[i]; if (!cur) continue;
-    const prev = cur.toks[cur.toks.length - 1];
     /* Tabte tegn inde i et ord: en kendt stavemåde må dække hullet, når mindst ét bevaret tegn passer på sin plads. */
     for (let j = i + 2; j <= Math.min(n, i + 8); j++) {
       const sl = codes.slice(i, j); if (sl.includes('_')) break;
       const wild = sl.filter(isLost), realN = sl.length - wild.length; if (!wild.length || !realN) continue;
       const re = lostRe(sl), alts = [];
       lostCands(sl).forEach(k => { if (re.test(k)) alts.push(...g0(k)); });
-      if (alts.length) put(j, cur.score + 10 * realN - 1 - wild.reduce((a, c) => a + (c === '*' ? 2 : 1), 0), cur.toks, { type: 'word', alts, len: j - i, lost: true });
+      if (alts.length) edge(i, { type: 'word', alts, len: j - i, lost: true, pen: LMW.LOST * wild.reduce((a, c) => a + (c === '*' ? 2 : 1), 0) });
     }
-    if (codes[i] === '_') { put(i + 1, cur.score - 1, cur.toks, { type: 'gap', len: 1 }); continue; }
-    if (isLost(codes[i])) { put(i + 1, cur.score - 2, cur.toks, { type: 'lacuna', len: 1 }); continue; }
+    if (codes[i] === '_') { edge(i, { type: 'gap', len: 1, pen: LMW.GAP }); continue; }
+    if (isLost(codes[i])) {
+      edge(i, { type: 'lacuna', len: 1, pen: LMW.LAC });
+      continue;
+    }
     /* kendte stavemåder, der begynder her: opslag i mængden af alle tegnnøgler */
     let lim = n - i; for (let q = i; q < n; q++) if (isLost(codes[q])) { lim = q - i; break; }
     lim = Math.min(lim, MAXL);
-    for (let L = 1; L <= lim; L++) { const k = codes.slice(i, i + L).join('-'); if (KEYS.has(k)) put(i + L, cur.score + 10 * L - 1, cur.toks, { type: 'word', alts: g0(k), len: L }); }
+    const known = new Set();
+    for (let Ln = 1; Ln <= lim; Ln++) { const k = codes.slice(i, i + Ln).join('-'); if (KEYS.has(k)) { known.add(Ln); edge(i, { type: 'word', alts: g0(k), len: Ln, pen: 0 }); } }
     /* Ét tegn skrevet med et andet tegn med samme lydværdi */
-    for (let L = 2; L <= lim; L++) {
-      const w = codes.slice(i, i + L);
-      tail1(w.slice(1).join('-')).forEach(x => { if (x.c[0] !== w[0]) { const v = sharedValue(w[0], x.c[0]); if (v) put(i + L, cur.score + 10 * L - 4, cur.toks, { type: 'word', alts: g0(x.k), len: L, fuzzy: { typed: w[0], expected: x.c[0], value: v } }); } });
-      flBucket(w[0], L).forEach(x => {
-        let d = -1; for (let m = 1; m < L; m++) if (x.c[m] !== w[m]) { if (d >= 0) return; d = m; }
+    for (let Ln = 2; Ln <= lim; Ln++) {
+      const w = codes.slice(i, i + Ln);
+      tail1(w.slice(1).join('-')).forEach(x => { if (x.c[0] !== w[0]) { const v = sharedValue(w[0], x.c[0]); if (v) edge(i, { type: 'word', alts: g0(x.k), len: Ln, pen: LMW.FUZ, fuzzy: { typed: w[0], expected: x.c[0], value: v } }); } });
+      flBucket(w[0], Ln).forEach(x => {
+        let d = -1; for (let m = 1; m < Ln; m++) if (x.c[m] !== w[m]) { if (d >= 0) return; d = m; }
         if (d < 0) return; const v = sharedValue(w[d], x.c[d]);
-        if (v) put(i + L, cur.score + 10 * L - 4, cur.toks, { type: 'word', alts: g0(x.k), len: L, fuzzy: { typed: w[d], expected: x.c[d], value: v } });
+        if (v) edge(i, { type: 'word', alts: g0(x.k), len: Ln, pen: LMW.FUZ, fuzzy: { typed: w[d], expected: x.c[d], value: v } });
       });
     }
     /* Ét tegn udeladt: en kendt stavemåde må mangle ét tegn, typisk determinativet, når mindst to skrevne tegn passer. */
-    for (let L = 2; L <= lim && L < MAXL; L++) {
-      const w = codes.slice(i, i + L), cands = [];
-      tail1(w.join('-')).forEach(x => { if (x.c.length === L + 1) cands.push({ x, m: 0 }); });
-      flBucket(w[0], L + 1).forEach(x => {      /* samme første tegn: find det udeladte tegns plads m og sammenlign resten */
-        let q = 1; while (q < L && x.c[q] === w[q]) q++;
-        for (let z = q; z < L; z++) if (x.c[z + 1] !== w[z]) return;
+    for (let Ln = 2; Ln <= lim && Ln < MAXL; Ln++) {
+      const w = codes.slice(i, i + Ln), cands = [];
+      tail1(w.join('-')).forEach(x => { if (x.c.length === Ln + 1) cands.push({ x, m: 0 }); });
+      flBucket(w[0], Ln + 1).forEach(x => {
+        let q = 1; while (q < Ln && x.c[q] === w[q]) q++;
+        for (let z = q; z < Ln; z++) if (x.c[z + 1] !== w[z]) return;
         cands.push({ x, m: q });
       });
       cands.forEach(({ x, m }) => { const g = g0(x.k); if (!g.length) return; const det = g[0].signs[m] && g[0].signs[m].f === 'det';
-        put(i + L, cur.score + 10 * L - (det ? 7 : 8), cur.toks, { type: 'word', alts: g, len: L, short: { missing: x.c[m], det } }); });
+        edge(i, { type: 'word', alts: g, len: Ln, pen: det ? LMW.SHORTDET : LMW.SHORT, short: { missing: x.c[m], det } }); });
     }
-    /* Læst efter lyd: en række tegn, hvis lydværdier giver et ord fra ordbogen på mindst tre lyde. Tæller mindre end en gemt stavemåde. */
-    for (let L = 2; L <= 7 && i + L <= n; L++) {
-      const run = codes.slice(i, i + L); if (KEYS.has(run.join('-')) || run.every(isNum)) continue;
+    /* Læst efter lyd: en række tegn, hvis lydværdier giver et ord fra ordbogen. Tæller mindre end en gemt stavemåde. */
+    for (let Ln = 2; Ln <= 7 && i + Ln <= n; Ln++) {
+      const run = codes.slice(i, i + Ln); if (known.has(Ln) || run.every(isNum) || run.some(isLost)) continue;
       const pr = phonRead(run), nl = pr.ok ? units(letters(pr.t)).length : 0; if (nl < 2) continue;
       const extra = pr.parts.filter(x => x.role === 'det' || x.role === 'stroke').length;
-      const ms = nl >= 3 || L >= 3 ? phonMatches(pr.t) : [];
-      if (ms.length) put(i + L, cur.score + 10 * L - 8 - 3 * extra, cur.toks, { type: 'word', alts: ms, len: L, phon: pr });
-      else put(i + L, cur.score + 5 * L - 3 - 3 * extra, cur.toks, { type: 'unknown', len: L, guess: pr });
+      const ms = nl >= 3 || Ln >= 3 ? phonMatches(pr.t) : [];
+      if (ms.length) edge(i, { type: 'word', alts: ms, len: Ln, phon: pr, pen: LMW.PHON + LMW.PHONX * extra, nos: true });
+      else edge(i, { type: 'unknown', len: Ln, guess: pr, pen: LMW.UNKG * Ln + LMW.PHONX * extra });
     }
-    /* Tal: en række taltegn læses som ét tal. Den tæller mindre end en kendt stavemåde, så stregen efter et logogram bliver ved ordet. */
-    if (isNum(codes[i])) for (let j = i + 1; j <= n && isNum(codes[j - 1]); j++) put(j, cur.score + 3 * (j - i), cur.toks, { type: 'word', alts: [numSp(codes.slice(i, j))], len: j - i });
-    D.rules.forEach(r => {
-      if (prev && prev.type === 'word' && !prev.rule && prev.alts.some(sp => sp.lem.pos === r.pos && sp.form === 'base') && r.signs.every((x, k) => codes[i + k] === x))
-        put(i + r.signs.length, cur.score + 10 * r.signs.length, cur.toks, { type: 'affix', rule: r, len: r.signs.length });
-    });
-    put(i + 1, cur.score - 5, cur.toks, { type: 'unknown', c: codes[i], len: 1 });
+    /* Tal: en række taltegn læses som ét tal, når ingen kendt stavemåde af tallet står der. */
+    if (isNum(codes[i])) for (let j = i + 1; j <= n && isNum(codes[j - 1]); j++) if (!known.has(j - i)) edge(i, { type: 'word', alts: [numSp(codes.slice(i, j))], len: j - i, pen: LMW.NUM });
+    D.rules.forEach(r => { if (r.signs.every((x, k) => codes[i + k] === x)) edge(i, { type: 'affix', rule: r, len: r.signs.length, pen: LMW.AFF }); });
+    edge(i, { type: 'unknown', c: codes[i], len: 1, pen: LMW.UNK });
   }
+  /* 2. the best path (Viterbi over positions; a state remembers the last word, for the word pairs) */
+  const ST = new Array(n + 1).fill(null).map(() => new Map());
+  const keep = (j, st) => { const k = st.rule ? -1 - st.l : st.l, o = ST[j].get(k); if (!o || st.s > o.s) ST[j].set(k, st); };
+  ST[0].set(L.BOSL, { s: 0, l: L.BOSL, prev: null, e: null, sp: null });
+  for (let i = 0; i < n; i++) {
+    let states = Array.from(ST[i].values()); if (!states.length) continue;
+    if (states.length > LMW.BEAM) states = states.sort((x, y) => y.s - x.s).slice(0, LMW.BEAM);
+    EG[i].forEach(e => {
+      const j = i + e.len;
+      if (e.type === 'word') {
+        if (!e.base) {      /* each reading once: its own probability, best first, at most ALTS */
+          const list = e.alts.map(sp => ({ sp, l: lidOf(sp), b: (e.nos ? 0 : lpS(L, sp)) + e.pen }));
+          list.sort((x, y) => (y.b + Math.log(L.U[y.l] + 0.5)) - (x.b + Math.log(L.U[x.l] + 0.5)));
+          e.base = list.slice(0, LMW.ALTS);
+        }
+        states.forEach(st => e.base.forEach(x => keep(j, { s: st.s + lpB(L, st.l, x.l) + x.b, l: x.l, prev: st, e, sp: x.sp })));
+      } else if (e.type === 'affix') {
+        states.forEach(st => { if (st.sp && !st.rule && st.e && st.e.type === 'word' && st.sp.lem.pos === e.rule.pos && st.sp.form === 'base') keep(j, { s: st.s + e.pen, l: st.l, prev: st, e, sp: st.sp, rule: e.rule }); });
+      } else if (e.type === 'unknown') states.forEach(st => keep(j, { s: st.s + e.pen, l: 0, prev: st, e, sp: null }));
+      else states.forEach(st => keep(j, { s: st.s + lpB(L, st.l, 0) + e.pen, l: 0, prev: st, e, sp: null }));      /* lacuna, gap */
+    });
+  }
+  let fin = null; ST[n].forEach(st => { const s = st.s + lpB(L, st.l, L.EOSL); if (!fin || s > fin.s2) { fin = st; fin.s2 = s; } });
+  const path = []; for (let st = fin; st && st.e; st = st.prev) path.unshift(st);
+  /* 3. the words of the path; every word's readings in order of fit with the words chosen around it */
   const words = []; let p = 0;
-  best[n].toks.forEach(t => {
-    const at = p, codesOf = codes.slice(p, p + t.len); p += t.len;
-    if (t.type === 'affix') { const w = words[words.length - 1]; w.rule = t.rule; w.codes = w.codes.concat(codesOf); w.alts = w.alts.filter(sp => sp.lem.pos === t.rule.pos && sp.form === 'base'); }
-    else if (t.type === 'word') words.push({ kind: 'word', at, alts: t.alts.slice().sort((a, b) => (b.lem.count || 0) - (a.lem.count || 0)), codes: codesOf, fuzzy: t.fuzzy || null, short: t.short || null, phon: t.phon || null, rule: null, lost: !!t.lost, status: t.lost ? 'restored' : undefined });
+  path.forEach((st, k) => {
+    const t = st.e, at = p, codesOf = codes.slice(p, p + t.len); p += t.len;
+    if (t.type === 'affix') { const w = words[words.length - 1]; w.rule = t.rule; w.codes = w.codes.concat(codesOf); w.alts = w.alts.filter(sp => sp.lem.pos === t.rule.pos && sp.form === 'base'); return; }
+    if (t.type === 'word') {
+      let nx = k + 1; while (nx < path.length && path[nx].e.type === 'affix') nx++;
+      const pl = st.prev.l, nl = nx < path.length ? path[nx].l : L.EOSL, loc = x => lpB(L, pl, x.l) + x.b + lpB(L, x.l, nl);
+      const ranked = t.base.map(x => ({ x, s: loc(x) })).sort((a, b) => b.s - a.s);
+      const alts = [st.sp].concat(ranked.map(y => y.x.sp).filter(sp => sp !== st.sp));
+      t.alts.forEach(sp => { if (!alts.includes(sp)) alts.push(sp); });
+      words.push({ kind: 'word', at, alts, codes: codesOf, fuzzy: t.fuzzy || null, short: t.short || null, phon: t.phon || null, rule: null, lost: !!t.lost, status: t.lost ? 'restored' : undefined });
+    }
     else if (t.type === 'unknown' && t.guess) words.push({ kind: 'unknown', at, codes: codesOf, guess: t.guess });
     else if (t.type === 'unknown' && words.length && words[words.length - 1].kind === 'unknown' && !words[words.length - 1].guess) words[words.length - 1].codes.push(codesOf[0]);
     else words.push({ kind: t.type, at, codes: codesOf });
@@ -1786,7 +2008,10 @@ function matchChunks(ws, direct) {
   const out = (code, free, note) => ({ code, roles, free, cost, note: note || null, issues: iss }), objOf = x => x.np ? npText(x.np) : x.w.lem.obj;
   const subjOf = x => x.t === 'SUF' ? { s: x.w.lem.subj, third: x.w.lem.aux === 'has', be: x.w.lem.subj === 'I' ? 'am' : (x.w.lem.aux === 'has' ? 'is' : 'are') }
     : { s: npText(x.np), third: !npPlural(x.np), be: npPlural(x.np) ? 'are' : 'is' };
-  const lead = it[0] && ['PART', 'IW', 'NEG'].includes(it[0].t) ? it[0] : null, k0 = lead ? 1 : 0, sig = it.slice(k0).map(x => x.t).join(' ');
+  const lead = it[0] && ['PART', 'IW', 'NEG'].includes(it[0].t) ? it[0] : null;
+  /* F: m=k "behold (you)": the suffix pronoun after the particle m belongs to the particle, the sentence follows it */
+  const lsuf = lead && lead.t === 'PART' && lead.w.lem.t === 'm' && it[1] && it[1].t === 'SUF' && it.length > 2 ? 1 : 0;
+  const k0 = lead ? 1 + lsuf : 0, sig = it.slice(k0).map(x => x.t).join(' ');
   const kind = lead ? (lead.t === 'NEG' ? lead.w.lem.ptype : lead.t) : null;
   if (/^(NP|SUF) PREP (NP|SUF)$/.test(sig) && (kind === null || kind === 'IW' || kind === 'nn') && (it[k0].t === 'NP' || kind === 'IW')) {
     const su = subjOf(it[k0]); R(it[k0], 'subject'); R(it[k0 + 1], 'predicate'); R(it[k0 + 2], 'complement'); if (lead) R(lead, kind === 'nn' ? 'negation' : 'particle');
@@ -1807,7 +2032,7 @@ function matchChunks(ws, direct) {
       return null;
     }
     const core = vPhrase(l, form, su.s, su.third, su.be) + tail;
-    return out(VCODE[form], kind === 'PART' ? cap(lead.w.lem.gloss) + ', ' + core : cap(core));
+    return out(VCODE[form], kind === 'PART' ? cap(lead.w.lem.gloss.replace(/!$/, '')) + ', ' + core : cap(core));
   }
   if (kind === 'nn' && sig === 'NP') {
     const np = it[1].np, bare = np.adjs.concat([npPlural(np) ? (np.head.lem.pl || np.head.lem.gloss + 's') : np.head.lem.gloss]).join(' ') + (np.gen ? ' of ' + npText(np.gen) : '');
@@ -1823,6 +2048,12 @@ function matchPattern(ws) { return matchChunks(ws, false) || matchChunks(ws, tru
 const GAPLEM = { id: null, t: '[…]', gloss: '[…]', pl: '[…]', pp: '[…]', s3: '[…]', art: false, senses: ['lost word'] };
 const GAPPOS = ['noun', 'verb', 'adjective', 'preposition'];
 function setGap(g, pos) { g.pos = pos; g.lem = GAPLEM; g.form = 'base'; g.t = '[…]'; }
+/* F: the log probability of a whole reading (fixed words, chosen readings) under the corpus model */
+function pathScore(words, pick) {
+  const L = LMR(); let p = L.BOSL, s = 0;
+  words.forEach(w => { const sp = pick(w); const l = sp ? lidOf(sp) : 0; s += lpB(L, p, l) + (sp ? lpS(L, sp) : 0); p = l; });
+  return s + lpB(L, p, L.EOSL);
+}
 function analyse(codes, encl) {
   const words = segment(codes, encl), real = words.filter(w => w.kind === 'word'), gaps = words.filter(w => w.kind === 'gap');
   const seq = words.filter(w => w.kind === 'word' || w.kind === 'gap');
@@ -1830,18 +2061,24 @@ function analyse(codes, encl) {
   const combos = real.reduce((acc, w) => { const out = []; acc.forEach(a => w.alts.forEach(sp => out.push(a.concat([sp])))); return out.slice(0, 16); }, [[]]);
   const gcombos = gaps.reduce((acc, g) => { const out = []; acc.forEach(a => GAPPOS.forEach(p => out.push(a.concat([p])))); return out.slice(0, 16); }, [[]]);
   const readings = [], seenR = {};
-  if (complete) for (const c of combos) {
-    real.forEach((w, i) => resolve(w, c[i]));
-    for (const gc of gcombos) {
-      gaps.forEach((g, i) => setGap(g, gc[i]));
-      [false, true].forEach(direct => {
-        const p = matchChunks(seq, direct); if (!p || seenR[p.code + '|' + p.free]) return;
-        seenR[p.code + '|' + p.free] = 1;
-        readings.push({ p, c, gc, n: readings.length, sig: seq.map((w, i) => ({ id: w.lem ? w.lem.id : null, pos: w.pos, gloss: w.lem ? w.lem.gloss : '', t: w.t, gap: w.kind === 'gap', role: p.roles[i] })) });
-      });
+  if (complete) {
+    /* F: a sentence pattern is taken only with words that are nearly as likely as the most likely words (PATSLACK); among those the
+       pattern with the fewest problems, then the more likely words */
+    const ix = new Map(real.map((w, i) => [w, i])), lmOf = c => pathScore(words, w => ix.has(w) ? c[ix.get(w)] : null), best = lmOf(combos[0]);
+    for (const c of combos) {
+      const lm = lmOf(c); if (lm < best - LMW.PATSLACK) continue;
+      real.forEach((w, i) => resolve(w, c[i]));
+      for (const gc of gcombos) {
+        gaps.forEach((g, i) => setGap(g, gc[i]));
+        [false, true].forEach(direct => {
+          const p = matchChunks(seq, direct); if (!p || seenR[p.code + '|' + p.free]) return;
+          seenR[p.code + '|' + p.free] = 1;
+          readings.push({ p, c, gc, n: readings.length, lm, sig: seq.map((w, i) => ({ id: w.lem ? w.lem.id : null, pos: w.pos, gloss: w.lem ? w.lem.gloss : '', t: w.t, gap: w.kind === 'gap', role: p.roles[i] })) });
+        });
+      }
     }
   }
-  readings.sort((x, y) => x.p.cost - y.p.cost || x.n - y.n);
+  readings.sort((x, y) => (y.lm - LMW.COSTW * y.p.cost) - (x.lm - LMW.COSTW * x.p.cost) || x.n - y.n);
   const a = { words, real, seq, gaps, complete, pattern: null, readings, pick: 0 };
   if (readings.length) applyReading(a, 0);
   else { real.forEach(w => resolve(w, w.alts[0])); gaps.forEach(g => setGap(g, null)); }
@@ -1930,6 +2167,20 @@ function fuzzy(codes) {
     part.sort((a, b) => (b.sp.lem.count || 0) - (a.sp.lem.count || 0)).forEach(x => out.push(x));
   });
   return out.slice(0, 6);
+}
+/* "Mente du" (beslutning 5): ét tegn byttet med et tegn af samme Unicode-formgruppe (sign.shape_group). Kun når intet andet er fundet.
+   has(key) siger, om den nye nøgle findes (en stavemåde eller en sætning). */
+function shapeAlts(codes, has, limit) {
+  const out = [], seen = new Set();
+  codes.forEach((c, i) => {
+    if (isLost(c) || out.length >= (limit || 8)) return;
+    DB.shapeSiblings(c).forEach(x => {
+      const b = canon(x); if (b === c || out.length >= (limit || 8)) return;
+      const alt = codes.slice(); alt[i] = b; const k = alt.join('-');
+      if (seen.has(k) || !has(k)) return; seen.add(k); out.push({ codes: alt, at: i, from: c, to: b });
+    });
+  });
+  return out;
 }
 
 /* ---------- en linje med flere sætninger ---------- */
@@ -2186,23 +2437,60 @@ function quadSVG(codes, tree) {
   return '<svg class="quad" viewBox="0 0 ' + u(g.w) + ' ' + u(QH) + '" style="width:' + g.w.toFixed(3) + 'em;height:' + QH.toFixed(3) + 'em;vertical-align:' + (-QD).toFixed(3) + 'em" aria-hidden="true">' +
     out.map(o => { const k = INK[o.c]; return '<text data-c="' + o.c + '" data-i="' + o.i + '" x="' + u(o.x + k.l * o.s) + '" y="' + u(o.y + k.a * o.s) + '" font-size="' + u(o.s) + '">' + esc(SG[o.c].ch) + '</text>'; }).join('') + '</svg>';
 }
-const chOf = c => (SG[c] ? esc(SG[c].ch) : (isLost(c) ? lacHTML(c) : '?'));
+/* Tegn, der ikke kan tegnes (beslutning 12 og 20): en pladsholder med display_sign_id viser det tegn med et lille variantmærke; ellers står
+   koden i en ramme. NODRAW = kodepunkter, som hverken Noto eller NewGardiner har (sættes ind af build.py). */
+const NODRAW = new Set([78944, 78958, 78965, 78984, 78997, 78999, 79007, 79014, 79017, 79022, 79031, 79038, 79042, 79052, 79093, 79107, 79110, 79125, 79131, 79137, 79149, 79154, 79172, 79173, 79178, 79199, 79210, 79213, 79229, 79233, 79264, 79267, 79293, 79296, 79310, 79313, 79314, 79318, 79323, 79338, 79340, 79374, 79388, 79396, 79403, 79409, 79413, 79418, 79433, 79439, 79448, 79450, 79466, 79467, 79523, 79528, 79531, 79534, 79536, 79539, 79540, 79546, 79548, 79576, 79581, 79596, 79601, 79605, 79613, 79623, 79627, 79634, 79658, 79661, 79662, 79678, 79681, 79686, 79692, 79696, 79701, 79702, 79703, 79710, 79722, 79723, 79727, 79733, 79745, 79746, 79747, 79751, 79758, 79762, 79803, 79806, 79808, 79818, 79823, 79833, 79837, 79841, 79857, 79860, 79867, 79876, 79878, 79892, 79903, 79905, 79906, 79907, 79912, 79916, 79922, 79924, 79944, 79948, 79949, 79956, 79977, 79982, 79984, 79993, 80007, 80024, 80026, 80034, 80035, 80049, 80051, 80053, 80060, 80061, 80091, 80129, 80134, 80164, 80187, 80188, 80199, 80204, 80206, 80211, 80220, 80225, 80232, 80236, 80257, 80259, 80275, 80296, 80315, 80317, 80338, 80340, 80344, 80355, 80356, 80357, 80421, 80428, 80430, 80432, 80433, 80442, 80454, 80456, 80458, 80459, 80461, 80465, 80466, 80467, 80481, 80495, 80505, 80528, 80534, 80553, 80556, 80557, 80562, 80572, 80576, 80582, 80585, 80604, 80626, 80627, 80630, 80636, 80637, 80644, 80646, 80649, 80651, 80656, 80671, 80676, 80681, 80682, 80698, 80701, 80715, 80722, 80725, 80734, 80762, 80766, 80768, 80772, 80781, 80790, 80793, 80798, 80807, 80808, 80812, 80813, 80815, 80816, 80817, 80826, 80827, 80833, 80857, 80870, 80875, 80877, 80902, 80908, 80914, 80926, 80932, 80934, 80940, 80946, 80949, 80953, 80955, 80957, 80958, 80961, 80962, 80964, 80979, 80993, 81003, 81022, 81033, 81050, 81064, 81065, 81070, 81073, 81081, 81083, 81085, 81099, 81101, 81102, 81106, 81111, 81112, 81115, 81119, 81124, 81128, 81149, 81151, 81153, 81164, 81165, 81184, 81185, 81186, 81191, 81231, 81232, 81248, 81254, 81280, 81281, 81285, 81286, 81308, 81310, 81311, 81318, 81324, 81328, 81333, 81338, 81346, 81349, 81350, 81351, 81352, 81353, 81371, 81374, 81376, 81384, 81395, 81404, 81412, 81420, 81422, 81426, 81432, 81444, 81445, 81448, 81449, 81451, 81452, 81463, 81467, 81469, 81470, 81474, 81478, 81481, 81485, 81488, 81494, 81495, 81512, 81513, 81521, 81522, 81535, 81549, 81564, 81572, 81575, 81581, 81582, 81590, 81597, 81599, 81601, 81618, 81628, 81652, 81655, 81671, 81673, 81675, 81698, 81703, 81707, 81717, 81725, 81737, 81739, 81742, 81749, 81752, 81768, 81783, 81789, 81790, 81815, 81819, 81824, 81828, 81834, 81839, 81840, 81842, 81858, 81863, 81864, 81868, 81873, 81891, 81894, 81896, 81897, 81901, 81912, 81913, 81916, 81921, 81924, 81939, 81941, 81942, 81962, 81964, 81966, 81979, 81980, 81981, 81982, 81991, 81994, 82003, 82005, 82011, 82016, 82020, 82034, 82043, 82047, 82051, 82055, 82062, 82063, 82065, 82066, 82070, 82072, 82077, 82082, 82087, 82094, 82110, 82112, 82121, 82129, 82130, 82131, 82132, 82133, 82135, 82137, 82143, 82144, 82152, 82153, 82155, 82162, 82165, 82167, 82168, 82170, 82171, 82179, 82184, 82191, 82202, 82211, 82213, 82215, 82222, 82224, 82227, 82228, 82229, 82233, 82237, 82243, 82246, 82249, 82250, 82251, 82275, 82279, 82282, 82289, 82290, 82312, 82319, 82323, 82328, 82331, 82336, 82339, 82350, 82363, 82364, 82372, 82378, 82385, 82387, 82393, 82415, 82424, 82425, 82426, 82450, 82458, 82462, 82476, 82489, 82500, 82510, 82511, 82514, 82516, 82517, 82519, 82520, 82532, 82534, 82535, 82553, 82561, 82564, 82566, 82568, 82574, 82581, 82587, 82590, 82592, 82597, 82605, 82614, 82624, 82627, 82636, 82639, 82642, 82657, 82662, 82663, 82669, 82677, 82689, 82690, 82693, 82697, 82698, 82700, 82702, 82705, 82710, 82718, 82726, 82728, 82736, 82741, 82746, 82759, 82769, 82789, 82792, 82814, 82818, 82819, 82826, 82829, 82830, 82836, 82840, 82854, 82858, 82860, 82861, 82865, 82866, 82870, 82879, 82883, 82890, 82893, 82902, 82910, 82923, 82924, 82925, 82929, 82930, 82937]);
+const GK = {};
+D.signs.forEach(s => {
+  const own = s.placeholder ? null : (s.ch && s.ch !== '□' ? s.ch.codePointAt(0) : null);
+  if (s.placeholder) GK[s.c] = s.display && SG[s.display] && !SG[s.display].placeholder && SG[s.display].ch !== '□' ? 'var' : 'code';
+  else if (own == null || NODRAW.has(own)) GK[s.c] = 'code';
+});
+const plainSign = c => !!SG[c] && !GK[c];
+const ucode = (text, title) => '<span class="ucode"' + (title ? ' title="' + esc(title) + '"' : '') + '>' + esc(text) + '</span>';
+const chOf = c => { const s = SG[c]; if (!s) return isLost(c) ? lacHTML(c) : '?';
+  if (GK[c] === 'code') return ucode(s.code, 'No drawing of this sign. Its code is shown instead.');
+  if (GK[c] === 'var') return esc(s.ch) + '<sup class="vmark" title="A variant of this sign. The drawing is that of ' + esc(SG[s.display].code) + '.">v</sup>';
+  return esc(s.ch); };
 function seqHTML(codes, quads, from, to, skip) {
   let out = '', i = from || 0; const end = to === undefined ? codes.length : to;
   while (i < end) {
     const e = quads && quads.find(x => x.enc && x !== skip && x.at === i && x.n > 0 && x.at + x.n <= end);
     if (e) { out += '<span class="encl ' + e.enc + '">' + seqHTML(codes, quads, i, i + e.n, e) + '</span>'; i += e.n; continue; }
-    const q = quads && quads.find(x => x.tree && x.at === i && x.at + x.n <= end && codes.slice(i, i + x.n).every(c => INK[c]));
+    const q = quads && quads.find(x => x.tree && x.at === i && x.at + x.n <= end && codes.slice(i, i + x.n).every(c => INK[c] && plainSign(c)));
     if (q) { out += quadSVG(codes.slice(i, i + q.n), q.tree); i += q.n; }
     else { out += chOf(codes[i]); i++; }
   }
   return out;
 }
+/* Skriveretning (beslutning 11): en linje, der står fra højre mod venstre i kilden (h_rtl), vises spejlet; indstillingen vender visningen. */
+let DIRFLIP = false;
+const isRtl = () => (S.dir === 'rtl') !== DIRFLIP;
+function withDir(rtl, f) { const o = DIRFLIP; DIRFLIP = !!rtl; try { return f(); } finally { DIRFLIP = o; } }
+/* Tegnenes opstilling for databasens stavemåder og sætninger (beslutning 4); brugerens eget input står altid, som det er skrevet. */
+function autoQuads(codes) {
+  const out = []; let i = 0;
+  const low = c => { if (!plainSign(c)) return false; const k = INK[c]; return k && k.h <= QH * .62 && k.w >= k.h * .9; };
+  while (i < codes.length) {
+    let j = i, hsum = 0;
+    while (j < codes.length && j - i < 3 && low(codes[j]) && hsum + INK[codes[j]].h <= QH * 1.15) { hsum += INK[codes[j]].h + (j > i ? QGAP : 0); j++; }
+    if (j - i >= 2) { out.push({ at: i, n: j - i, tree: { t: 'v', k: Array.from({ length: j - i }, (x, q) => q) } }); i = j; } else i++;
+  }
+  return out;
+}
+const AQ = new Map();
+function layoutQuads(sp) {
+  if (!sp) return null;
+  if (S.layout === 'row') return null;
+  if (S.layout === 'quad') { const codes = sp.signs ? sp.signs.map(x => x.c) : sp.codes || []; const k = codes.join('-'); if (!AQ.has(k)) AQ.set(k, autoQuads(codes)); return AQ.get(k); }
+  return sp.quads;
+}
 function G(codes, cls, quads) {
-  return '<span class="gl' + (S.dir === 'rtl' ? ' rtl' : '') + (cls ? ' ' + cls : '') + '">' + seqHTML(codes, quads) + '</span>';
+  return '<span class="gl' + (isRtl() ? ' rtl' : '') + (cls ? ' ' + cls : '') + '">' + seqHTML(codes, quads) + '</span>';
 }
 function GW(w, cls) {
-  const open = '<span class="gl' + (S.dir === 'rtl' ? ' rtl' : '') + (cls ? ' ' + cls : '') + '">';
+  const open = '<span class="gl' + (isRtl() ? ' rtl' : '') + (cls ? ' ' + cls : '') + '">';
+  if (w.sp && w.sp.tok && (w.sp.raw || w.sp.unenc) && (!w.codes.length || (w.codes.length === 1 && w.codes[0] === '?'))) return open + ucode(w.sp.raw || '?', w.sp.raw ? "The source's own code for signs it does not encode." : 'The source does not record the signs of this word.') + '</span>';
   const fill = w.lost ? lostFill(baseCodes(w), w.sp) : null;
   let inner, p = 0;
   if ((w.marks && w.marks.length) || (w.cont && w.cont.length)) {
@@ -2210,7 +2498,7 @@ function GW(w, cls) {
     let out = '', cur = '';
     w.codes.forEach((c, i) => { const k = kind(i); if (k !== cur) { if (cur) out += '</span>'; if (k) out += '<span class="' + k + '">'; cur = k; } out += chOf(c); });
     inner = open + out + (cur ? '</span>' : '') + '</span>';
-  } else if (!fill) inner = G(w.codes, cls, w.quads || (w.sp.signs && w.codes.length === w.sp.signs.length && w.codes.every((c, i) => c === w.sp.signs[i].c) ? w.sp.quads : null));
+  } else if (!fill) inner = G(w.codes, cls, w.quads || (w.sp.signs && w.codes.length === w.sp.signs.length && w.codes.every((c, i) => c === w.sp.signs[i].c) ? layoutQuads(w.sp) : null));
   else inner = open + w.codes.map((c, i) => {
     if (i >= fill.length) return chOf(c);
     const part = w.sp.signs.slice(p, p + fill[i]); p += fill[i];
@@ -2219,7 +2507,7 @@ function GW(w, cls) {
   const e = w.enc || (w.sp && (w.sp.enc || (w.sp.cart ? 'cart' : null)));
   return e ? '<span class="encl ' + e + '">' + inner + '</span>' : inner;
 }
-const GS = (sp, cls) => { if (!sp) return ''; const e = sp.enc || (sp.cart ? 'cart' : null), g = G(sp.signs.map(x => x.c), cls, sp.quads); return e ? '<span class="encl ' + e + (cls ? ' ' + cls : '') + '">' + g + '</span>' : g; };
+const GS = (sp, cls) => { if (!sp) return ''; const e = sp.enc || (sp.cart ? 'cart' : null), g = G(sp.signs.map(x => x.c), cls, layoutQuads(sp)); return e ? '<span class="encl ' + e + (cls ? ' ' + cls : '') + '">' + g + '</span>' : g; };
 
 /* ---------- spor til sidepanelet ---------- */
 let TR = [];
@@ -2312,21 +2600,25 @@ function renderInflected(inf, typed, quads) {
   const SENS = {};
   return () => {
     lastInflected = inf; if (!(inf.pick < vars.length)) inf.pick = 0;
-    let h = '<div class="rhead"><p class="eyebrow grow">Inflected form</p>' + starBtn({ kind: 'input', title: CODES(typed), mode: 'word', codes: typed }) + '</div>' + G(typed, null, quads);
-    h += '<p class="banner">This form is not stored as a whole. The app has put it together from ' + ['the dictionary word'].concat(stem.rule ? ['the rule for the form'] : []).concat(sl ? ['the suffix pronoun'] : []).join(', ').replace(/, ([^,]*)$/, ' and $1') + '. The translation is the app\'s own, not an attested one.</p>';
+    const ruleGuess = !!(stem.rule && stem.rule.computed);      /* beslutning 15: kun fundet gennem en afledt regel = et gæt */
+    let h = '<div class="rhead"><p class="eyebrow grow">Inflected form</p>' + (ruleGuess ? '<span class="pill g">guess</span>' : '') + starBtn({ kind: 'input', title: CODES(typed), mode: 'word', codes: typed }) + '</div>' + G(typed, null, quads);
+    h += '<p class="banner">This form is not stored as a whole. The app has put it together from ' + ['the dictionary word'].concat(stem.rule ? ['the rule for the form'] : []).concat(sl ? ['the suffix pronoun'] : []).join(', ').replace(/, ([^,]*)$/, ' and $1') + '. The translation is the app\'s own, not an attested one.' +
+      (ruleGuess ? ' The rule was derived from the texts by the app (computed), so the reading is a guess.' : '') + '</p>';
     h += [vars[inf.pick]].map(v => {
       const l = v.lem, stored = !stem.rule && v.form !== 'base';
       /* sætninger med ordet i samme form (og med samme suffikspronomen efter): indeks på ordform */
       const fk = l.id + '|' + (stem.rule ? stem.rule.gf || stem.rule.form : v.sp.gf || 'base');
       const sens = SENS[fk] || (SENS[fk] = typeof l.id === 'number' ? DB.formSentences(l.id, [stem.rule ? stem.rule.gf : (v.sp.gf || 'base')], sl && typeof sl.id === 'number' ? sl.id : null, 200) : []);
-      let c = '<div class="infl" data-infl="' + l.id + '"><p class="trl">' + T(v.t) + '</p><p class="note">' + esc(l.pos) + ' · ' + inflName(v, sl) + (l.vclass ? ' · ' + esc(l.vclass) : '') + '</p>';
+      let c = '<div class="infl" data-infl="' + l.id + '"><p class="trl' + (ruleGuess ? ' guess-text' : '') + '">' + T(v.t) + '</p><p class="note">' + esc(l.pos) + ' · ' + inflName(v, sl) + (l.vclass ? ' · ' + esc(l.vclass) : '') + '</p>';
+      const pf = stem.rule ? stem.rule.form : (stored ? v.form : null), pl = pf && !FULL() ? DB.plainLabel(pf) : null;      /* beslutning 9 */
+      if (pl) c += '<p class="note plain">' + esc(pl) + '</p>';
       c += transBlock((stored ? l.gloss + ' (' + formLabel(v.form) + ')' : l.gloss + (stem.rule ? ' (' + formLabel(stem.rule.form) + ')' : '')) + (sl ? ' · ' + sl.gloss : ''), cap(inflTrans(v, sl)), true);
       if (stem.short) c += '<p class="note">' + T(v.base) + ' is written here without ' + (stem.short.det ? 'its determinative ' : '') + esc(CODE(stem.short.missing)) + ' (' + esc(SG[stem.short.missing].d) + '), which the spelling in the database has.</p>';
       if (stem.phon) c += '<p class="note phnote">' + T(v.sp.t) + ' is read by sound here (' + esc(phonSum(stem.phon)) + '). The database has the word, but not this spelling.</p>';
       if (stem.fuzzy) c += '<p class="note">Written with ' + esc(CODE(stem.fuzzy.typed)) + ' where the database has ' + esc(CODE(stem.fuzzy.expected)) + '. Both write ' + esc(tl(stem.fuzzy.value)) + '.</p>';
       c += '<details open><summary>How the form is built</summary><div><table class="t"><thead><tr><th>Signs</th><th>Reading</th><th>Part</th></tr></thead><tbody>' +
         '<tr><td>' + G(stemCodes, 'sm') + '</td><td>' + T(stem.rule ? v.sp.t : v.base) + '<br><span class="note">' + esc(l.senses[0]) + '</span></td><td>' + (stored ? esc(formLabel(v.form)) + ' of the ' + esc(l.pos) + ' ' + T(l.t) + ', stored in this spelling' : 'stem: the ' + esc(l.pos) + ' in its base form') + '</td></tr>' +
-        (stem.rule ? '<tr><td>' + G(ruleCodes, 'sm') + '</td><td>' + T(stem.rule.affix) + '</td><td>marks the ' + esc(formLabel(stem.rule.form)) + '<br><span class="note">recognised by a rule, not stored</span></td></tr>' : '') +
+        (stem.rule ? '<tr><td>' + G(ruleCodes, 'sm') + '</td><td>' + T(stem.rule.affix) + '</td><td>marks the ' + esc(formLabel(stem.rule.form)) + '<br><span class="note">recognised by a rule, not stored</span>' + (ruleGuess ? ' ' + mk('computed', 'A rule the app derived from the texts.') : '') + '</td></tr>' : '') +
         (sl ? '<tr><td>' + G(suf.codes, 'sm') + '</td><td>' + T(sl.t) + '<br><span class="note">' + esc(sl.senses[0]) + '</span></td><td>suffix pronoun, ' + esc(sl.pn || '') + '<br><span class="note">' + SUFROLE[l.pos] + '</span></td></tr>' : '') +
         '</tbody></table></div></details>';
       c += '<p class="eyebrow">Dictionary entries</p><button type="button" class="rowbtn stemref" data-lem="' + l.id + '">' + GS(primSp0(l), 'sm') + '<span class="grow">' + T(l.t) + (l.hom ? ' <span class="pill">' + l.hom + '</span>' : '') + '<small>' + esc(l.pos) + ' · ' + esc(l.senses.join('; ')) + '</small></span><span class="chev" aria-hidden="true">›</span></button>';
@@ -2360,7 +2652,7 @@ function addHist(mode, codes, label) {
   if (cut > 0) state.hist.length = S.hist;
   step(['search_history'], 'Søgningen gemmes med søgetype og den skrevne tekst i Manuel de Codage, så en kvadratopstilling følger med.' + (cut > 0 ? ' Loftet er ' + S.hist + ', så den ældste række slettes.' : ' Loftet er ' + S.hist + '.'));
 }
-function toast(msg) { const t = $('#toast'); t.textContent = msg; t.style.bottom = (state.kbOpen ? 10 : $('.tabs').offsetHeight + 10) + 'px'; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => { t.hidden = true; }, 2200); }
+function toast(msg) { const t = $('#toast'); t.classList.remove('undo'); t.textContent = msg; t.style.bottom = (state.kbOpen ? 10 : $('.tabs').offsetHeight + 10) + 'px'; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => { t.hidden = true; }, 2200); }
 
 /* ---------- visning af resultater ---------- */
 let results = $('#results');
@@ -2380,42 +2672,125 @@ function transBlock(lit, free, guess) {
   return h;
 }
 const det = (title, body) => '<details' + (S.detail === 'full' ? ' open' : '') + '><summary>' + title + '</summary><div>' + body + '</div></details>';
+/* ---------- G2: herkomst, kilder og små mærker ----------
+   mk(): et lille gråt ord efter det, det gælder (computed, unchecked, reconstructed, estimated); forklaret i Help. */
+const FULL = () => S.detail === 'full';
+const MKTXT = { computed: 'Worked out by the app from the data, not given by the source.', unchecked: "From the app's own list. Not yet checked by an Egyptologist.",
+  reconstructed: "Signs the source does not record. The app shows the word's usual spelling.", estimated: 'Estimated by the app, not stated by the source.' };
+const mk = (w, title) => '<span class="mk" title="' + esc(title || MKTXT[w] || '') + '">' + esc(w) + '</span>';
+/* maskinoversat tekst i rækker: et lille hævet mærke; tekst, der endnu kun findes på kildens sprog: sprogets kode */
+const mtSup = tr => !tr ? '' : (tr.mt ? '<sup class="mtm" title="Machine-translated">MT</sup>' : (tr.untranslated ? '<sup class="mtm" title="Not yet translated into English. This is the source\'s ' + esc(tr.langName) + '.">' + esc(String(tr.lang).toUpperCase()) + '</sup>' : ''));
+const trText = (tr, fallback) => tr ? esc(tr.text) + mtSup(tr) : esc(fallback || '');
+/* under en oversættelse: mærker, "Suggest a correction" for maskinoversat tekst, og på fuldt niveau kildens egen ordlyd */
+function trFoot(tr, ref) {
+  if (!tr) return '';
+  const pills = (tr.mt ? '<span class="pill">machine-translated</span>' : '') + (tr.untranslated ? '<span class="pill">' + esc(tr.langName) + '</span> not yet translated into English' : '') + (tr.draft && FULL() ? mk('unchecked') : '');
+  const sug = tr.mt && ref ? suggestBtn(ref, tr.text, tr.orig) : '';
+  return (pills || sug ? '<p class="note trmark">' + pills + (pills && sug ? ' · ' : '') + sug + '</p>' : '') + origBox(tr);
+}
+function origBox(tr, label) {
+  if (!tr || !tr.orig || !FULL()) return '';
+  return '<details class="orig"><summary>' + esc(label || 'Original translation') + ' (' + esc(tr.orig.langName) + '), ' + esc(tr.orig.sourceName) + '</summary><div><p class="trn" lang="' + esc(tr.orig.lang) + '">' + esc(tr.orig.text) + '</p></div></details>';
+}
+/* rettelsesforslag (beslutning 17): åbner en lille udfyldt formular under linjen */
+let SUGSEQ = 0; const SUGG = {};
+function suggestBtn(ref, text, orig) { const id = 'g' + (++SUGSEQ); SUGG[id] = { ref, text, orig }; return '<button type="button" class="linkbtn" data-suggest="' + id + '">Suggest a correction</button>'; }
+/* kildelinje på fuldt niveau (beslutning 22): kilde, licens og et link til ordet, teksten eller sætningen hos kilden */
+function srcLine(table, rowId, what) {
+  if (!FULL() || rowId == null || typeof rowId !== 'number') return '';
+  const L = DB.extLink(table, rowId); if (!L) return '';
+  return '<p class="note srcline">Source: ' + esc(L.sourceName) + (L.license ? ', ' + esc(L.license) : '') + ' · <a href="' + esc(L.url) + '" target="_blank" rel="noopener noreferrer">' + esc(what) + ' at the source ↗</a></p>';
+}
+/* tegnværdi: fra håndlisten (OWN, ikke godkendt) = unchecked, afledt af teksterne = computed; vises på fuldt niveau */
+const valMark = v => !FULL() || !v ? '' : (v.computed ? ' ' + mk('computed', 'Value derived from the texts by the app.') : (v.source != null && DB.SOURCES[v.source] && DB.SOURCES[v.source].kind === 'own' && !v.verified ? ' ' + mk('unchecked', "Value from the app's own sign list. Not yet checked.") : ''));
 function signTable(sp, marks, cont) {
   const order = sp.signs.some(x => x.rp); marks = marks || []; cont = cont || [];
+  /* funktionerne vises kun, når stavemåden er delt op (spelling.is_aligned, beslutning 19); syntetiske stavemåder (tal, navne) har deres egne */
+  const split = sp.aligned || typeof sp.id !== 'number';
+  const cell = (x, i) => { const mk1 = marks.includes(i), ct = cont.includes(i); return '<td>' + (mk1 || ct ? GW({ codes: [x.c], marks: mk1 ? [0] : [], cont: ct ? [0] : [], sp: {} }) : G([x.c])) + '</td><td class="mono">' + esc(CODE(x.c)) + '</td>'; };
+  const pill = i => marks.includes(i) ? '<br><span class="pill g">restored</span>' : (cont.includes(i) ? '<br><span class="pill g">not written</span>' : '');
+  if (!split) return '<table class="t"><thead><tr><th>Sign</th><th>No.</th>' + (marks.length + cont.length ? '<th></th>' : '') + '</tr></thead><tbody>' +
+    sp.signs.map((x, i) => '<tr>' + cell(x, i) + (marks.length + cont.length ? '<td>' + pill(i).replace('<br>', '') + '</td>' : '') + '</tr>').join('') + '</tbody></table><p class="note">The function of each sign is not known for this spelling.</p>';
   return '<table class="t"><thead><tr><th>Sign</th><th>No.</th><th>Function</th><th>Value</th>' + (order ? '<th>Read</th>' : '') + '</tr></thead><tbody>' +
-    sp.signs.map((x, i) => { const v = x.value || valuesOf(x.c).find(q => q.f === x.f) || {}, mk = marks.includes(i), ct = cont.includes(i); return '<tr><td>' + (mk || ct ? GW({ codes: [x.c], marks: mk ? [0] : [], cont: ct ? [0] : [], sp: {} }) : G([x.c])) + '</td><td class="mono">' + esc(CODE(x.c)) + '</td><td>' + (FUNC[x.f] || '') + (x.comp ? ', complement' : '') + (mk ? '<br><span class="pill g">restored</span>' : (ct ? '<br><span class="pill g">not written</span>' : '')) + '</td><td>' + (v.t ? T(v.t) : esc(v.n || '')) + '</td>' + (order ? '<td>' + (x.rp || i + 1) + '</td>' : '') + '</tr>'; }).join('') + '</tbody></table>' +
+    sp.signs.map((x, i) => { const v = x.value || valuesOf(x.c).find(q => q.f === x.f) || {}; return '<tr>' + cell(x, i) + '<td>' + (FUNC[x.f] || '') + (x.comp ? ', complement' : '') + (x.computed && x.f ? ' ' + mk('computed', 'The function of this sign was worked out by the app.') : '') + pill(i) + '</td><td>' + (v.t ? T(v.t) : esc(v.n || '')) + valMark(x.value) + '</td>' + (order ? '<td>' + (x.rp || i + 1) + '</td>' : '') + '</tr>'; }).join('') + '</tbody></table>' +
     (order ? '<p class="note">Written order and reading order differ here (honorific transposition).</p>' : '');
 }
 const POSTEXT = l => l.posLabel && l.pos === 'proper noun' ? l.posLabel.toLowerCase() : l.pos;      /* navne: hvilken slags navn */
+/* et navns vigtigste oplysninger på én linje (beslutning 8): konge = dynasti, regeringsår og navnets type; sted = det større sted */
+function entityLine(ent) {
+  const bits = [esc(ent.type)];
+  if (ent.code === 'king') { if (ent.dynasty) bits.push(esc(ent.dynasty)); if (ent.reign) bits.push(esc(ent.reign)); if (ent.nameType) bits.push(esc(ent.nameType.toLowerCase())); }
+  else if (ent.partOf) bits.push('in ' + esc(ent.partOf));
+  return '<p class="note entline">' + bits.join(' · ') + '</p>';
+}
+/* en eksempelsætning under et ord (beslutning 2): ord uden optegnede tegn vises med en rekonstrueret stavemåde, markeret som ikke skrevet */
+function exRow(id) {
+  const s = DB.sentence(id); if (!s) return '';
+  let rec = false;
+  const signs = s.toks.filter(t => t.written || t.lemmaId != null).map(t => {
+    const sp = t.spo, real = !sp.tok || (sp.key && !sp.codes.includes('?'));
+    if (real) return seqHTML(sp.signs.map(x => x.c), layoutQuads(sp));
+    const r = t.lemmaId != null ? DB.reconstructedSpelling(t.formId, t.lemmaId) : null;
+    if (r && r.signs.length) { rec = true; return '<span class="cont">' + seqHTML(r.signs.map(x => x.c), layoutQuads(r)) + '</span>'; }
+    return lacHTML(t.status === 'lacuna' ? '*' : '_');
+  }).join('');
+  return '<button type="button" class="rowbtn exrow" data-sen="' + s.id + '"><span class="grow"><span class="gl sm' + (isRtl() ? ' rtl' : '') + '">' + signs + '</span>' + '<span class="tl exl">' + esc(tl(s.t)) + '</span><small>' + (s.tr || s.free ? trText(s.tr, s.free) : 'No translation in the source.') + '</small><small>' + esc(s.src.work) + ', ' + esc(s.src.witness) + '</small>' +
+    (rec ? '<small class="why">Coloured signs: reconstructed spelling. The source does not record them.</small>' : '') + '</span><span class="chev" aria-hidden="true">›</span></button>';
+}
+function sensesList(l) {
+  const R = l.senseRows && l.senseRows.length ? l.senseRows : null;
+  if (!R) return '<ol style="margin:0;padding-left:20px">' + l.senses.map(x => '<li>' + esc(x) + '</li>').join('') + '</ol>';
+  let h = '<ol style="margin:0;padding-left:20px">' + R.map(r => '<li>' + esc(r.text || '(no meaning recorded)') + mtSup(r.tr) + (FULL() && r.tr && r.tr.draft ? ' ' + mk('unchecked') : '') + '</li>').join('') + '</ol>';
+  const mt = R.filter(r => r.tr && r.tr.mt), un = R.filter(r => r.tr && r.tr.untranslated);
+  if (mt.length || un.length) h += '<p class="note trmark">' + (mt.length ? '<span class="pill">machine-translated</span>' + (mt.length < R.length ? ' (marked MT)' : '') + ' · ' + suggestBtn({ kind: 'lemma', id: l.id, sense: mt.map(r => r.id) }, mt.map(r => r.text).join('\n'), mt[0].tr.orig) : '') +
+    (un.length ? (mt.length ? ' · ' : '') + '<span class="pill">' + esc(un[0].tr.langName) + '</span> not yet translated into English' : '') + '</p>';
+  const og = FULL() ? R.filter(r => r.tr && r.tr.orig) : [];
+  if (og.length) h += '<details class="orig"><summary>Original meanings (' + esc(og[0].tr.orig.langName) + '), ' + esc(og[0].tr.orig.sourceName) + '</summary><div><ol style="margin:0;padding-left:20px">' + og.map(r => '<li lang="' + esc(r.tr.orig.lang) + '">' + esc(r.tr.orig.text) + '</li>').join('') + '</ol></div></details>';
+  return h;
+}
 function wordCard(sp, typed, extra) {
   const l = sp.lem, real = typeof l.id === 'number';
-  const others = real ? DB.spellingsOfLemma(l.id).filter(id => id !== sp.id) : [];
+  const forms = real ? DB.spellingFormsOfLemma(l.id).filter(x => x.id !== sp.id) : [];
   const fam = real && l.rootId != null ? DB.rootLemmas(l.rootId, l.id) : [];
   const ent = real ? DB.entityOf(l.id) : null;
   const nsen = real ? DB.lemmaSentenceCount(l.id) : 0;
+  const ex = real ? DB.lemmaExamples(l.id) : [];
+  const rule = extra && extra.rule, ruleGuess = !!(rule && rule.computed);
   const fav = { kind: 'word', ref: l.id, title: l.t, mode: 'word', codes: typed || sp.codes };
   const dm = extra && extra.fit ? diffMarks(sp, extra.fit) : { rest: [], cont: [] }, marked = dm.rest.length + dm.cont.length > 0;
-  let h = '<div class="rhead"><div class="grow">' + (marked ? GW({ codes: sp.signs.map(x => x.c), marks: dm.rest, cont: dm.cont, sp }) : GS(sp)) + '</div>' + starBtn(fav) + '</div>';
-  h += '<p class="trl">' + T(sp.t) + (l.hom ? ' <span class="pill">' + l.hom + '</span>' : '') + '</p>';
-  h += '<p class="note">' + esc(POSTEXT(l)) + (l.g ? ', ' + (l.g === 'm' ? 'masculine' : 'feminine') : '') + (sp.form !== 'base' || (extra && extra.rule) ? ' · ' + esc(formLabel(extra && extra.rule ? extra.rule.form : sp.form)) + ' of ' + T(l.t) : '') + (l.vclass ? ' · ' + esc(l.vclass) : '') + '</p>';
-  if (sp.bare) h += '<p class="note">No spelling with signs is recorded for this word.</p>';
-  h += '<ol style="margin:0;padding-left:20px">' + l.senses.map(x => '<li>' + esc(x) + '</li>').join('') + '</ol>';
-  Array.from(new Set(semDets(sp))).forEach(c => { const n = Math.max(0, DB.detCount(c) - 1);
+  let h = '<div class="rhead"><div class="grow">' + (marked ? GW({ codes: sp.signs.map(x => x.c), marks: dm.rest, cont: dm.cont, sp }) : GS(sp)) + '</div>' + (ruleGuess ? '<span class="pill g">guess</span>' : '') + starBtn(fav) + '</div>';
+  h += '<p class="trl' + (ruleGuess ? ' guess-text' : '') + '">' + T(sp.t) + (l.hom ? ' <span class="pill">' + l.hom + '</span>' : '') + '</p>';
+  const fl = rule ? rule.form : (sp.form !== 'base' ? sp.form : null);
+  h += '<p class="note">' + esc(POSTEXT(l)) + (l.g ? ', ' + (l.g === 'm' ? 'masculine' : 'feminine') : '') + (fl ? ' · ' + esc(formLabel(fl)) + ' of ' + T(l.t) : '') + (l.vclass ? ' · ' + esc(l.vclass) : '') + '</p>';
+  if (fl && !FULL()) { const pl = DB.plainLabel(fl); if (pl) h += '<p class="note plain">' + esc(pl) + '</p>'; }
+  if (ent) h += entityLine(ent);
+  if (sp.bare) h += '<p class="note">No spelling with signs is recorded for this word.' + (ex.length ? ' The example sentences below show it in context.' : '') + '</p>';
+  h += sensesList(l);
+  if (sp.aligned || !real) Array.from(new Set(semDets(sp))).forEach(c => { const n = Math.max(0, DB.detCount(c) - 1);
     h += '<button type="button" class="rowbtn detref" data-det="' + c + '">' + G([c], 'sm') + '<span class="grow">Determinative <span class="mono">' + esc(CODE(c)) + '</span> · ' + esc(detMeaning(c)) + '<small>' + (n ? fmtNum(n) + ' other word' + (n > 1 ? 's' : '') + ' with this determinative' : 'No other word in the dictionary has this determinative') + '</small></span><span class="chev" aria-hidden="true">›</span></button>'; });
-  if (extra && extra.rule) h += '<p class="banner">This form is not stored. It was recognised by a rule: ' + esc(formLabel(extra.rule.form)) + ' is marked by ' + extra.rule.signs.map(CODE).join(' ') + ' after a ' + esc(extra.rule.pos) + '.</p>';
+  if (rule) h += ruleGuess
+    ? '<p class="banner">This form is not stored, so the reading is a guess. It was recognised by a rule that the app derived from the texts (computed): ' + esc(formLabel(rule.form)) + ' is marked by ' + rule.signs.map(CODE).join(' ') + ' after a ' + esc(rule.pos) + '.</p>'
+    : '<p class="banner">This form is not stored. It was recognised by a rule: ' + esc(formLabel(rule.form)) + ' is marked by ' + rule.signs.map(CODE).join(' ') + ' after a ' + esc(rule.pos) + '.</p>';
   if (l.alt) h += '<p class="note">Also read ' + T(l.alt) + ' by some scholars.</p>';
   if (l.note) h += '<p class="note">' + esc(l.note) + '</p>';
   if (ent) h += det(esc(ent.type) + ': ' + esc(ent.name), '<table class="t"><tbody>' + ent.lines.map(x => '<tr><td>' + esc(x[0]) + '</td><td>' + esc(x[1]) + '</td></tr>').join('') + '</tbody></table>');
   if (sp.signs.length) h += (marked ? '<details open><summary>Signs in this spelling</summary><div>' + signTable(sp, dm.rest, dm.cont) + '</div></details>' : det('Signs in this spelling', signTable(sp)));
-  if (others.length) h += det('Other spellings and forms (' + others.length + ')', lazyRows(others, id => { const x = DB.spelling(id); return x ? '<button type="button" class="rowbtn" data-sp="' + x.id + '">' + GS(x, 'sm') + '<span class="grow">' + T(x.t) + '<small>' + esc(formLabel(x.form)) + (x.primary ? '' : ', variant') + '</small></span></button>' : ''; }));
+  if (forms.length) {      /* grupperet efter form; hver gruppe får sin overskrift (beslutning 6-7) */
+    const items = [], byForm = new Map();      /* flere ordformer kan have samme navn: de samles under én overskrift i den rækkefølge, de først optræder */
+    forms.forEach(x => { if (!byForm.has(x.form)) byForm.set(x.form, []); byForm.get(x.form).push(x); });
+    byForm.forEach((xs, f) => { items.push({ head: f, n: xs.length }); items.push(...xs); });
+    h += det('Other spellings and forms (' + forms.length + ')', lazyRows(items, x => x.head !== undefined ? '<p class="eyebrow fgroup">' + esc(x.head === 'base' ? 'Dictionary form' : formLabel(x.head)) + ' (' + x.n + ')</p>' : (() => { const y = DB.spelling(x.id); return y ? '<button type="button" class="rowbtn" data-sp="' + y.id + '">' + GS(y, 'sm') + '<span class="grow">' + T(y.t) + '<small>' + (y.primary ? 'main spelling' : 'variant') + (y.count ? ' · ' + fmtNum(y.count) + '×' : '') + '</small></span></button>' : ''; })()));
+  }
   if (l.parts) h += det('Made of', l.parts.map(k => { const o = DB.lemma(k); return o ? '<button type="button" class="rowbtn" data-lem="' + k + '"><span class="grow">' + T(o.t) + '<small>' + esc(o.senses[0]) + '</small></span></button>' : ''; }).join(''));
   if (fam.length) h += det('Same root ' + T(l.root), lazyRows(fam, k => { const x = DB.lemma(k); return '<button type="button" class="rowbtn" data-lem="' + x.id + '"><span class="grow">' + T(x.t) + '<small>' + esc(x.senses[0]) + '</small></span></button>'; }));
+  if (ex.length) { const body = ex.map(exRow).join(''); h += sp.bare ? '<details open class="examples"><summary>Example sentences (' + ex.length + ')</summary><div>' + body + '</div></details>' : det('Example sentences (' + ex.length + ')', body); }
   if (nsen) h += '<details><summary>Sentences with this word (' + fmtNum(nsen) + ')</summary><div>' + lazyRows({ n: nsen, get: (a, k) => DB.lemmaSentences(l.id, a, k) }, id => sentRow(DB.sentenceLite(id))) + '</div></details>';
   const cit = real ? DB.rows('SELECT s.abbreviation, c.locator FROM citation c JOIN source s USING(source_id) WHERE c.lemma_id=? ORDER BY s.abbreviation = \'AED\', s.abbreviation, c.citation_id', [l.id]) : [];
   h += det('Sources', cit.length ? '<table class="t"><tbody>' + cit.map(x => '<tr><td>' + esc(x[0]) + '</td><td>' + esc(x[1] || '') + '</td></tr>').join('') + '</tbody></table>' : '<p class="note">No dictionary references are recorded for this word.</p>');
+  if (real) h += srcLine('lemma', l.id, 'This word');
   return h;
 }
-const sentRow = s => s ? '<button type="button" class="rowbtn" data-sen="' + s.id + '"><span class="grow">' + T(s.t) + '<small>' + esc(s.free) + ' · ' + esc(s.src.work) + ', ' + esc(s.src.witness) + '</small></span></button>' : '';
+const sentRow = s => s ? '<button type="button" class="rowbtn" data-sen="' + s.id + '"><span class="grow">' + T(s.t) + '<small>' + trText(s.tr, s.free) + ' · ' + esc(s.src.work) + ', ' + esc(s.src.witness) + '</small></span></button>' : '';
 function renderWords(group, typed, fit) {
   return () => '<p class="eyebrow">' + (group.length > 1 ? group.length + ' words are written this way' : 'Word') + '</p>' +
     (fit ? '<p class="banner">Opened from a proposal. The highlighted signs are not ones you wrote. Brackets mark signs that fill a loss you entered.</p>' : '') +
@@ -2450,50 +2825,88 @@ function renderSign(code) {
     return h + usesHTML(uses, 'Words with this sign');
   };
 }
-function wordsTable(ws, roles) {
+/* Betydning i sammenhæng (beslutning 13): alle betydninger, den sandsynlige fremhævet. I en databasesætning er det ordets betydning i
+   sætningen (eller den eneste); i brugerens eget input den hyppigste som et gæt (ingen, hvis ingen hyppighed er kendt). */
+function sensesInline(w, db) {
+  const l = w.lem; if (!l || !l.senses) return esc(w.gloss || '');
+  const R = l.senseRows && l.senseRows.length ? l.senseRows : null, list = R ? R.map(r => r.text || '(no meaning recorded)') : l.senses;
+  let hi = -1, guess = false;
+  if (db) hi = w.sense != null ? w.sense : (list.length === 1 ? 0 : -1);
+  else if (R) { let best = -1, bf = 0; R.forEach((r, i) => { if (r.freq > bf) { bf = r.freq; best = i; } }); hi = best; guess = true; }
+  if (list.length === 1 && hi === 0 && !guess) return esc(list[0]) + (R && R[0].tr ? mtSup(R[0].tr) : '');
+  /* samme ordlyd fra flere betydninger (fx dansk-tysk opdeling og maskinoversat kopi) står én gang; MT-mærket kun, hvis alle er maskinoversatte */
+  /* en kildes samlede betydning ("to reach; to attack") og de enkelte betydninger, appen har delt den i, står tit side om side: listen deles i dele */
+  const grp = new Map(), txt = new Map(); list.forEach((x, i) => String(x).split(/;\s+/).forEach(p => { const k = p.toLowerCase().trim(); if (!k) return; if (!grp.has(k)) { grp.set(k, []); txt.set(k, p.trim()); } grp.get(k).push(i); }));
+  return [...grp.keys()].map(k => { const ix = grp.get(k), x = txt.get(k), on = ix.includes(hi), trs = R ? ix.map(j => R[j].tr).filter(Boolean) : [];
+    const sup = trs.length && trs.every(t => t.mt) ? mtSup(trs[0]) : (trs.length && trs.every(t => t.untranslated) ? mtSup(trs[0]) : '');
+    return (on ? '<b class="' + (guess ? 'guess-text' : 'sense-hi') + '" title="' + (guess ? 'The most frequent meaning. A guess.' : 'The meaning in this sentence.') + '">' + esc(x) + '</b>' : esc(x)) + sup; }).join('; ');
+}
+/* rollerne i en databasesætning er beregnet af appen (beslutning 3) og vises på fuldt niveau */
+const DBROLE = { subject: 'subject', possessor: 'possessor', pobject: 'object of preposition', attribute: 'attribute', particle: 'opening particle' };
+function wordsTable(ws, roles, db) {
   return '<table class="t"><thead><tr><th>Word</th><th>Reading</th><th>Analysis</th></tr></thead><tbody>' + ws.map((w, i) => {
-    const role = roles && roles[i] ? '<br><span class="note">' + esc(ROLE[roles[i]] || roles[i]) + '</span>' : '';
+    let role = '';
+    if (db) { if (FULL() && w.role) role = '<br><span class="pill role">' + esc(DBROLE[w.role] || ROLE[w.role] || w.role) + '</span>' + (w.roleComputed ? ' ' + mk('computed', 'The role was worked out by the app.') : ''); }
+    else if (roles && roles[i]) role = '<br><span class="note">' + esc(ROLE[roles[i]] || roles[i]) + '</span>';
     if (w.kind === 'gap') return '<tr><td>' + G(w.codes, 'sm') + '</td><td><span class="note">lost word</span></td><td>' + (w.pos ? esc(w.pos) + ' (assumed)' : 'unknown') + role + '</td></tr>';
-    return '<tr><td>' + GW(w, 'sm') + '</td><td>' + T(w.t) + '<br><span class="note">' + esc(w.gloss || w.lem.senses[w.sense || 0] || '') + '</span></td><td>' + esc(w.pos) +
+    return '<tr><td>' + GW(w, 'sm') + '</td><td>' + T(w.t) + '<br><span class="note">' + sensesInline(w, db) + '</span></td><td>' + esc(w.pos) +
       (w.form && w.form !== 'base' ? ', ' + esc(formLabel(w.form)) : '') + role + (w.status === 'restored' ? '<br><span class="pill g">restored</span>' : '') + '</td></tr>';
   }).join('') + '</tbody></table>';
 }
 function gline(ws, guess, base) {
   const pos = w => base != null && w.at != null ? ' data-at="' + (base + w.at) + '" data-n="' + w.codes.length + '"' : '';
-  return '<div class="gline' + (S.dir === 'rtl' ? ' rtl' : '') + '">' + ws.map(w => w.kind && w.kind !== 'word'
+  return '<div class="gline' + (isRtl() ? ' rtl' : '') + '">' + ws.map(w => w.kind && w.kind !== 'word'
     ? '<span class="gw"' + pos(w) + '>' + G(w.codes) + '<small>' + (w.kind === 'gap' ? 'lost word' : (w.kind === 'lacuna' ? (w.codes[0] === '*' ? 'lost signs' : 'lost') : (w.guess ? '<span class="tl guess-text">' + esc(tl(w.guess.t)) + '?</span>' : 'unknown'))) + '</small></span>'
     : '<button type="button" class="gw' + (guess ? ' guess' : '') + (w.status === 'restored' && !w.lost ? ' restw' : '') + '" data-sp="' + w.sp.id + '"' + pos(w) + (w.lost || w.short || w.fuzzy || w.phon ? ' data-fit="' + baseCodes(w).join(' ') + '"' : '') + '>' + GW(w) + '<small>' + esc(tl(w.t)) + '</small></button>').join('') + '</div>';
 }
+/* tekstens og kildens oplysninger (beslutning 10, 16, 1): værk, vidne, linje, teksttype, genstand, fundsted, sprogtrin, datering */
+const BASIS = { date: 'date', corpus: 'corpus', vocabulary: 'vocabulary', script: 'script' };
+function sourceTable(s) {
+  const w = DB.work(s.src.workId), wi = DB.witness(s.src.witnessId), row = (k, v) => v ? '<tr><td>' + k + '</td><td>' + v + '</td></tr>' : '';
+  const nr = '<span class="muted">not recorded</span>';
+  const stage = wi.stage || w.stage, stComp = wi.stage ? wi.stageComputed : w.stageComputed;
+  const place = wi.place ? esc(wi.place.name) + (wi.place.parent ? ', in ' + esc(wi.place.parent) : '') : nr;
+  const date = [wi.period, wi.dynasty, wi.king ? 'reign of ' + wi.king : null, wi.years].filter(Boolean).map(esc).join(' · ');
+  return '<table class="t"><tbody>' + row('Work', trText(w.titleTr, w.title) + (w.titleTr && w.titleTr.draft && FULL() ? ' ' + mk('unchecked', "English title from the app's own list. Not yet checked.") : '')) + row('Witness', esc(s.src.witness)) + row('Line', esc(s.src.line || '')) +
+    row('Text type', w.genre ? esc(w.genre) + (w.genreComputed ? ' ' + mk('computed', 'The app assigned the text type.') : '') : nr) + row('Object', wi.object ? esc(wi.object) : nr) + row('Find spot', place) +
+    row('Language stage', stage ? esc(stage) + (stComp ? ' <span class="note">estimated from: ' + esc((wi.stage ? wi.stageBasis : []).map(b => BASIS[b] || b).join(', ') || 'the data') + '</span>' : '') : nr) +
+    row('Date', date) + row('Script', wi.scriptLabel ? esc(wi.scriptLabel) : '') + '</tbody></table>' + origBox(w.titleTr, 'Original title') + (s.src.note ? '<p class="note">' + esc(s.src.note) + '</p>' : '');
+}
 function renderKnown(s, typed, marks, cont, base) {
-  return () => {
+  return () => withDir(s.rtl, () => {
     /* ord, der ikke er skrevet (tilføjet af udgiveren), står i læsningen, men ikke i tegnrækken */
-    const ws = s.toks.map(t => { const sp = t.spo; return { sp, lem: sp.lem, pos: sp.lem.pos, t: sp.t, form: sp.form, codes: sp.signs.map(x => x.c), sense: t.sense, status: t.status, o: t.wp, written: t.written }; });
+    const ws = s.toks.map(t => { const sp = t.spo; return { sp, lem: sp.lem, pos: sp.lem.pos, t: sp.t, form: sp.form, codes: sp.signs.map(x => x.c), sense: t.sense, status: t.status, o: t.wp, written: t.written, role: t.role, roleComputed: t.roleComputed }; });
     const wr = ws.filter(w => w.written), written = wr.slice().sort((a, b) => (a.o || 0) - (b.o || 0));
     marks = marks || []; cont = cont || []; const from = marks.length + cont.length > 0;
     if (from) { let off = 0; const loc = (l, w) => l.filter(q => q >= off && q < off + w.codes.length).map(q => q - off); written.forEach(w => { w.marks = loc(marks, w); w.cont = loc(cont, w); off += w.codes.length; }); }
     const vars = DB.passageOthers(s);
-    let h = '<div class="rhead"><p class="eyebrow grow">Known sentence</p>' + starBtn({ kind: 'sentence', ref: s.id, title: s.t, mode: 'sentence', codes: typed || s.codes }) + '</div>';
+    let h = '<div class="rhead"><p class="eyebrow grow">Known sentence</p><span class="pill lvl">found in the sources</span>' + starBtn({ kind: 'sentence', ref: s.id, title: s.t, mode: 'sentence', codes: typed || s.codes }) + '</div>';
     if (from) h += '<p class="banner">Opened from your input. The highlighted signs are not ones you wrote.' + (marks.length ? ' Brackets mark signs that fill a loss you entered.' : '') + (cont.length ? ' The other highlighted signs come from the sentence as it is recorded.' : '') + '</p>';
     const reorder = s.toks.some(t => t.wp), shown = reorder ? written : wr; let off = 0; shown.forEach(w => { w.at = off; off += w.codes.length; });
-    h += gline(shown, false, typed ? base || 0 : null) + '<p class="trl">' + T(s.t) + '</p>' + transBlock(s.lit, s.free);
+    h += gline(shown, false, typed ? base || 0 : null);
+    if (s.rtl) h += '<p class="note dirnote">The source writes this line from right to left' + (s.dirComputed ? ' ' + mk('computed', 'The direction was worked out by the app from the script.') : '') + '.' + (S.dir === 'rtl' ? ' It is shown left to right because Settings reverse the writing direction.' : ' Settings → Writing direction reverses it.') + '</p>';
+    h += '<p class="trl">' + T(s.t) + '</p>' + (s.free || s.lit ? transBlock(s.lit, s.free) : '<p class="note">No translation in the source.</p>') + trFoot(s.tr, { kind: 'sentence', id: s.id });
     h += '<p class="note">' + esc(s.src.work) + ', ' + esc(s.src.witness) + (s.src.line ? ', ' + esc(s.src.line) : '') + '</p>';
+    if (vars.length) h += '<p class="note alsoin">Also in ' + vars.map(id => { const o = DB.sentenceLite(id); return o ? '<button type="button" class="linkbtn" data-sen="' + id + '">' + esc(o.src.workId !== s.src.workId ? o.src.work + ', ' : '') + esc(o.src.witness) + '</button>' : ''; }).filter(Boolean).join(', ') + (s.passageComputed ? ' ' + mk('computed', 'The app matched these witnesses of the same passage.') : '') + '</p>';
     if (reorder) h += '<p class="note">The words are written in a different order than they are read.</p>';
-    h += det('Word by word', (s.pattern ? '<p class="note">' + esc(patternLabel(s.pattern)) + '</p>' : '') + wordsTable(ws, s.toks.map(t => t.role)));
-    h += det('Source', '<table class="t"><tbody><tr><td>Work</td><td>' + esc(s.src.work) + '</td></tr><tr><td>Witness</td><td>' + esc(s.src.witness) + '</td></tr><tr><td>Place</td><td>' + esc(s.src.line || '') + '</td></tr></tbody></table>' + (s.src.note ? '<p class="note">' + esc(s.src.note) + '</p>' : ''));
-    h += det('Other witnesses of this passage (' + vars.length + ')', vars.length ? lazyRows(vars, id => sentRow(DB.sentenceLite(id))) : '<p class="note">None. Only one witness has this passage.</p>');
+    h += det('Word by word', (s.pattern ? '<p class="note">' + esc(patternLabel(s.pattern)) + '</p>' : '') + wordsTable(ws, null, true));
+    h += det('Source', sourceTable(s));
+    h += srcLine('sentence', s.id, 'This sentence') + srcLine('witness', s.src.witnessId, 'The whole text');
     return h;
-  };
+  });
 }
 function renderProposal(codes, a, opts) {
   opts = opts || {};
-  let same, known;      /* kendte sætninger, der passer, regnes én gang pr. forslag, ikke ved hver visning */
+  let same, known, dym;      /* kendte sætninger, der passer, regnes én gang pr. forslag, ikke ved hver visning */
   return () => {
     const gaps = a.gaps, seq = a.seq;
     if (same === undefined) same = a.complete && !gaps.length ? sameSentence(a) : null;
     const fz = a.real.filter(w => w.fuzzy);
-    let h = '<div class="rhead"><p class="eyebrow grow">' + (opts.eyebrow || 'Not a known sentence') + '</p>' + starBtn({ kind: 'input', title: a.real.length ? joinT(a.words) : CODES(codes), mode: 'sentence', codes }) + '</div>';
+    let h = '<div class="rhead"><p class="eyebrow grow">' + (opts.eyebrow || 'Not a known sentence') + '</p>' + (a.pattern ? '<span class="pill g lvl">composed from known words and a known pattern</span>' : (a.real.length ? '<span class="pill g lvl">guess</span>' : '')) + starBtn({ kind: 'input', title: a.real.length ? joinT(a.words) : CODES(codes), mode: 'sentence', codes }) + '</div>';
     if (a.quads && a.quads.length) a.words.forEach(w => { if (w.kind === 'word' && !w.lost) w.quads = a.quads.filter(q => q.tree && q.at >= w.at && q.at + q.n <= w.at + w.codes.length).map(q => ({ at: q.at - w.at, n: q.n, tree: q.tree })); });
     h += gline(a.words, true, opts.base || 0);
+    if (dym === undefined) dym = opts.noKnown || codes.some(isLost) ? [] : shapeAlts(codes, k => DB.sentenceIdByKey(k) != null, 4);
+    h += shapeBlock(dym, 'sentence');
     if (a.real.length) h += '<p class="trl guess-text">' + T(joinT(a.words)) + '</p>';
     if (known === undefined) { known = opts.noKnown ? [] : sentenceFits(codes); if (!opts.noKnown) lemmaFits(a).forEach(f => { if (f.s !== same && !known.some(x => x.s === f.s)) known.push(f); }); }
     if (known.length) h += '<p class="eyebrow">' + (known.length > 1 ? 'Known sentences this could be (' + known.length + ')' : 'A known sentence this could be') + '</p>' + lazyRows(known, fitSentRow, 10);
@@ -2522,7 +2935,7 @@ function renderProposal(codes, a, opts) {
     a.real.filter(w => w.nameGuess).forEach(w => { const rd = w.nameGuess; h += '<p class="note phnote">The ' + esc(ENCL[w.enc].what) + ' in the ' + esc(ENCL[w.enc].label.toLowerCase()) + ' is not in the database.' + (rd.ok ? ' Read by sound it would be ' + T(rd.t) + '.' + (rd.god ? ' ' + T('Rꜥ') + ' is written first and read last.' : '') : ' Its signs cannot all be read by sound.') + '</p>'; });
     a.words.filter(w => w.guess).forEach(w => { h += '<p class="note phnote">' + G(w.codes, 'xs') + ' is not in the dictionary. Read by sound it would be ' + T(w.guess.t) + ' (' + esc(phonSum(w.guess)) + ').</p>'; });
     fz.forEach(w => { h += '<p class="note">' + T(w.t) + ' is written with ' + esc(CODE(w.fuzzy.typed)) + ' where the database has ' + esc(CODE(w.fuzzy.expected)) + '. Both write ' + T(w.fuzzy.value) + '.</p>'; });
-    a.real.filter(w => w.rule).forEach(w => { h += '<p class="note">' + T(w.t) + ' was recognised by a rule: ' + esc(formLabel(w.rule.form)) + ' of ' + T(w.lem.t) + '.</p>'; });
+    a.real.filter(w => w.rule).forEach(w => { h += '<p class="note">' + T(w.t) + ' was recognised by a rule: ' + esc(formLabel(w.rule.form)) + ' of ' + T(w.lem.t) + '.' + (w.rule.computed ? ' The rule was derived from the texts by the app ' + mk('computed', 'A rule the app derived from the texts.') + ', so this is a guess.' : '') + '</p>'; });
     if (same) h += '<p class="note">The same words occur as a known sentence with a different spelling:</p>' + sentRow(same);
     if (a.real.length) h += '<details open><summary>Word by word</summary><div>' + (a.pattern ? '<p class="note">' + esc(patternLabel(a.pattern.code)) + '</p>' : '') + wordsTable(a.pattern ? seq : a.real, a.pattern ? a.pattern.roles : null) + '</div></details>';
     /* "Known sentences built the same way": databasen har endnu ingen sætningsmønstre (sentence_reading.pattern_id er tom), så blokken vises ikke */
@@ -2563,7 +2976,7 @@ function renderLine(codes, ln, quads) {
     const label = p => p.kind === 'full' ? 'Sentence' + (multi ? ' ' + p.no : '') : PARTLABEL[p.kind];
     let h = '<div class="rhead"><p class="eyebrow grow">' + (nf ? count(nf, 'sentence', 'sentences') + (inc ? ' and ' + count(inc, 'incomplete part', 'incomplete parts') : '') : 'No whole sentence: ' + count(inc, 'incomplete part', 'incomplete parts')) + '</p>' +
       starBtn({ kind: 'input', title: P.map(tOf).join(' | '), mode: 'sentence', codes }) + '</div>';
-    h += '<div class="lineview' + (S.dir === 'rtl' ? ' rtl' : '') + '" role="group" aria-label="Your line, divided">' + P.map((p, k) =>
+    h += '<div class="lineview' + (isRtl() ? ' rtl' : '') + '" role="group" aria-label="Your line, divided">' + P.map((p, k) =>
       '<button type="button" class="lseg ' + p.kind + '" data-part="' + k + '" aria-label="' + esc(label(p)) + ', open it below">' + partSigns(p) + '<small>' + (p.kind === 'full' ? 'sentence' + (multi ? ' ' + p.no : '') : PARTSHORT[p.kind]) + '</small></button>').join('') + '</div>';
     const has = k => P.some(p => p.kind === k), bits = [];
     if (has('tail')) bits.push('begins with the end of another sentence'); if (has('head')) bits.push('ends with the beginning of the next one'); if (has('frag')) bits.push('has signs between the sentences that could not be read as a sentence');
@@ -2593,10 +3006,20 @@ function renderRestored(codes, list, near) {
     '<p class="banner">' + (list.length > 1 ? 'These words fit' : 'This word fits') + ' the signs that remain. What is restored is shown in brackets. It is a proposal, not a reading.</p>' + lazyRows(list, sp => fitRow(sp, codes)) +
     (near.length ? '<p class="eyebrow">Less close (' + near.length + ')</p>' + near.map(x => nearRow(x, codes)).join('') : '');
 }
+/* "Did you mean" (beslutning 5): samme tegn i en anden Unicode-form; det byttede tegn er markeret som ikke skrevet af brugeren */
+function shapeBlock(alts, kind) {
+  if (!alts.length) return '';
+  return '<p class="banner">Did you mean ' + (alts.length > 1 ? 'one of these' : 'this') + '? Nothing is written exactly like your signs. ' + (alts.length > 1 ? 'These differ' : 'This differs') + ' in one sign of the same shape, which may be what you meant. The highlighted sign is not the one you wrote.</p>' +
+    alts.map(x => {
+      const signs = GW({ codes: x.codes, marks: [], cont: [x.at], sp: {} }, 'sm'), why = '<small class="why">' + esc(CODE(x.to)) + ' instead of ' + esc(CODE(x.from)) + ', same shape</small>';
+      if (kind === 'sentence') { const s = sentenceByKey(x.codes.join('-')); return s ? '<button type="button" class="rowbtn dym" data-sen="' + s.id + '" data-cont="' + x.at + '">' + signs + '<span class="grow">' + T(s.t) + '<small>' + trText(s.tr, s.free) + '</small>' + why + '</span></button>' : ''; }
+      const g = GROUPS[x.codes.join('-')] || []; return g.length ? '<button type="button" class="rowbtn dym" data-sp="' + g[0].id + '" data-fit="' + x.codes.map((c, i) => i === x.at ? x.from : c).join(' ') + '">' + signs + '<span class="grow">' + T(g[0].t) + ' · ' + esc(g[0].lem.senses[0]) + (g.length > 1 ? '<small>and ' + (g.length - 1) + ' more word' + (g.length > 2 ? 's' : '') + ' written this way</small>' : '') + why + '</span></button>' : '';
+    }).join('');
+}
 function renderNotFound(codes, list) {
-  const lost = codes.some(isLost);
-  return () => '<div class="rhead"><p class="eyebrow grow">Not in the database</p>' + starBtn({ kind: 'input', title: CODES(codes), mode: 'word', codes }) + '</div>' + G(codes) +
-    (list.length ? '<p class="banner info">No word is written exactly like this. The closest spellings are listed below.</p><p class="eyebrow">Close spellings</p>' + list.map(x =>
+  const lost = codes.some(isLost), dym = lost ? [] : shapeAlts(codes, k => DB.KEYS.has(k));
+  return () => '<div class="rhead"><p class="eyebrow grow">Not in the database</p>' + starBtn({ kind: 'input', title: CODES(codes), mode: 'word', codes }) + '</div>' + G(codes) + shapeBlock(dym, 'word') +
+    (!list.length && dym.length ? '' : list.length ? '<p class="banner info">No word is written exactly like this. The closest spellings are listed below.</p><p class="eyebrow">Close spellings</p>' + list.map(x =>
       '<button type="button" class="rowbtn" data-sp="' + x.sp.id + '" data-fit="' + codes.join(' ') + '">' + GS(x.sp, 'sm') + '<span class="grow">' + T(x.sp.t) + ' · ' + esc(x.sp.lem.senses[0]) + '<small>' + esc(x.why) + '</small></span></button>').join('')
       : '<p class="banner err">' + (lost ? 'Nothing was found. No word in the database fits the signs that remain around what is lost.' : 'Nothing was found. No word is written like this, and there are no close spellings either.') + '</p>');
 }
@@ -3504,6 +3927,30 @@ function resetMode() {
   trace('Nulstillet: ' + cap(m)); step([], 'Et tryk på den søgetype, man allerede står i, tømmer feltet og resultatet for den. De andre søgetyper, historikken og Saved er urørte.');
   renderField();
 }
+/* Beslutning 26: et tryk på Search-fanen, mens man står i Search, eller på den søgetype, man står i, tømmer feltet og resultatet.
+   En linje med "Undo" står i omkring 5 sekunder og sætter det hele tilbage, som det var. */
+let undoSnap = null;
+function clearWithUndo() {
+  const m = S.mode;
+  if (!state.mstack[m]) return;
+  const empty = !state.mstack[m].length && !state.buf.length && !(state.text || '').length;
+  if (empty) return resetMode();
+  undoSnap = { m, stack: state.mstack[m].slice(), last: state.last[m], lastQ: state.lastQ[m], buf: state.buf.slice(), quads: copyQuads(state.quads || []), text: state.text, scanCtx: state.scanCtx, searched: state.searched, top: results.scrollTop };
+  resetMode();
+  const t = $('#toast'); t.classList.add('undo'); t.innerHTML = '<span>' + esc(cap(m)) + ' cleared</span><button type="button" data-act="undo">Undo</button>';
+  t.style.bottom = (state.kbOpen ? 10 : $('.tabs').offsetHeight + 10) + 'px'; t.hidden = false;
+  clearTimeout(toast.h); toast.h = setTimeout(() => { t.hidden = true; t.classList.remove('undo'); undoSnap = null; }, 5000);
+}
+function runUndo() {
+  const u = undoSnap, t = $('#toast'); undoSnap = null; clearTimeout(toast.h); t.hidden = true; t.classList.remove('undo');
+  if (!u) return;
+  state.mstack[u.m].length = 0; state.mstack[u.m].push(...u.stack); state.last[u.m] = u.last; if (!isText(u.m)) state.lastQ[u.m] = u.lastQ;
+  if (state.view !== 'search') setView('search');
+  setMode(u.m);
+  Object.assign(state, { buf: u.buf, quads: u.quads, text: u.text, scanCtx: u.scanCtx, searched: u.searched, cur: null, tcur: null });
+  renderField(); results.scrollTop = u.top;
+  trace('Fortrudt: ' + cap(u.m)); step([], 'Feltet og resultatet står igen, som de stod. Intet blev slået op igen.');
+}
 function setMode(m) {
   cancelComp();
   saveScroll();
@@ -3524,36 +3971,90 @@ function setMode(m) {
   } else { results.innerHTML = state.searched ? '<p class="empty">' + HINT[m].replace('{lang}', LANGS[S.lang]) + '</p>' : ''; afterShow(); }
 }
 
-/* ---------- foto (simuleret) ---------- */
+/* ---------- foto (beslutning 23) ----------
+   Genkendelsen er den rigtige: photo/hiero_ocr.js med model.json + model.bin (fra S/r4/photo/js/), indlæst første gang arket bruges.
+   Den finder tegnene, sætter dem i læserækkefølge og giver hvert tegn fem bud med sikkerhed. Appen deler tegnene i ord med sin egen
+   ordopdeling. Brugeren retter direkte: vælger et andet bud, sletter et tegn eller sætter et tabt tegn (▨) ind, som søgningen udfylder.
+   Prøverne er to syntetiske sider fra genkenderens testsæt (tegnet med Noto og NewGardiner, begge OFL; teksten fra AED, CC BY-SA). */
 const cc = (c, st) => st === 'restored' ? 'guess' : (c >= .85 ? 'ok' : (c >= .6 ? 'warn' : 'bad'));
 const pct = c => Math.round(c * 100) + '%';
-/* Fotoets to prøver er stadig opdigtede genkendelsesresultater (appen kan ikke læse et foto endnu). Tegnene slås op i databasen efter Gardiner-kode. */
-D.scans = [
-  { id: 'P1', title: 'Papyrus fragment', sub: 'Clear, one damaged sign', dir: 'rtl', conf: 0.78, words: [
-    { conf: 0.95, signs: [['D21', .97, 'intact'], ['D36', .96, 'intact'], ['N5', .93, 'intact'], ['Z1', .98, 'intact']] },
-    { conf: 0.99, signs: [['G17', .99, 'intact']] },
-    { conf: 0.62, signs: [['Q3', .90, 'intact'], ['X1', .88, 'intact'], ['N1', .45, 'partial', [['N1', .45], ['N35', .30], ['O1', .12]]]] }] },
-  { id: 'P2', title: 'Stela with cartouche', sub: 'Worn surface, one sign lost', dir: 'ltr', conf: 0.61, words: [
-    { conf: 0.90, signs: [['M23', .92, 'intact'], ['X1', .90, 'intact'], ['N35', .89, 'intact']] },
-    { conf: 0.58, cart: 1, signs: [['N5', .91, 'intact'], ['Y5', .52, 'partial', [['Y5', .52], ['N35', .31]]], ['L1', .34, 'restored', [['L1', .34], ['G17', .22]]]] }] },
-].map(sc => Object.assign({}, sc, { words: sc.words.map(w => Object.assign({}, w, { signs: w.signs.map(x => ({ c: GCODE(x[0]), conf: x[1], status: x[2], alts: (x[3] || []).map(a => [GCODE(a[0]), a[1]]) })) })) }));
-function scanSigns(sc) { return sc.words.map((w, wi) => w.signs.map((x, si) => state.scanEdits[sc.id + wi + '.' + si] || x.c)); }
+const SAMPLES = [
+  { id: 'P1', title: 'Printed page', sub: 'Clean print, one uncertain sign', url: 'photo/samples/p1.png', dir: 'ltr' },
+  { id: 'P2', title: 'Carved relief', sub: 'Shadows and worn edges', url: 'photo/samples/p2.png', dir: 'ltr' },
+];
+const SCANS = {};
+/* genkenderens kodepunkt (hex) -> tegnets id; grundtegnet foretrækkes frem for en variant med samme kodepunkt */
+let UMAP = null;
+function umap() {
+  if (UMAP) return UMAP; UMAP = {};
+  D.signs.forEach(s => { if (s.placeholder || !s.ch || s.ch === '□' || Array.from(s.ch).length !== 1) return;
+    const k = s.ch.codePointAt(0).toString(16).toUpperCase(); if (!UMAP[k] || (SG[UMAP[k]].base && !s.base)) UMAP[k] = s.c; });
+  return UMAP;
+}
+let OCR = null;
+async function loadOCR() {
+  if (OCR) return OCR;
+  const base = new URL('photo/', location.href), mod = await import(new URL('hiero_ocr.js', base).href);
+  const json = await (await fetch(new URL('model.json', base))).json();
+  let bin = null;
+  try { const r = await fetch(new URL(json.weights_file, base)); if (r.ok) { const a = await r.arrayBuffer(); if (a.byteLength === json.total_bytes) bin = a; } } catch (e) { /* værten serverer ikke binære filer */ }
+  if (!bin) { const t = (await (await fetch(new URL(json.weights_file + '.b64.txt', base))).text()).trim(), s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); bin = u.buffer; }
+  await mod.loadModel({ json, bin });
+  return (OCR = mod);
+}
+/* Et foto læses: tegnes på et lærred (højst 1600 px på den lange led, som genkenderen alligevel bruger), genkendes og gemmes som en aflæsning. */
+let photoURL = null;
+async function readPhoto(meta, blob) {
+  const dir = state.photoDir || S.dir;
+  Object.assign(state, { scan: null, scanErr: null, scanBusy: meta.title }); renderPhoto();
+  await new Promise(r => setTimeout(r, 40));
+  try {
+    const ocr = await loadOCR();
+    if (!blob) blob = await (await fetch(meta.url)).blob();
+    const bmp = await createImageBitmap(blob), k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+    const W = Math.max(1, Math.round(bmp.width * k)), H = Math.max(1, Math.round(bmp.height * k));
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const cx = cv.getContext('2d', { willReadFrequently: true }); cx.fillStyle = '#fff'; cx.fillRect(0, 0, W, H); cx.drawImage(bmp, 0, 0, W, H);
+    const r = ocr.recognise(cx.getImageData(0, 0, W, H), { direction: dir }), U = umap(), signs = [];
+    r.lines.forEach((L, li) => L.signs.forEach(x => {
+      const alts = []; x.alts.forEach(a => { const c = U[String(a.codepoint).toUpperCase()]; if (c && !alts.some(y => y[0] === c)) alts.push([c, a.conf]); });
+      if (alts.length) signs.push({ c: alts[0][0], orig: alts[0][0], conf: alts[0][1], status: 'intact', alts, line: li, box: [x.box[0] / W * 100, x.box[1] / H * 100, x.box[2] / W * 100, x.box[3] / H * 100] });
+    }));
+    SCANS[meta.id] = { id: meta.id, title: meta.title, sub: meta.sub, url: meta.url, src: [meta, blob], dir, lines: r.lines.length, ms: Math.round(r.stats.total_ms), signs, dels: 0 };
+    state.scan = meta.id; state.scanWord = 0;
+    trace('Foto læst'); step(['scan', 'scan_line'], 'Billedet og de aflæste linjer gemmes med samlet sikkerhed. Genkendelsen sker på enheden (' + signs.length + ' tegn, ' + Math.round(r.stats.total_ms) + ' ms).');
+    step(['scan_sign', 'scan_sign_candidate'], 'Hvert tegn har placering, sikkerhed og fem bud. Appen deler tegnene i ord med sin egen ordopdeling.');
+  } catch (e) { state.scanErr = String((e && e.message) || e); trace('Foto kunne ikke læses'); }
+  state.scanBusy = null; renderPhoto();
+}
+/* Ordene i en aflæsning: appens ordopdeling linje for linje; tegn, der ikke hører til et ord, står hver for sig. */
+function scanWords(sc) {
+  const s = sc.signs, out = []; let a = 0;
+  while (a < s.length) {
+    let b = a; while (b < s.length && s[b].line === s[a].line) b++;
+    let p = a;
+    segment(s.slice(a, b).map(x => x.c)).sort((x, y) => x.at - y.at).forEach(w => { const at = a + w.at, n = Math.max(1, (w.codes || []).length);
+      if (at < p || at + n > b) return; for (; p < at; p++) out.push({ at: p, n: 1 }); out.push({ at, n }); p = at + n; });
+    for (; p < b; p++) out.push({ at: p, n: 1 });
+    a = b;
+  }
+  return out.map(w => Object.assign(w, { conf: Math.min(...s.slice(w.at, w.at + w.n).map(x => x.c !== x.orig ? 1 : x.conf)) }));
+}
+const scanConf = sc => sc.signs.length ? sc.signs.reduce((a, x) => a + (x.c !== x.orig ? 1 : x.conf), 0) / sc.signs.length : 0;
+const scanEdited = sc => (sc.dels || 0) + sc.signs.filter(x => x.c !== x.orig).length;
 /* ---------- fotoaflæsningen følger med ind i resultatet ----------
    Når tegnene kommer fra et foto, huskes aflæsningens sikkerhed for sætningen, hvert ord og hvert tegn, så længe feltet står, som fotoet gav det.
    I resultatet vises den på tre niveauer: en linje øverst for hele aflæsningen, en tynd streg under hvert ord med ét stykke pr. tegn, og tegnene enkeltvis, når man åbner et ord eller linjen øverst. */
 const CCWORD = { ok: 'sure', warn: 'uncertain', bad: 'doubtful', guess: 'restored' };
 function scanCtxOf(sc) {
-  const signs = [], words = [], quads = []; let at = 0;
-  sc.words.forEach((w, wi) => {
-    words.push({ at, n: w.signs.length, conf: w.conf }); if (w.cart) quads.push({ at, n: w.signs.length, enc: 'cart' });
-    w.signs.forEach((x, si) => { const key = sc.id + wi + '.' + si; signs.push({ key, orig: x.c, c: state.scanEdits[key] || x.c, conf: x.conf, status: x.status, alts: x.alts, wi }); at++; });
-  });
-  return { id: sc.id, title: sc.title, conf: sc.conf, signs, words, quads, codes: signs.map(s => s.c), open: false };
+  const words = scanWords(sc), signs = sc.signs.map((x, i) => ({ key: sc.id + ':' + i, orig: x.orig, c: x.c, conf: x.conf, status: x.status, alts: x.alts }));
+  return { id: sc.id, title: sc.title, conf: scanConf(sc), signs, words, quads: [], codes: signs.map(s => s.c), open: false };
 }
 const scanLive = () => { const c = state.scanCtx; return c && S.mode === 'sentence' && state.view === 'search' && state.panel === 'search' && state.buf.length === c.codes.length && state.buf.every((x, i) => x === c.codes[i]) ? c : null; };
-/* Et tegn, brugeren selv har valgt et andet bud for, har ikke længere aflæsningens sikkerhed. */
+/* Et tegn, brugeren selv har valgt et andet bud for (eller sat ind), har ikke længere aflæsningens sikkerhed. */
 const signCls = s => s.c !== s.orig ? 'pick' : cc(s.conf, s.status);
 const signPct = s => { if (s.c === s.orig) return s.conf; const a = s.alts.find(x => x[0] === s.c); return a ? a[1] : null; };
+const scCode = c => isLost(c) ? 'lost sign' : CODE(c);
 function scanRange(ctx, at, n) {
   const signs = ctx.signs.slice(at, at + n), w = ctx.words.find(x => x.at === at && x.n === n);
   const conf = w ? w.conf : Math.min(...signs.map(s => s.conf));      /* deler appen ordene anderledes end fotoet, gælder det svageste tegn */
@@ -3566,23 +4067,23 @@ function scanSignsHTML(ctx, at, n) {
   return '<div class="scsigns">' + ctx.signs.slice(at, at + n).map((s, k) => {
     const cls = signCls(s), p = signPct(s);
     const alts = s.alts.length > 1 ? '<div class="alts">' + s.alts.map(a => {
-      const w = codes.slice(); w[k] = a[0]; const g = GROUPS[w.map(canon).join('-')];
-      return '<button type="button" data-salt="' + (at + k) + '|' + a[0] + '" aria-pressed="' + (s.c === a[0]) + '"><span class="gl sm">' + SG[a[0]].ch + '</span><span>' + esc(CODE(a[0])) + (S.conf ? ' ' + pct(a[1]) : '') + (n > 1 ? '<small>' + (g ? 'gives ' + esc(tl(g[0].t)) : 'no known word') + '</small>' : '') + '</span></button>'; }).join('') + '</div>' : '';
-    return '<div class="scsign"><span class="gl">' + SG[s.c].ch + '</span><div><span class="mono">' + esc(CODE(s.c)) + '</span> ' + (cls === 'pick' ? '<span class="pill">chosen by you</span>' : '<span class="conf c-' + cls + '">' + (S.conf && p != null ? pct(p) + ' ' : '') + CCWORD[cls] + '</span>') +
+      const w = codes.slice(); w[k] = a[0]; const g = w.some(isLost) ? null : GROUPS[w.map(canon).join('-')];
+      return '<button type="button" data-salt="' + (at + k) + '|' + a[0] + '" aria-pressed="' + (s.c === a[0]) + '"><span class="gl sm">' + chOf(a[0]) + '</span><span>' + esc(CODE(a[0])) + (S.conf ? ' ' + pct(a[1]) : '') + (n > 1 ? '<small>' + (g ? 'gives ' + esc(tl(g[0].t)) : 'no known word') + '</small>' : '') + '</span></button>'; }).join('') + '</div>' : '';
+    return '<div class="scsign"><span class="gl">' + chOf(s.c) + '</span><div><span class="mono">' + esc(scCode(s.c)) + '</span> ' + (cls === 'pick' ? '<span class="pill">' + (s.orig == null ? 'added by you' : 'chosen by you') + '</span>' : '<span class="conf c-' + cls + '">' + (S.conf && p != null ? pct(p) + ' ' : '') + CCWORD[cls] + '</span>') +
       (s.status !== 'intact' && cls !== 'pick' && cls !== 'guess' ? ' <span class="pill">' + esc(s.status) + '</span>' : '') + cbar([s]) + alts + '</div></div>'; }).join('') + '</div>';
 }
 function scanSummary(ctx) {
   const n = { warn: 0, bad: 0, guess: 0, pick: 0 }; ctx.signs.forEach(s => { const c = signCls(s); if (c in n) n[c]++; });
   const bits = [['bad', 'doubtful'], ['warn', 'uncertain'], ['guess', 'restored']].filter(x => n[x[0]]).map(x => n[x[0]] + ' ' + x[1]);
   const one = bits.length === 1 && n[['bad', 'warn', 'guess'].find(k => n[k])] === 1, pick = n.pick ? n.pick + (n.pick > 1 ? ' signs' : ' sign') + ' chosen by you' : '';
-  return bits.length ? bits.join(', ') + (one ? ' sign' : ' signs') + (pick ? ' \u00b7 ' + pick : '') : (pick ? cap(pick) + ', the rest read clearly' : 'All signs read clearly');
+  return bits.length ? bits.join(', ') + (one ? ' sign' : ' signs') + (pick ? ' · ' + pick : '') : (pick ? cap(pick) + ', the rest read clearly' : 'All signs read clearly');
 }
 /* Linjen øverst i resultatet: hele aflæsningen. Foldet ud viser den hvert ord med sine tegn. */
 function scanBoxHTML(ctx) {
   const cam = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
   let h = '<details class="scanbox"' + (ctx.open ? ' open' : '') + '><summary>' + cam + '<span class="grow"><b>Read from a photo</b><small>' + esc(scanSummary(ctx)) + '</small></span>' + (S.conf ? '<span class="conf c-' + cc(ctx.conf) + '">' + pct(ctx.conf) + '</span>' : '') + '</summary><div>';
   ctx.words.forEach((w, wi) => { const r = scanRange(ctx, w.at, w.n);
-    h += '<div class="scword"><div class="schead"><span class="gl sm">' + r.signs.map(s => SG[s.c].ch).join('') + '</span><span class="eyebrow grow">Word ' + (wi + 1) + '</span>' + (S.conf ? '<span class="conf c-' + r.cls + '">' + pct(r.conf) + ' ' + CCWORD[r.cls] + '</span>' : '') + '</div>' + scanSignsHTML(ctx, w.at, w.n) + '</div>'; });
+    h += '<div class="scword"><div class="schead"><span class="gl sm">' + r.signs.map(s => chOf(s.c)).join('') + '</span><span class="eyebrow grow">Word ' + (wi + 1) + '</span>' + (S.conf ? '<span class="conf c-' + r.cls + '">' + pct(r.conf) + ' ' + CCWORD[r.cls] + '</span>' : '') + '</div>' + scanSignsHTML(ctx, w.at, w.n) + '</div>'; });
   h += '<div class="legend"><span><i class="b-ok"></i>sure</span><span><i class="b-warn"></i>uncertain</span><span><i class="b-bad"></i>doubtful</span><span><i class="b-guess"></i>restored by the app</span></div>';
   return h + '<button type="button" class="secondary" data-act="scanopen">Back to the photo</button></div></details>';
 }
@@ -3608,36 +4109,45 @@ function scanWordPage(at, n) {
 }
 function scanSwap(i, code) {
   const ctx = state.scanCtx, s = ctx && ctx.signs[i]; if (!s || s.c === code) return;
-  s.c = code; ctx.codes[i] = code; if (code === s.orig) delete state.scanEdits[s.key]; else state.scanEdits[s.key] = code;
+  s.c = code; ctx.codes[i] = code; const sc = SCANS[ctx.id]; if (sc && sc.signs[i]) sc.signs[i].c = code;
   state.fillNote = 'Brugeren har valgt et andet af fotoets bud for tegn ' + (i + 1) + ': ' + CODE(code) + '. Linjen læses igen med det nye tegn. Valget kan sendes som rettelse fra fotoet.';
   load('sentence', ctx.codes, ctx.quads);
 }
+const DIROPT = [['ltr', 'Left to right'], ['rtl', 'Right to left']];
 function renderPhoto() {
   const el = $('#photo');
-  if (!state.scan) {
-    el.innerHTML = '<p class="note">Here the app would open the camera or the gallery and ask whether the photo should be kept. The prototype cannot read a real photo, so choose one of two samples to see what recognition returns.</p><p class="eyebrow">Sample photos</p>' +
-      D.scans.map(s => '<button type="button" class="rowbtn" data-scan="' + s.id + '">' + G(s.words[0].signs.map(x => x.c), 'sm') + '<span class="grow">' + esc(s.title) + '<small>' + esc(s.sub) + '</small></span></button>').join('');
+  if (state.scanBusy) { el.innerHTML = '<p class="eyebrow">Reading: ' + esc(state.scanBusy) + '</p><p class="note">Finding the signs and putting them in reading order. A large photo can take a few seconds.</p>'; return; }
+  const sc = state.scan && SCANS[state.scan];
+  if (!sc) {
+    el.innerHTML = '<p class="note">Take a photo of an inscription or choose one from your gallery. The app finds the signs itself, puts them in reading order and marks the uncertain ones. Tap a sign to choose another candidate, delete it, or insert a lost sign.</p>' +
+      '<p class="banner info">Experimental. Clean printed pages and drawn copies read well. Photos of carved or worn walls do not yet: in a test on ten wall photos the app found only 12 % of the signs.</p>' +
+      (state.scanErr ? '<p class="banner err">The photo could not be read. ' + esc(state.scanErr) + '</p>' : '') +
+      '<div class="photoin"><label class="primary" for="photofile">Take or choose a photo</label><input type="file" id="photofile" accept="image/*" capture="environment"></div>' +
+      '<div class="field"><label for="photodir">Reading direction</label><select id="photodir">' + DIROPT.map(o => '<option value="' + o[0] + '"' + ((state.photoDir || S.dir) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select><small>The signs face the start of the line. The app cannot yet tell the direction from the photo.</small></div>' +
+      '<p class="eyebrow">Sample photos</p>' + SAMPLES.map(s => '<button type="button" class="rowbtn" data-scan="' + s.id + '"><img class="thumb" src="' + s.url + '" alt=""><span class="grow">' + esc(s.title) + '<small>' + esc(s.sub) + '</small></span></button>').join('');
     return;
   }
-  const sc = D.scans.find(s => s.id === state.scan), rtl = sc.dir === 'rtl', signs = scanSigns(sc);
-  const edited = Object.keys(state.scanEdits).some(k => k.indexOf(sc.id) === 0);
-  let h = '<button type="button" class="backbtn" data-act="scanback"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>Samples</span></button>';
-  h += '<div class="slab"><span class="gl' + (rtl ? ' rtl' : '') + '">' + sc.words.map(w => (w.cart ? '<span class="cart">' : '') + w.signs.map(x => '<span' + (x.status !== 'intact' ? ' class="dmg"' : '') + '>' + SG[x.c].ch + '</span>').join('') + (w.cart ? '</span>' : '')).join(' ') + '</span></div>';
-  h += '<p class="note">' + esc(sc.title) + ' · read ' + (rtl ? 'right to left' : 'left to right') + (S.conf ? ' · <span class="conf c-' + cc(sc.conf) + '">sentence ' + pct(sc.conf) + '</span>' : '') + '</p>';
-  h += '<p class="eyebrow">Digital reading. Tap a word.</p><div class="words">' + sc.words.map((w, wi) => {
-    const g = GROUPS[signs[wi].map(canon).join('-')];
-    return '<button type="button" class="wchip" data-sw="' + wi + '" aria-pressed="' + (state.scanWord === wi) + '">' + (w.cart ? '<span class="cart">' : '') + '<span class="gl sm' + (rtl ? ' rtl' : '') + '">' + signs[wi].map(c => SG[c].ch).join('') + '</span>' + (w.cart ? '</span>' : '') +
+  const words = scanWords(sc), rtl = sc.dir === 'rtl', wi = Math.max(0, Math.min(state.scanWord, words.length - 1)), cw = words[wi], edited = scanEdited(sc), conf = scanConf(sc);
+  let h = '<button type="button" class="backbtn" data-act="scanback"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>Photos</span></button>';
+  h += '<div class="photoimg"><img src="' + esc(sc.url) + '" alt="' + esc(sc.title) + '">' + sc.signs.map((x, i) => x.box ? '<i class="' + (x.c !== x.orig ? 'ok' : cc(x.conf)) + (cw && i >= cw.at && i < cw.at + cw.n ? ' on' : '') + '" style="left:' + x.box[0].toFixed(2) + '%;top:' + x.box[1].toFixed(2) + '%;width:' + x.box[2].toFixed(2) + '%;height:' + x.box[3].toFixed(2) + '%"></i>' : '').join('') + '</div>';
+  h += '<p class="note">' + esc(sc.title) + ' · ' + sc.signs.length + ' sign' + (sc.signs.length === 1 ? '' : 's') + ' in ' + sc.lines + ' line' + (sc.lines === 1 ? '' : 's') + ' · read ' + (rtl ? 'right to left' : 'left to right') + (S.conf && sc.signs.length ? ' · <span class="conf c-' + cc(conf) + '">reading ' + pct(conf) + '</span>' : '') + '</p>';
+  if (!cw) { el.innerHTML = h + '<p class="banner err">No signs were found in this photo. Try a sharper photo, straight on, with the signs filling most of the picture.</p>'; return; }
+  h += '<p class="eyebrow">Digital reading. Tap a word.</p><div class="words">' + words.map((w, k) => {
+    const codes = sc.signs.slice(w.at, w.at + w.n).map(x => x.c), g = codes.some(isLost) ? null : GROUPS[codes.map(canon).join('-')];
+    return '<button type="button" class="wchip" data-sw="' + k + '" aria-pressed="' + (k === wi) + '"><span class="gl sm' + (rtl ? ' rtl' : '') + '">' + codes.map(chOf).join('') + '</span>' +
       '<span class="tl">' + (g ? esc(tl(g[0].t)) : '?') + '</span>' + (S.conf ? '<span class="conf c-' + cc(w.conf) + '">' + pct(w.conf) + '</span><span class="bar"><i class="b-' + cc(w.conf) + '" style="width:' + pct(w.conf) + '"></i></span>' : '') + '</button>';
   }).join('') + '</div>';
-  const w = sc.words[state.scanWord];
-  h += '<p class="eyebrow">Signs in the selected word</p><div>' + w.signs.map((x, si) => {
-    const k = sc.id + state.scanWord + '.' + si, now = state.scanEdits[k] || x.c;
-    return '<div class="signrow">' + G([now]) + '<div><span class="mono">' + esc(CODE(now)) + '</span> ' + (state.scanEdits[k] ? '<span class="pill">changed by you</span>' : (S.conf ? '<span class="conf c-' + cc(x.conf, x.status) + '">' + pct(x.conf) + '</span> ' : '') + (x.status !== 'intact' ? '<span class="pill' + (x.status === 'restored' ? ' g' : '') + '">' + x.status + '</span>' : '')) +
-      (x.alts.length ? '<div class="alts" style="margin-top:4px">' + x.alts.map(a => '<button type="button" data-alt="' + k + '|' + a[0] + '" aria-pressed="' + (now === a[0]) + '"><span class="gl sm">' + SG[a[0]].ch + '</span>' + esc(CODE(a[0])) + (S.conf ? ' ' + pct(a[1]) : '') + '</button>').join('') + '</div>' : '') + '</div></div>';
+  h += '<p class="eyebrow">Signs in the selected word</p><div>' + sc.signs.slice(cw.at, cw.at + cw.n).map((x, k) => {
+    const i = cw.at + k, c = cc(x.conf), last = i === sc.signs.length - 1;
+    const state1 = x.orig == null ? '<span class="pill">added by you</span>' : (x.c !== x.orig ? '<span class="pill">changed by you</span>' : (S.conf ? '<span class="conf c-' + c + '">' + pct(x.conf) + ' ' + CCWORD[c] + '</span>' : (c !== 'ok' ? '<span class="pill">' + CCWORD[c] + '</span>' : '')));
+    return '<div class="signrow"><span class="gl">' + chOf(x.c) + '</span><div><span class="mono">' + esc(scCode(x.c)) + '</span> ' + state1 +
+      (x.alts.length > 1 ? '<div class="alts" style="margin-top:4px">' + x.alts.map(a => '<button type="button" data-alt="' + i + '|' + a[0] + '" aria-pressed="' + (x.c === a[0]) + '"><span class="gl sm">' + chOf(a[0]) + '</span>' + esc(CODE(a[0])) + (S.conf ? ' ' + pct(a[1]) : '') + '</button>').join('') + '</div>' : '') +
+      '<div class="edits"><button type="button" class="secondary" data-sdel="' + i + '">Delete</button><button type="button" class="secondary" data-sins="' + i + '" aria-label="Insert a lost sign before this sign">Insert ▨ before</button>' + (last ? '<button type="button" class="secondary" data-sins="' + (i + 1) + '" aria-label="Insert a lost sign after this sign">Insert ▨ after</button>' : '') + '</div></div></div>';
   }).join('') + '</div>';
-  if (S.conf) h += '<div class="legend"><span class="c-ok">■ sure</span><span class="c-warn">■ uncertain</span><span class="c-bad">■ doubtful</span><span class="c-guess">■ restored by the app</span></div>';
+  if (S.conf) h += '<div class="legend"><span class="c-ok">■ sure</span><span class="c-warn">■ uncertain</span><span class="c-bad">■ doubtful</span></div>';
   h += '<div style="display:flex;flex-wrap:wrap;gap:8px"><button type="button" class="primary" data-act="scanlook">Look up this reading</button><button type="button" class="secondary" data-act="scansuggest"' + (edited ? '' : ' disabled') + '>Send correction</button></div>';
-  if (!edited) h += '<p class="note">Is a sign wrong? Pick another candidate above, then send the correction.</p>';
+  if (!edited) h += '<p class="note">Is a sign wrong? Pick another candidate, delete it or insert a lost sign, then send the correction.</p>';
+  h += '<p class="note">Read on this device in ' + (sc.ms / 1000).toFixed(1) + ' s. The photo is not uploaded.</p>';
   el.innerHTML = h;
 }
 
@@ -3703,9 +4213,10 @@ const OPT = {
   lang: ['Language of translations', [['en', 'English']], 'English only for now. More languages are added as data, and searching by meaning in Text follows the language chosen here.'],
   detail: ['Detail level', [['basic', 'Basic'], ['full', 'Full analysis']], 'Everything is in the database either way. This only decides what is open at first.'],
   trans: ['Translation', [['free', 'Free'], ['literal', 'Literal'], ['both', 'Both']], ''],
-  trad: ['Grammar terms', [['gardiner', 'Gardiner'], ['standard', 'Standard theory'], ['allen', 'Allen']], 'The same form has a different name in each tradition.'],
+  trad: ['Grammar terms', [['gardiner', 'Gardiner'], ['standard', 'Standard (TLA)'], ['allen', 'Allen']], 'The same form has a different name in each tradition. At the Basic detail level a plain explanation is shown as well.'],
   scheme: ['Transliteration', [['gardiner', 'Gardiner (ỉ, ḳ, sḏm.f)'], ['tla', 'TLA (j, q, sḏm=f)'], ['mdc', 'MdC (ASCII, sDm=f)']], 'Suffix pronouns are joined with a dot in Gardiner and with = in the other two.'],
-  dir: ['Writing direction', [['ltr', 'Left to right'], ['rtl', 'Right to left']], 'Right to left mirrors the signs, as on the monuments.'],
+  dir: ['Writing direction', [['ltr', 'Left to right'], ['rtl', 'Right to left']], 'Right to left mirrors the signs, as on the monuments. Lines that the source writes from right to left are shown that way; this setting reverses every line.'],
+  layout: ['Sign layout', [['source', 'As in the source'], ['row', 'In a row'], ['quad', 'In quadrats']], 'For words and sentences from the database. What you write yourself is always shown as you wrote it. The sources write everything in a row; In quadrats lets the app stack small signs.'],
   conf: ['Confidence on photos', [['true', 'Show'], ['false', 'Hide']], ''],
 };
 function renderSettings() {
@@ -3713,7 +4224,7 @@ function renderSettings() {
     OPT[k][1].map(o => '<option value="' + o[0] + '"' + (String(S[k]) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select>' + (OPT[k][2] ? '<small>' + OPT[k][2] + '</small>' : '') + '</div>').join('');
 }
 /* Historikken er en anden rude i samme skuffe: skuffen vokser til hele skærmen og tilbage igen. */
-const PANES = { hist: ['#dhist', 'History'], help: ['#dhelp', 'Help'], set: ['#dset', 'Settings'] };
+const PANES = { hist: ['#dhist', 'History'], help: ['#dhelp', 'Help'], set: ['#dset', 'Settings'], src: ['#dsrc', 'Sources and licence'] };
 function setDrawerPane(name) {
   name = name || null; state.drawerPane = name; state.drawerHist = name === 'hist';
   $('#drawer').classList.toggle('pane', !!name); $('#dmenu').inert = !!name;
@@ -3721,9 +4232,23 @@ function setDrawerPane(name) {
   $('#drawer').setAttribute('aria-label', name ? PANES[name][1] : 'Menu');
   if (name === 'hist') { renderHist(); trace('Historik'); step(['search_history'], 'De seneste ' + S.hist + ' søgninger hentes, nyeste først, med søgetype og den skrevne tekst.'); }
   if (name === 'set') { renderSettings(); trace('Indstillinger'); step(['user_setting'], 'Brugerens indstillinger hentes. Den lokale gæst har sin egen række.'); }
+  if (name === 'src') { renderSources(); trace('Kilder og licens'); step(['source', 'source_link'], 'Kilderne hentes med citat, licens, licenslink, hvad appen har ændret, og art.'); }
   if (name === 'help') { renderHelp(); trace('Hjælp'); step([], 'Hjælpesiden er fast tekst i appen. Eksemplerne er tegnet med de samme markeringer som i resultaterne. Intet hentes fra databasen.'); }
   if (!name) $('#histcount').textContent = state.hist.length ? String(state.hist.length) : '';
   layout();
+}
+/* Beslutning 22: kilderne og deres licenser, bygget af tabellen source. */
+const SRCKIND = [['dataset', 'Data sets'], ['machine', 'Machine translation'], ['own', "The app's own lists"], ['publication', 'Publications cited in the dictionary']];
+function renderSources() {
+  const L = Object.values(DB.SOURCES), a = (u, t) => u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(t || u) + ' ↗</a>' : '';
+  const one = x => '<div class="srcsec"><p><b>' + esc(x.abbr) + '</b> · ' + esc(x.citation || '') + '</p>' +
+    (x.license ? '<p class="note">Licence: ' + (x.licenseUrl ? a(x.licenseUrl, x.license) : esc(x.license)) + '</p>' : '') +
+    (x.changes ? '<p class="note">What the app changed: ' + esc(x.changes) + '</p>' : '') + (x.url ? '<p class="note">' + a(x.url, 'Where to get it') + '</p>' : '') + '</div>';
+  $('#sources').innerHTML = '<p class="note">Everything the app shows comes from these sources. Each keeps its own licence. At the Full analysis detail level every result ends with a source line and a link to the entry at the source.</p>' +
+    SRCKIND.map(k => { const xs = L.filter(x => x.kind === k[0]); if (!xs.length) return '';
+      return '<section class="hsec"><h3>' + k[1] + '</h3>' + (k[0] === 'publication' ? '<p class="note">Cited as references in the word entries. Nothing from them is copied.</p>' + xs.map(x => '<p class="note"><b>' + esc(x.abbr) + '</b> · ' + esc(x.citation || '') + '</p>').join('') : xs.map(one).join('')) + '</section>'; }).join('') +
+    (L.some(x => !SRCKIND.some(k => k[0] === x.kind)) ? '<section class="hsec"><h3>Other</h3>' + L.filter(x => !SRCKIND.some(k => k[0] === x.kind)).map(one).join('') + '</section>' : '') +
+    '<section class="hsec"><h3>Fonts and software</h3><p class="note">Signs: Noto Sans Egyptian Hieroglyphs and NewGardiner, both SIL Open Font License 1.1. Text: IBM Plex Sans and Mono, Gentium Book Plus, SIL Open Font License 1.1. Database: SQLite (public domain). Photo recognition: the app\'s own model, trained on signs drawn with these fonts; it runs on this device.</p></section>';
 }
 function setDrawerHist(on) { setDrawerPane(on ? 'hist' : null); }
 /* Hjælpen findes kun her: farver, markeringer og taster forklaret med et lille eksempel hver. */
@@ -3751,6 +4276,32 @@ function renderHelp() {
       row('<span class="pill">known</span>', 'Known', 'Recorded in the database with its source.'),
       row('<span class="pill g">filled in</span>', 'Filled in', 'Signs set in from a known sentence because you asked for it.'),
       row('<span class="pill g">agreement</span>', 'Agreement', 'Gender or number does not fit. The reading is shown anyway.')]) +
+    sec('How sure a sentence result is', [
+      row('<span class="pill">found in the sources</span>', 'Found in the sources', 'The exact sentence is in a text in the database.'),
+      row('<span class="pill g">composed</span>', 'Composed from known words and a known pattern', 'Not in the sources. Every word is known, and together they fit a known grammatical pattern.'),
+      row('<span class="pill g">guess</span>', 'Guess', 'Not in the sources, and no known pattern fits. The words are read one by one.')]) +
+    sec('Where it comes from', [
+      row('<span class="pill">machine-translated</span>', 'Machine-translated', 'English made by machine from the German of the source. Not yet checked. Suggest a correction under the translation.'),
+      row('<span>house<sup class="mtm">MT</sup></span>', 'MT after a word', 'This meaning was translated by machine.'),
+      row('<span>Haus<sup class="mtm">DE</sup></span>', 'Language code', "Not yet translated into English. You see the source's own wording, here German."),
+      row('<span class="note">Original ›</span>', 'Original translation', "At the Full analysis level: the source's own wording, in its language, under every translation that has one."),
+      row(mk('computed'), 'computed', 'Worked out by the app from the data, not stated by the source: the role of a word, the function of a sign, a value found in the texts, the direction of a line.'),
+      row(mk('unchecked'), 'unchecked', "From the app's own lists, for example an English title or a value in the sign list. Not yet checked by an Egyptologist."),
+      row(mk('reconstructed'), 'reconstructed spelling', "The source does not record the signs of this word. The app shows the word's usual spelling, coloured as signs you did not write. Never used for what you type or photograph."),
+      row(mk('estimated'), 'estimated', 'The language stage of a text, estimated by the app from its date, corpus and vocabulary.'),
+      row('<span class="note">Also in</span>', 'Also in', 'Other copies of the same passage. Tap one to open it.'),
+      row('<span class="note">Source ↗</span>', 'Source line', 'At the Full analysis level: the source of a result, its licence and a link to the entry at the source. All sources are listed under Sources and licence in the menu.')]) +
+    sec('Meanings', [
+      row('<span><b class="sense-hi">house</b>; temple</span>', 'Bold meaning', 'The meaning in this sentence, given by the source or worked out by the app.'),
+      row('<span><b class="guess-text">house</b>; temple</span>', 'Yellow meaning', 'For your own input: the most frequent meaning of the word. A guess.'),
+      row('<span class="pill">subject</span>', 'Role', 'At the Full analysis level: what the word does in a sentence from the database. Worked out by the app.')]) +
+    sec('Signs and lines', [
+      row(gl(ucode('U+13460')), 'Code in a frame', "No font draws this sign, so its code is shown. Also the source's own code for signs it does not encode."),
+      row(gl(ch('A1') + '<sup class="vmark">v</sup>'), 'Small v', 'A variant of a sign. It is drawn like its base sign.'),
+      row('<span class="gl sm rtl">' + ch('G17') + ch('D21') + '</span>', 'Mirrored line', 'The source writes this line from right to left. Settings → Writing direction reverses every line. What you write is always shown as you wrote it.'),
+      row(gl((q => q.every(c => c && INK[c]) ? quadSVG(q, { t: 'v', k: [0, 1] }) : ch('N35') + ch('X1'))([GCODE('N35'), GCODE('X1')])), 'Stacked signs', 'Settings → Sign layout → In quadrats lets the app stack small signs. The sources write everything in a row.')]) +
+    sec('Photo', [
+      row('<span class="pill g">Experimental</span>', 'Experimental', 'Reading from a photo works on clean printed pages and drawn copies, not yet on carved or worn walls. Uncertain signs are marked; tap one to correct it.')]) +
     sec('Name frames', Object.keys(ENCL).map(k => row(gl('<span class="encl ' + k + '">' + ch('N5') + '</span>'), esc(ENCL[k].label), cap(ENCL[k].what) + '. The signs inside are read as one name.'))) +
     sec('Keyboard', [
       row(key($('#kfirst').dataset.act === 'lacuna' ? '<span class="lac">▨</span>' : '▨'), 'Lost', 'Marks one lost sign. Hold it for lost signs or a lost word.'),
@@ -3848,8 +4399,8 @@ document.addEventListener('click', e => {
   if (d.read) { saveScroll(); return show(textReads[Number(d.read)].render); }
   if (d.sortopen) return setSortMenu(b);
   if (d.sortpick) { const p = d.sortpick.split(':'); return pickSort(p[0], p[1]); }
-  if (d.mode) return d.mode === S.mode && state.view === 'search' ? resetMode() : setMode(d.mode);
-  if (d.view) return setView(d.view);
+  if (d.mode) return d.mode === S.mode && state.view === 'search' ? clearWithUndo() : setMode(d.mode);
+  if (d.view) return d.view === 'search' && state.view === 'search' ? clearWithUndo() : setView(d.view);
   if (d.tab) return kbGo(KBP.findIndex(p => p.cat === d.tab), true);
   if (d.lost) return addLost(d.lost);
   if (d.quad) { const p = d.quad.split('.').map(Number); return applyQuad(p[0], p[1]); }
@@ -3867,9 +4418,17 @@ document.addEventListener('click', e => {
   if (d.favopen) { const f = state.favs.find(x => favKey(x) === d.favopen); trace('Åbner favorit'); return load(f.mode, f.codes, f.quads); }
   if (d.favdel) { state.favs = state.favs.filter(x => favKey(x) !== d.favdel); trace('Favorit'); step(['favorite'], 'Rækken slettes.'); return renderSaved(); }
   if (d.hist) { const x = state.hist[Number(d.hist)]; return load(x.mode, x.codes, x.quads); }
-  if (d.scan) { state.scan = d.scan; state.scanWord = 0; trace('Foto: ' + d.scan); step(['scan', 'scan_line'], 'Billedet og den aflæste linje gemmes med samlet sikkerhed.'); step(['scan_word', 'scan_word_candidate'], 'Tegnene samles til ord, hvert med sin sikkerhed og alternative bud.'); step(['scan_sign', 'scan_sign_candidate', 'scan_group'], 'Hvert tegn har placering, sikkerhed, status og bud. En kartouche er en ramme om en gruppe.'); return renderPhoto(); }
+  if (d.scan) { const m = SAMPLES.find(x => x.id === d.scan); trace('Foto: ' + m.title); return readPhoto(m); }
   if (d.sw) { state.scanWord = Number(d.sw); return renderPhoto(); }
-  if (d.alt) { const p = d.alt.split('|'), sc = D.scans.find(s => p[0].indexOf(s.id) === 0), orig = sc.words[Number(p[0].slice(sc.id.length).split('.')[0])].signs[Number(p[0].split('.')[1])].c; if (p[1] === orig) delete state.scanEdits[p[0]]; else state.scanEdits[p[0]] = p[1]; return renderPhoto(); }
+  if (d.alt) { const p = d.alt.split('|'), sc = SCANS[state.scan], x = sc && sc.signs[Number(p[0])]; if (x) x.c = p[1]; return renderPhoto(); }
+  if (d.sdel) { const sc = SCANS[state.scan], i = Number(d.sdel), x = sc && sc.signs[i]; if (!x) return; sc.signs.splice(i, 1); if (x.orig != null) sc.dels++; trace('Foto: tegn slettet'); return renderPhoto(); }
+  if (d.sins) { const sc = SCANS[state.scan], i = Number(d.sins), ref = sc && (sc.signs[i] || sc.signs[i - 1]); if (!ref) return; sc.signs.splice(i, 0, { c: '?', orig: null, conf: 1, status: 'inserted', alts: [], line: ref.line, box: null }); trace('Foto: tabt tegn sat ind'); return renderPhoto(); }
+  if (d.suggest) { const g = SUGG[d.suggest], host = b.closest('p') || b, nx = host.nextElementSibling; if (!g) return; if (nx && nx.classList.contains('sugform')) return nx.remove();
+    host.insertAdjacentHTML('afterend', '<div class="sugform"><label class="eyebrow" for="sf-' + d.suggest + '">Your correction</label><textarea id="sf-' + d.suggest + '">' + esc(g.text) + '</textarea>' + (g.orig ? '<small class="note">The source (' + esc(g.orig.langName) + '): ' + esc(g.orig.text) + '</small>' : '') + '<div class="btns"><button type="button" class="primary" data-sugsend="' + d.suggest + '">Send</button><button type="button" class="secondary" data-sugcancel="1">Cancel</button></div></div>');
+    trace('Rettelsesforslag'); step([], 'Formularen er udfyldt med maskinoversættelsen' + (g.orig ? ' og kildens egen ordlyd' : '') + '. Brugeren retter teksten og sender.'); return host.nextElementSibling.querySelector('textarea').focus(); }
+  if (d.sugsend) { const f = b.closest('.sugform'), v = f.querySelector('textarea').value.trim(), g = SUGG[d.sugsend]; f.remove(); if (!v || v === g.text) return toast('Nothing changed');
+    state.sugg++; trace('Rettelse sendt'); step(['suggestion', 'suggestion_item'], 'Ny række med status "new": ' + g.ref.kind + ' ' + g.ref.id + ', den maskinoversatte tekst og brugerens forslag. Indholdet ændres først, når forslaget er godkendt.'); return toast('Correction queued for review'); }
+  if (d.sugcancel) return b.closest('.sugform').remove();
   switch (d.act) {
     case 'back': if (isText(S.mode)) backText(); else if (state.repl != null) return replCut(); else popSign(); return renderField();
     case 'clear': state.buf = []; state.quads = []; state.text = ''; state.cur = null; state.tcur = null; return renderField();
@@ -3884,13 +4443,15 @@ document.addEventListener('click', e => {
     case 'history': return setDrawerPane('hist');
     case 'help': return setDrawerPane('help');
     case 'settings': return setDrawerPane('set');
+    case 'sources': return setDrawerPane('src');
+    case 'undo': return runUndo();
     case 'histback': case 'paneback': return setDrawerPane(null);
     case 'pop': state.stack.pop(); return rerender();
     case 'scanback': state.scan = null; return renderPhoto();
-    case 'scanlook': { const sc = D.scans.find(s => s.id === state.scan), ctx = scanCtxOf(sc); state.scanCtx = ctx; return load('sentence', ctx.codes, ctx.quads); }
+    case 'scanlook': { const sc = SCANS[state.scan]; if (!sc || !sc.signs.length) return; const ctx = scanCtxOf(sc); state.scanCtx = ctx; return load('sentence', ctx.codes, ctx.quads); }
     case 'scanopen': { const id = state.scanCtx && state.scanCtx.id; setOverlay('sheet'); if (id) { state.scan = id; renderPhoto(); } return; }
     case 'scansuggest': {
-      const n = Object.keys(state.scanEdits).filter(k => k.indexOf(state.scan) === 0).length; state.sugg++;
+      const n = scanEdited(SCANS[state.scan]); state.sugg++;
       trace('Rettelse sendt'); step(['suggestion'], 'Ny række med status "new" og en beskåret kopi af billedet.'); step(['suggestion_item'], n + ' punkt(er): udsnittets placering, appens bud og dit forslag. Punktet peger ikke på scanningen.'); step([], 'Rettelsen venter på godkendelse. Intet i indholdet ændres endnu.');
       return toast('Correction queued for review (' + n + ' sign' + (n > 1 ? 's' : '') + ')');
     }
@@ -3900,6 +4461,9 @@ document.addEventListener('click', e => {
 document.addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('scanbox') && state.scanCtx) state.scanCtx.open = e.target.open; }, true);
 document.addEventListener('toggle', e => { const el = e.target; if (el.classList && el.classList.contains('part') && lastLine && lastLine.parts[el.dataset.pk]) lastLine.parts[el.dataset.pk].open = el.open; }, true);
 document.addEventListener('change', e => {
+  if (e.target.id === 'photofile') { const f = e.target.files && e.target.files[0]; if (!f) return; if (photoURL) URL.revokeObjectURL(photoURL); photoURL = URL.createObjectURL(f);
+    trace('Foto valgt'); return readPhoto({ id: 'U' + (++state.seq), title: 'Your photo', sub: f.name, url: photoURL }, f); }
+  if (e.target.id === 'photodir') { state.photoDir = e.target.value; return; }
   const k = e.target.dataset && e.target.dataset.set; if (!k) return;
   S[k] = k === 'conf' ? e.target.value === 'true' : (k === 'hist' ? Number(e.target.value) : e.target.value);
   if (k === 'hist' && state.hist.length > S.hist) state.hist.length = S.hist;
@@ -4019,6 +4583,7 @@ if (APP) {
   ['click', 'change', 'keydown'].forEach(ev => document.addEventListener(ev, () => { clearTimeout(pt); pt = setTimeout(persist, 250); setTimeout(syncBack, 0); }));
   window.addEventListener('pagehide', persist);
   window.addEventListener('popstate', () => { if (backDrop) { backDrop = false; backGuard = false; return; } backGuard = false; doBack(); syncBack(); });
+  /* koden her kører først, når databasen er åbnet, så load-hændelsen er som regel allerede sket */
   /* Ny udgave: når appen åbnes eller kommer frem igen, ser den efter en ny sw.js. Findes der en, overtager den, og siden genindlæses én gang med de nye filer. */
   if ('serviceWorker' in navigator) {
     const hadSW = !!navigator.serviceWorker.controller; let reloaded = false;
@@ -4038,7 +4603,10 @@ requestAnimationFrame(() => requestAnimationFrame(() => { layout.ready = true; l
 const remeasure = () => { measureInk(); renderField(); rerender(); };
 if (document.fonts && document.fonts.load) document.fonts.load('32px ' + FAM, (KBKEYS.common || []).map(c => SG[c].ch).filter(Boolean).join('') || '\u{13000}').then(remeasure, () => {});
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasure);
-window.__app = { load, restart, renderField, renderRecent, S, state, analyse, D, DB, sortKey, INK, QUADS, quadSVG, canBack, GCODE, CODE };
+/* F: the corpus model (word pairs from the sentences, DB.LM) is built in small slices while the page is idle, so the first sentence
+   search does not have to wait for it (it finishes at once if a search needs it earlier) */
+(function lmIdle() { if (DB.LM.step(1000)) return; if (window.requestIdleCallback) requestIdleCallback(lmIdle, { timeout: 400 }); else setTimeout(lmIdle, 40); })();
+window.__app = { load, restart, renderField, renderRecent, S, state, analyse, D, DB, sortKey, INK, QUADS, quadSVG, canBack, GCODE, CODE, refresh, setMode, setView, setDrawerPane, setOverlay, openLemma, openSentence, openSign, rerender };
 
 }
 boot();
@@ -4066,7 +4634,7 @@ boot();
 </div>
 <script>
 (function () {
-  const LOG = [{"version": "2026-10-10.3", "items": ["Settings has a Check for updates button, so you can get a new version straight away.", "Fixed: the app again stores itself on the phone, so it opens without internet and updates itself."]}, {"version": "2026-10-10.2", "title": "The whole dictionary", "items": ["The app now uses the full database: 5,364 signs, 31,643 words and 47,087 sentences from 7,405 texts.", "The first start downloads the dictionary once (about 66 MB, so Wi-Fi is a good idea). After that it opens from the copy on your phone, also without internet.", "Signs from Unicode's extended list are now shown with the NewGardiner font."]}, {"version": "2026-10-10", "items": ["After an update, this window shows what has changed."]}, {"version": "2026-10-06", "title": "New version of the app", "items": ["A menu with History, Help and Settings (the button at the top right).", "Recently used signs on the keyboard.", "Hold a finger on what you have written to magnify it and move the cursor.", "Sort menus in the Dictionary and in Saved.", "The app now updates itself when a new version is published."]}];
+  const LOG = [{"version": "2026-10-12", "title": "Read from a photo", "items": ["The camera button now really recognises the signs in a photo, on the phone and without internet. Two example photos are included to try it.", "Better sentence reading: the app chooses words by how they are used in the known texts.", "Words show example sentences, other spellings grouped by form, and where the information comes from, with a link to the source.", "Names show the most important facts (for kings: dynasty and years). \"Did you mean\" suggests a similar sign when nothing is found.", "An updated dictionary. It is downloaded again once (about 66 MB)."]}, {"version": "2026-10-10.3", "items": ["Settings has a Check for updates button, so you can get a new version straight away.", "Fixed: the app again stores itself on the phone, so it opens without internet and updates itself."]}, {"version": "2026-10-10.2", "title": "The whole dictionary", "items": ["The app now uses the full database: 5,364 signs, 31,643 words and 47,087 sentences from 7,405 texts.", "The first start downloads the dictionary once (about 66 MB, so Wi-Fi is a good idea). After that it opens from the copy on your phone, also without internet.", "Signs from Unicode's extended list are now shown with the NewGardiner font."]}, {"version": "2026-10-10", "items": ["After an update, this window shows what has changed."]}, {"version": "2026-10-06", "title": "New version of the app", "items": ["A menu with History, Help and Settings (the button at the top right).", "Recently used signs on the keyboard.", "Hold a finger on what you have written to magnify it and move the cursor.", "Sort menus in the Dictionary and in Saved.", "The app now updates itself when a new version is published."]}];
   const SEEN = 'hiero-news-seen', STORE = 'hiero-proto-v1';
   if (!LOG.length) return;
   const latest = LOG[0].version;
@@ -4096,7 +4664,7 @@ boot();
 </style>
 <script>
 (function () {
-  const VERSION = "2026-10-10.3";
+  const VERSION = "2026-10-12";
   const host = document.getElementById('settings');
   if (!host) return;
   const label = v => { const d = new Date(String(v).slice(0, 10) + 'T12:00:00'); return isNaN(d) ? v : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); };
