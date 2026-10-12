@@ -626,6 +626,9 @@ body.app .appbar{padding-top:calc(8px + env(safe-area-inset-top))}
 body.app .tabs{padding-bottom:env(safe-area-inset-bottom)}
 body.app .kbd{padding-bottom:calc(10px + env(safe-area-inset-bottom))}
 body.app button{touch-action:manipulation}
+/* Ruderne i menuen og fotoarket går helt ned bag telefonens navigationslinje: plads nederst, så det sidste kan rulles frem. */
+body.app .dpane .pad,body.app .sheet .pad{padding-bottom:max(48px,calc(24px + env(safe-area-inset-bottom)))}
+body.app .who{padding-bottom:calc(10px + env(safe-area-inset-bottom))}
 /* Tasterne følger skærmens højde, så tastaturet fylder omtrent det samme på en høj telefon som på en lav. */
 body.app .phone{--kh:clamp(54px,7.4dvh,72px)}
 body.app #menubtn{top:calc(8px + env(safe-area-inset-top))}
@@ -884,11 +887,14 @@ async function boot() {
     bootProgress('Opening the dictionary', 'Looking for a copy on this device', null);
     const sqP = loadSqlite();      /* SQLite hentes samtidig med databasen */
     let man = null, manErr = null;
-    try { man = await (await fetchOk(DATA_DIR + 'manifest.json')).json(); } catch (e) { manErr = e; }
+    const manP = fetchOk(DATA_DIR + 'manifest.json').then(r => r.json()).then(m => { man = m; }, e => { manErr = e; });
     const meta = await idbGet(IDB.meta);
+    await (meta ? Promise.race([manP, new Promise(r => setTimeout(r, 1500))]) : manP);
     let bytes = null;
     if (meta && meta.sha256 && (!man || meta.sha256 === man.sha256)) {
-      const b = await idbGet(IDB.bytes);
+      let b = await idbGet(IDB.bytes); const wasBlob = b instanceof Blob;
+      if (wasBlob) b = b.size === meta.bytes ? new Uint8Array(await b.arrayBuffer()) : null;
+      else if (b && b.byteLength === meta.bytes) { const keep = b instanceof Uint8Array ? b : new Uint8Array(b); setTimeout(() => idbPut([[IDB.bytes, new Blob([keep])]]), 3000); }
       if (b && b.byteLength === meta.bytes) { bytes = b instanceof Uint8Array ? b : new Uint8Array(b); BOOT.source = 'cache'; }
     }
     mark('cache');
@@ -913,7 +919,7 @@ async function boot() {
     if (performance.memory) BOOT.jsHeap = performance.memory.usedJSHeapSize;
     if (fresh && man) {      /* gemmes bagefter, så appen ikke venter på lageret */
       const sha = man.sha256, n = bytes.length;
-      setTimeout(() => { idbPut([[IDB.bytes, bytes], [IDB.meta, { sha256: sha, bytes: n, at: Date.now() }]]).then(ok => { BOOT.cached = ok; bytes = null; }); }, 500);
+      setTimeout(() => { idbPut([[IDB.bytes, new Blob([bytes])], [IDB.meta, { sha256: sha, bytes: n, at: Date.now() }]]).then(ok => { BOOT.cached = ok; bytes = null; }); }, 500);
     } else bytes = null;
   } catch (e) {
     bootError(e && e.message ? e.message : String(e));
@@ -4670,7 +4676,7 @@ boot();
 </div>
 <script>
 (function () {
-  const LOG = [{"version": "2026-10-12.2", "items": ["A clearer start screen while the dictionary downloads and opens, with progress in percent.", "This window now waits until the app is ready."]}, {"version": "2026-10-12", "title": "Read from a photo", "items": ["The camera button now really recognises the signs in a photo, on the phone and without internet. Two example photos are included to try it.", "Better sentence reading: the app chooses words by how they are used in the known texts.", "Words show example sentences, other spellings grouped by form, and where the information comes from, with a link to the source.", "Names show the most important facts (for kings: dynasty and years). \"Did you mean\" suggests a similar sign when nothing is found.", "An updated dictionary. It is downloaded again once (about 66 MB)."]}, {"version": "2026-10-10.3", "items": ["Settings has a Check for updates button, so you can get a new version straight away.", "Fixed: the app again stores itself on the phone, so it opens without internet and updates itself."]}, {"version": "2026-10-10.2", "title": "The whole dictionary", "items": ["The app now uses the full database: 5,364 signs, 31,643 words and 47,087 sentences from 7,405 texts.", "The first start downloads the dictionary once (about 66 MB, so Wi-Fi is a good idea). After that it opens from the copy on your phone, also without internet.", "Signs from Unicode's extended list are now shown with the NewGardiner font."]}, {"version": "2026-10-10", "items": ["After an update, this window shows what has changed."]}, {"version": "2026-10-06", "title": "New version of the app", "items": ["A menu with History, Help and Settings (the button at the top right).", "Recently used signs on the keyboard.", "Hold a finger on what you have written to magnify it and move the cursor.", "Sort menus in the Dictionary and in Saved.", "The app now updates itself when a new version is published."]}];
+  const LOG = [{"version": "2026-10-12.3", "items": ["The app starts faster: it reads the dictionary on the phone straight away instead of waiting for the internet, and the copy is read up to ten times faster.", "The Check for updates button in Settings is no longer hidden behind the phone's navigation bar."]}, {"version": "2026-10-12.2", "items": ["A clearer start screen while the dictionary downloads and opens, with progress in percent.", "This window now waits until the app is ready."]}, {"version": "2026-10-12", "title": "Read from a photo", "items": ["The camera button now really recognises the signs in a photo, on the phone and without internet. Two example photos are included to try it.", "Better sentence reading: the app chooses words by how they are used in the known texts.", "Words show example sentences, other spellings grouped by form, and where the information comes from, with a link to the source.", "Names show the most important facts (for kings: dynasty and years). \"Did you mean\" suggests a similar sign when nothing is found.", "An updated dictionary. It is downloaded again once (about 66 MB)."]}, {"version": "2026-10-10.3", "items": ["Settings has a Check for updates button, so you can get a new version straight away.", "Fixed: the app again stores itself on the phone, so it opens without internet and updates itself."]}, {"version": "2026-10-10.2", "title": "The whole dictionary", "items": ["The app now uses the full database: 5,364 signs, 31,643 words and 47,087 sentences from 7,405 texts.", "The first start downloads the dictionary once (about 66 MB, so Wi-Fi is a good idea). After that it opens from the copy on your phone, also without internet.", "Signs from Unicode's extended list are now shown with the NewGardiner font."]}, {"version": "2026-10-10", "items": ["After an update, this window shows what has changed."]}, {"version": "2026-10-06", "title": "New version of the app", "items": ["A menu with History, Help and Settings (the button at the top right).", "Recently used signs on the keyboard.", "Hold a finger on what you have written to magnify it and move the cursor.", "Sort menus in the Dictionary and in Saved.", "The app now updates itself when a new version is published."]}];
   const SEEN = 'hiero-news-seen', STORE = 'hiero-proto-v1';
   if (!LOG.length) return;
   const latest = LOG[0].version;
@@ -4702,7 +4708,7 @@ boot();
 </style>
 <script>
 (function () {
-  const VERSION = "2026-10-12.2";
+  const VERSION = "2026-10-12.3";
   const host = document.getElementById('settings');
   if (!host) return;
   const label = v => { const d = new Date(String(v).slice(0, 10) + 'T12:00:00'); return isNaN(d) ? v : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); };
