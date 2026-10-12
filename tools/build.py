@@ -30,6 +30,25 @@ AUTO_UPDATE = """  /* Ny udgave: når appen åbnes eller kommer frem igen, ser d
 """
 
 
+# Hurtigere start (byttes ind i prototypens boot; bygningen stopper, hvis prototypen er ændret her).
+#  1. Kopien på telefonen læses, mens appen spørger nettet, om databasen er ny; har den en kopi, venter den højst 1,5 s på svar.
+#  2. Kopien gemmes som en Blob, der læses 5-10 gange hurtigere end en Uint8Array og uden at låse skærmen. Gamle kopier omgemmes.
+BOOT_PATCHES = [
+    ("""    try { man = await (await fetchOk(DATA_DIR + 'manifest.json')).json(); } catch (e) { manErr = e; }
+    const meta = await idbGet(IDB.meta);
+""", """    const manP = fetchOk(DATA_DIR + 'manifest.json').then(r => r.json()).then(m => { man = m; }, e => { manErr = e; });
+    const meta = await idbGet(IDB.meta);
+    await (meta ? Promise.race([manP, new Promise(r => setTimeout(r, 1500))]) : manP);
+"""),
+    ("""      const b = await idbGet(IDB.bytes);
+      if (b && b.byteLength === meta.bytes) {""", """      let b = await idbGet(IDB.bytes); const wasBlob = b instanceof Blob;
+      if (wasBlob) b = b.size === meta.bytes ? new Uint8Array(await b.arrayBuffer()) : null;
+      else if (b && b.byteLength === meta.bytes) { const keep = b instanceof Uint8Array ? b : new Uint8Array(b); setTimeout(() => idbPut([[IDB.bytes, new Blob([keep])]]), 3000); }
+      if (b && b.byteLength === meta.bytes) {"""),
+    ("""idbPut([[IDB.bytes, bytes], [IDB.meta,""", """idbPut([[IDB.bytes, new Blob([bytes])], [IDB.meta,"""),
+]
+
+
 def cut(text, start, end, what):
     i = text.find(start)
     j = text.find(end, i)
@@ -59,6 +78,10 @@ def main():
     if len(reg.findall(body)) != 1:
         sys.exit('Fandt ikke præcis én registrering af sw.js i prototypen')
     body = reg.sub(lambda m: AUTO_UPDATE, body)
+    for old, new in BOOT_PATCHES:
+        if body.count(old) != 1:
+            sys.exit('Prototypens indlæsning af databasen er ændret; ret BOOT_PATCHES i tools/build.py:\n' + old)
+        body = body.replace(old, new)
     # Webappen bruger sin egen kopi af SQLite først, så den ikke afhænger af et CDN og virker uden net.
     body = re.sub(r'const SQLITE_URLS = \[("https://[^"]+"), ("vendor/[^"]+")\];', r'const SQLITE_URLS = [\2, \1];', body)
 

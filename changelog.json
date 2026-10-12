@@ -1,5 +1,12 @@
 [
   {
+    "version": "2026-10-12.3",
+    "items": [
+      "The app starts faster: it reads the dictionary on the phone straight away instead of waiting for the internet, and the copy is read up to ten times faster.",
+      "The Check for updates button in Settings is no longer hidden behind the phone's navigation bar."
+    ]
+  },
+  {
     "version": "2026-10-12.2",
     "items": [
       "A clearer start screen while the dictionary downloads and opens, with progress in percent.",
