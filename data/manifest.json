@@ -23,19 +23,23 @@
   },
   {
    "name": "hiero_phone.sqlite.gz.005",
-   "bytes": 8893758
+   "bytes": 11500000
+  },
+  {
+   "name": "hiero_phone.sqlite.gz.006",
+   "bytes": 2024671
   }
  ],
  "part_limit": 11500000,
- "gz_bytes": 66393758,
- "sha256": "1cc0a33aabcd2cf00f301442b8d7f687d9cd60c14e73f63f31b329b3feb049c6",
- "db_bytes": 176603136,
- "db_sha256": "3b47cd0faf679f1553908aae2d6defc341de81bdae9c19ba1001fb94d7630329",
+ "gz_bytes": 71024671,
+ "sha256": "410472d8d47b8c0d5fb86e9a57abe194ea2029bbb4b710c863b511530397e880",
+ "db_bytes": 187478016,
+ "db_sha256": "cda5ba5238e673da09fc8bd50f54508cb650f91d60ec630ac32cf8537c079d3a",
  "source": {
   "path": "full/phone/hiero_phone.sqlite",
-  "bytes": 176603136,
-  "mtime": 1791782958
+  "bytes": 187478016,
+  "mtime": 1792417454
  },
- "built": "2026-10-12T09:43:45",
- "gzip_seconds": 68.4
+ "built": "2026-10-19T15:46:46",
+ "gzip_seconds": 70.1
 }

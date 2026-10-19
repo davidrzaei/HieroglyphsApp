@@ -1,5 +1,13 @@
 [
   {
+    "version": "2026-10-19",
+    "title": "More English translations",
+    "items": [
+      "45,889 sentences now have an English translation, up from 13,141. The new ones are machine-translated from the German of the source and marked as such.",
+      "The dictionary is downloaded again once (about 71 MB, so Wi-Fi is a good idea)."
+    ]
+  },
+  {
     "version": "2026-10-12.3",
     "items": [
       "The app starts faster: it reads the dictionary on the phone straight away instead of waiting for the internet, and the copy is read up to ten times faster.",
