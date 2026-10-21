@@ -1,4 +1,4 @@
-<!-- Startskærmen, mens ordbogen hentes og åbnes: midt på skærmen, et ankh-tegn, en tydelig bjælke med procent, og en løbende bjælke i trinene uden procent. Tastaturet holdes skjult, til appen er klar. -->
+<!-- Startskærmen, mens ordbogen hentes og åbnes: midt på skærmen, et ankh-tegn, en tydelig bjælke med procent, og en løbende bjælke i trinene uden procent. Den ses kun, hvis splashskærmen er væk (fejl og "Try again"). Tastaturet holdes skjult, til appen er klar. -->
 <style>
 .booting .kbd{visibility:hidden}
 #bresults:has(.boot){justify-content:center}
@@ -22,15 +22,41 @@
 </style>
 <script>
 (function () {
-  /* Mens ordbogen åbnes, har siden klassen booting. Andre dele (nyhedsvinduet) venter på hændelsen app-ready. */
-  const root = document.documentElement;
+  /* Mens ordbogen åbnes, har siden klassen booting, og splashskærmen dækker appen. Den viser kun en kort status; når ordbogen
+     hentes første gang, også hvor langt den er. Er appen klar, glider splashskærmen væk, og hændelsen app-ready sendes
+     (nyhedsvinduet venter på den). Går noget galt, fjernes splashskærmen, så fejlen og "Try again" kan ses. */
+  const root = document.documentElement, splash = document.getElementById('splash');
   const B = () => window.__boot;
-  if (!B() || B().phase === 'ready') { window.__appReady = true; return; }
+  const hide = () => { if (!splash || splash.classList.contains('gone')) return; splash.classList.add('gone'); setTimeout(() => { splash.hidden = true; }, 400); };
+  const show = () => { if (!splash) return; splash.hidden = false; void splash.offsetWidth; splash.classList.remove('gone'); };
+  if (!B() || B().phase === 'ready') { hide(); window.__appReady = true; return; }
   root.classList.add('booting');
+  const st = splash && splash.querySelector('.st'), bar = splash && splash.querySelector('.sbar'), fill = bar && bar.querySelector('i');
+  /* En almindelig start viser kun ikon og navn. Hentes ordbogen (første gang eller efter en ny database), vises hvor langt den er.
+     Tager starten usædvanligt lang tid, kommer en lille løbende bjælke frem, så appen ikke ser ud til at stå stille. */
+  let slow = false; setTimeout(() => { slow = true; mirror(); }, 4000);
+  function mirror() {
+    if (!splash) return;
+    const boot = document.querySelector('#bresults .boot'), title = boot && boot.querySelector('.banner b'), pb = boot && boot.querySelector('.bar');
+    const t = title ? title.textContent : '', download = !!pb && /download/i.test(t), fetching = download || /unpack|check/i.test(t);
+    const pct = pb ? Number(pb.getAttribute('aria-valuenow')) || 0 : 0;
+    st.textContent = download ? 'Downloading the dictionary · ' + pct + '%' : fetching ? t : '';
+    bar.hidden = !(fetching || slow);
+    bar.classList.toggle('det', download);
+    fill.style.width = download ? pct + '%' : '';
+  }
+  const res = document.getElementById('bresults');
+  if (res) new MutationObserver(mirror).observe(res, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-valuenow'] });
+  mirror();
+  let last = B().phase;
   const t = setInterval(() => {
-    if (!B() || B().phase !== 'ready') return;
-    clearInterval(t); root.classList.remove('booting');
+    const ph = B() ? B().phase : 'ready';
+    if (ph === 'error' && last !== 'error') hide();      /* tastaturet forbliver skjult, til appen er klar */
+    if (ph === 'loading' && last === 'error') { show(); mirror(); }      /* "Try again" */
+    last = ph;
+    if (ph !== 'ready') return;
+    clearInterval(t); root.classList.remove('booting'); hide();
     window.__appReady = true; window.dispatchEvent(new Event('app-ready'));
-  }, 150);
+  }, 100);
 })();
 </script>

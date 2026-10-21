@@ -1,5 +1,11 @@
 [
   {
+    "version": "2026-10-21",
+    "items": [
+      "The app now opens with a splash screen with its icon while the dictionary is loaded, instead of showing the loading steps."
+    ]
+  },
+  {
     "version": "2026-10-19",
     "title": "More English translations",
     "items": [

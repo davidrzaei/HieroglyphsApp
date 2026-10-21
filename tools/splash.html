@@ -1,0 +1,21 @@
+<!-- Splashskærm: dækker hele appen, mens ordbogen åbnes, så man ikke ser indlæsningen. Samme hvide flade og ikon som telefonens egen startskærm (manifest.webmanifest). Fjernes af tools/boot.html. -->
+<style>
+#splash{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#ffffff;color:#17212b;padding:env(safe-area-inset-top) 24px env(safe-area-inset-bottom);transition:opacity .35s ease,visibility .35s}
+#splash.gone{opacity:0;visibility:hidden;pointer-events:none}
+#splash img{width:112px;height:112px;border-radius:26px;box-shadow:0 6px 20px rgba(31,78,140,.25)}
+#splash b{font-family:"Gentium Book Plus",Georgia,serif;font-size:1.7rem;font-weight:700;letter-spacing:.01em}
+#splash .sp{position:absolute;left:0;right:0;bottom:calc(56px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:8px;font:500 .82rem "IBM Plex Sans",system-ui,sans-serif;color:#5a6876;min-height:40px}
+#splash .sbar[hidden]{display:none}
+#splash .sbar{width:160px;height:4px;border-radius:999px;background:#e3e8ee;overflow:hidden;position:relative}
+#splash .sbar i{position:absolute;top:0;bottom:0;left:0;width:0;border-radius:999px;background:#1f4e8c;transition:width .2s}
+#splash .sbar:not(.det) i{width:35%;animation:splashrun 1.2s ease-in-out infinite}
+@keyframes splashrun{0%{left:-35%}100%{left:100%}}
+@media (prefers-reduced-motion: reduce){#splash .sbar:not(.det) i{animation:none;left:0;width:100%;opacity:.35}}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #splash{background:#17202a;color:#e6ebf0}:root:not([data-theme="light"]) #splash .sp{color:#9aa8b5}:root:not([data-theme="light"]) #splash .sbar[hidden]{display:none}
+#splash .sbar{background:#2f3b47}:root:not([data-theme="light"]) #splash .sbar i{background:#8fb8ee}}
+</style>
+<div id="splash" role="status" aria-live="polite" aria-label="Opening Hieroglyphs">
+  <img src="icons/icon-512.png" alt="">
+  <b>Hieroglyphs</b>
+  <div class="sp"><span class="st"></span><span class="sbar" hidden><i></i></span></div>
+</div>
