@@ -635,6 +635,27 @@ body.app #menubtn{top:calc(8px + env(safe-area-inset-top))}
 </style>
 </head>
 <body class="app">
+<!-- Splashskærm: dækker hele appen, mens ordbogen åbnes, så man ikke ser indlæsningen. Samme hvide flade og ikon som telefonens egen startskærm (manifest.webmanifest). Fjernes af tools/boot.html. -->
+<style>
+#splash{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#ffffff;color:#17212b;padding:env(safe-area-inset-top) 24px env(safe-area-inset-bottom);transition:opacity .35s ease,visibility .35s}
+#splash.gone{opacity:0;visibility:hidden;pointer-events:none}
+#splash img{width:112px;height:112px;border-radius:26px;box-shadow:0 6px 20px rgba(31,78,140,.25)}
+#splash b{font-family:"Gentium Book Plus",Georgia,serif;font-size:1.7rem;font-weight:700;letter-spacing:.01em}
+#splash .sp{position:absolute;left:0;right:0;bottom:calc(56px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:8px;font:500 .82rem "IBM Plex Sans",system-ui,sans-serif;color:#5a6876;min-height:40px}
+#splash .sbar[hidden]{display:none}
+#splash .sbar{width:160px;height:4px;border-radius:999px;background:#e3e8ee;overflow:hidden;position:relative}
+#splash .sbar i{position:absolute;top:0;bottom:0;left:0;width:0;border-radius:999px;background:#1f4e8c;transition:width .2s}
+#splash .sbar:not(.det) i{width:35%;animation:splashrun 1.2s ease-in-out infinite}
+@keyframes splashrun{0%{left:-35%}100%{left:100%}}
+@media (prefers-reduced-motion: reduce){#splash .sbar:not(.det) i{animation:none;left:0;width:100%;opacity:.35}}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #splash{background:#17202a;color:#e6ebf0}:root:not([data-theme="light"]) #splash .sp{color:#9aa8b5}:root:not([data-theme="light"]) #splash .sbar[hidden]{display:none}
+#splash .sbar{background:#2f3b47}:root:not([data-theme="light"]) #splash .sbar i{background:#8fb8ee}}
+</style>
+<div id="splash" role="status" aria-live="polite" aria-label="Opening Hieroglyphs">
+  <img src="icons/icon-512.png" alt="">
+  <b>Hieroglyphs</b>
+  <div class="sp"><span class="st"></span><span class="sbar" hidden><i></i></span></div>
+</div>
 <div class="wrap">
   <header>
     <h1>Hieroglyf-app prototype</h1>
@@ -4619,7 +4640,7 @@ boot();
 })();
 </script>
 
-<!-- Startskærmen, mens ordbogen hentes og åbnes: midt på skærmen, et ankh-tegn, en tydelig bjælke med procent, og en løbende bjælke i trinene uden procent. Tastaturet holdes skjult, til appen er klar. -->
+<!-- Startskærmen, mens ordbogen hentes og åbnes: midt på skærmen, et ankh-tegn, en tydelig bjælke med procent, og en løbende bjælke i trinene uden procent. Den ses kun, hvis splashskærmen er væk (fejl og "Try again"). Tastaturet holdes skjult, til appen er klar. -->
 <style>
 .booting .kbd{visibility:hidden}
 #bresults:has(.boot){justify-content:center}
@@ -4643,16 +4664,42 @@ boot();
 </style>
 <script>
 (function () {
-  /* Mens ordbogen åbnes, har siden klassen booting. Andre dele (nyhedsvinduet) venter på hændelsen app-ready. */
-  const root = document.documentElement;
+  /* Mens ordbogen åbnes, har siden klassen booting, og splashskærmen dækker appen. Den viser kun en kort status; når ordbogen
+     hentes første gang, også hvor langt den er. Er appen klar, glider splashskærmen væk, og hændelsen app-ready sendes
+     (nyhedsvinduet venter på den). Går noget galt, fjernes splashskærmen, så fejlen og "Try again" kan ses. */
+  const root = document.documentElement, splash = document.getElementById('splash');
   const B = () => window.__boot;
-  if (!B() || B().phase === 'ready') { window.__appReady = true; return; }
+  const hide = () => { if (!splash || splash.classList.contains('gone')) return; splash.classList.add('gone'); setTimeout(() => { splash.hidden = true; }, 400); };
+  const show = () => { if (!splash) return; splash.hidden = false; void splash.offsetWidth; splash.classList.remove('gone'); };
+  if (!B() || B().phase === 'ready') { hide(); window.__appReady = true; return; }
   root.classList.add('booting');
+  const st = splash && splash.querySelector('.st'), bar = splash && splash.querySelector('.sbar'), fill = bar && bar.querySelector('i');
+  /* En almindelig start viser kun ikon og navn. Hentes ordbogen (første gang eller efter en ny database), vises hvor langt den er.
+     Tager starten usædvanligt lang tid, kommer en lille løbende bjælke frem, så appen ikke ser ud til at stå stille. */
+  let slow = false; setTimeout(() => { slow = true; mirror(); }, 4000);
+  function mirror() {
+    if (!splash) return;
+    const boot = document.querySelector('#bresults .boot'), title = boot && boot.querySelector('.banner b'), pb = boot && boot.querySelector('.bar');
+    const t = title ? title.textContent : '', download = !!pb && /download/i.test(t), fetching = download || /unpack|check/i.test(t);
+    const pct = pb ? Number(pb.getAttribute('aria-valuenow')) || 0 : 0;
+    st.textContent = download ? 'Downloading the dictionary · ' + pct + '%' : fetching ? t : '';
+    bar.hidden = !(fetching || slow);
+    bar.classList.toggle('det', download);
+    fill.style.width = download ? pct + '%' : '';
+  }
+  const res = document.getElementById('bresults');
+  if (res) new MutationObserver(mirror).observe(res, { childList: true, subtree: true, attributes: true, attributeFilter: ['aria-valuenow'] });
+  mirror();
+  let last = B().phase;
   const t = setInterval(() => {
-    if (!B() || B().phase !== 'ready') return;
-    clearInterval(t); root.classList.remove('booting');
+    const ph = B() ? B().phase : 'ready';
+    if (ph === 'error' && last !== 'error') hide();      /* tastaturet forbliver skjult, til appen er klar */
+    if (ph === 'loading' && last === 'error') { show(); mirror(); }      /* "Try again" */
+    last = ph;
+    if (ph !== 'ready') return;
+    clearInterval(t); root.classList.remove('booting'); hide();
     window.__appReady = true; window.dispatchEvent(new Event('app-ready'));
-  }, 150);
+  }, 100);
 })();
 </script>
 <!-- Nyheder: første gang appen åbnes efter en opdatering, vises de punkter i changelog.json, man ikke har set. -->
@@ -4676,7 +4723,7 @@ boot();
 </div>
 <script>
 (function () {
-  const LOG = [{"version": "2026-10-19", "title": "More English translations", "items": ["45,889 sentences now have an English translation, up from 13,141. The new ones are machine-translated from the German of the source and marked as such.", "The dictionary is downloaded again once (about 71 MB, so Wi-Fi is a good idea)."]}, {"version": "2026-10-12.3", "items": ["The app starts faster: it reads the dictionary on the phone straight away instead of waiting for the internet, and the copy is read up to ten times faster.", "The Check for updates button in Settings is no longer hidden behind the phone's navigation bar."]}, {"version": "2026-10-12.2", "items": ["A clearer start screen while the dictionary downloads and opens, with progress in percent.", "This window now waits until the app is ready."]}, {"version": "2026-10-12", "title": "Read from a photo", "items": ["The camera button now really recognises the signs in a photo, on the phone and without internet. Two example photos are included to try it.", "Better sentence reading: the app chooses words by how they are used in the known texts.", "Words show example sentences, other spellings grouped by form, and where the information comes from, with a link to the source.", "Names show the most important facts (for kings: dynasty and years). \"Did you mean\" suggests a similar sign when nothing is found.", "An updated dictionary. It is downloaded again once (about 66 MB)."]}, {"version": "2026-10-10.3", "items": ["Settings has a Check for updates button, so you can get a new version straight away.", "Fixed: the app again stores itself on the phone, so it opens without internet and updates itself."]}, {"version": "2026-10-10.2", "title": "The whole dictionary", "items": ["The app now uses the full database: 5,364 signs, 31,643 words and 47,087 sentences from 7,405 texts.", "The first start downloads the dictionary once (about 66 MB, so Wi-Fi is a good idea). After that it opens from the copy on your phone, also without internet.", "Signs from Unicode's extended list are now shown with the NewGardiner font."]}, {"version": "2026-10-10", "items": ["After an update, this window shows what has changed."]}, {"version": "2026-10-06", "title": "New version of the app", "items": ["A menu with History, Help and Settings (the button at the top right).", "Recently used signs on the keyboard.", "Hold a finger on what you have written to magnify it and move the cursor.", "Sort menus in the Dictionary and in Saved.", "The app now updates itself when a new version is published."]}];
+  const LOG = [{"version": "2026-10-21", "items": ["The app now opens with a splash screen with its icon while the dictionary is loaded, instead of showing the loading steps."]}, {"version": "2026-10-19", "title": "More English translations", "items": ["45,889 sentences now have an English translation, up from 13,141. The new ones are machine-translated from the German of the source and marked as such.", "The dictionary is downloaded again once (about 71 MB, so Wi-Fi is a good idea)."]}, {"version": "2026-10-12.3", "items": ["The app starts faster: it reads the dictionary on the phone straight away instead of waiting for the internet, and the copy is read up to ten times faster.", "The Check for updates button in Settings is no longer hidden behind the phone's navigation bar."]}, {"version": "2026-10-12.2", "items": ["A clearer start screen while the dictionary downloads and opens, with progress in percent.", "This window now waits until the app is ready."]}, {"version": "2026-10-12", "title": "Read from a photo", "items": ["The camera button now really recognises the signs in a photo, on the phone and without internet. Two example photos are included to try it.", "Better sentence reading: the app chooses words by how they are used in the known texts.", "Words show example sentences, other spellings grouped by form, and where the information comes from, with a link to the source.", "Names show the most important facts (for kings: dynasty and years). \"Did you mean\" suggests a similar sign when nothing is found.", "An updated dictionary. It is downloaded again once (about 66 MB)."]}, {"version": "2026-10-10.3", "items": ["Settings has a Check for updates button, so you can get a new version straight away.", "Fixed: the app again stores itself on the phone, so it opens without internet and updates itself."]}, {"version": "2026-10-10.2", "title": "The whole dictionary", "items": ["The app now uses the full database: 5,364 signs, 31,643 words and 47,087 sentences from 7,405 texts.", "The first start downloads the dictionary once (about 66 MB, so Wi-Fi is a good idea). After that it opens from the copy on your phone, also without internet.", "Signs from Unicode's extended list are now shown with the NewGardiner font."]}, {"version": "2026-10-10", "items": ["After an update, this window shows what has changed."]}, {"version": "2026-10-06", "title": "New version of the app", "items": ["A menu with History, Help and Settings (the button at the top right).", "Recently used signs on the keyboard.", "Hold a finger on what you have written to magnify it and move the cursor.", "Sort menus in the Dictionary and in Saved.", "The app now updates itself when a new version is published."]}];
   const SEEN = 'hiero-news-seen', STORE = 'hiero-proto-v1';
   if (!LOG.length) return;
   const latest = LOG[0].version;
@@ -4708,7 +4755,7 @@ boot();
 </style>
 <script>
 (function () {
-  const VERSION = "2026-10-19";
+  const VERSION = "2026-10-21";
   const host = document.getElementById('settings');
   if (!host) return;
   const label = v => { const d = new Date(String(v).slice(0, 10) + 'T12:00:00'); return isNaN(d) ? v : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); };
