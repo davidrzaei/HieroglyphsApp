@@ -1,15 +1,28 @@
 // hiero_ocr.js - offline hieroglyph recognition for photos and scans. Dependency-free ES module (browser, Node >= 20).
 //
-//   import { loadModel, recognise } from './hiero_ocr.js';
+//   import { loadModel, loadFacing, recognise, reorder } from './hiero_ocr.js';
 //   await loadModel('model.json');            // or loadModel({ json: <object|string>, bin: <ArrayBuffer|Uint8Array> })
-//   const r = recognise(imageData, { direction: 'ltr' });   // 'ltr' | 'rtl' | 'auto' (auto = ltr, see below)
-//   r = { layout: 'rows'|'columns', direction, polarity, lines: [ { signs: [ { char, codepoint, conf, uncertain,
-//         alts: [ { char, codepoint, conf } x5 ], box: [x, y, w, h], group } ] } ] }
+//   await loadFacing('facing.json');          // optional (reading direction); or loadFacing({ json, bin })
+//   await loadDetector('det.json');           // optional (P3 B sign detector for walls); or loadDetector({ json, bin })
+//   await loadSignLM('signlm.json');          // optional (P3 C2: each line decoded with the corpus' sign sequences)
+//   const r = recognise(imageData, { direction: 'auto' });  // 'ltr' | 'rtl' | 'auto' (from the signs' facing)
+//   r = { layout: 'rows'|'columns', direction, direction_source: 'auto'|'user'|'default (no facing model)',
+//         direction_certainty, direction_votes, direction_flag, direction_auto: {...}, polarity, angle,
+//         lines: [ { signs: [ { char, codepoint, conf, uncertain, alts: [ { char, codepoint, conf, cls } x5 ],
+//         box: [x, y, w, h], group, wbox, k } ] } ], segmenter: 'classic'|'detector', segmenter_mode, segmenter_scores, stats }
+//   with loadSignLM(): each sign also has rec = { cls, prob } (the recogniser's own top-k) and p_rec; char/conf/uncertain/
+//   alts come from the joint decoding of its line (see "dictionary decoding"); r.decode = { applied, params, changed };
+//   opts.signlm: null switches the decoding off, opts.lm overrides its parameters.
+//   detector lines get in-line merges (P3 C1, DET_PARAMS.det_merge: overlapping boxes, plural-stroke runs read as one sign).
+//   opts.segmenter: 'auto' (default with a detector: detector; if it finds <= 30 signs also the classical segmentation,
+//   the larger quality score wins) | 'classic' | 'detector'; without loadDetector() always 'classic'.
+//   const r2 = reorder(r, 'rtl');             // the same signs in the other reading direction (no new recognition)
 //
 // imageData: { width, height, data } with RGBA (browser ImageData), RGB or grey (1 byte per pixel) data.
 // The segmentation is a line-by-line port of segment.py (the Python reference) and gives the same boxes; the CNN is the
 // forward pass of ref_forward.py (3x3 conv with folded BatchNorm, ReLU, 2x2 max-pool, global average pool, linear,
-// softmax over logits + corpus prior). 'auto' direction: no facing detector yet, falls back to 'ltr'.
+// softmax over logits + corpus prior). 'auto' direction (P3 A0): see "reading direction" below; without loadFacing()
+// it falls back to 'ltr' (direction_source 'default (no facing model)').
 
 export const PARAMS = Object.freeze({
   max_side: 1600, stretch_lo: 0.01, stretch_hi: 0.99,
@@ -504,7 +517,7 @@ function segmentPolarity(g0, gb, r1, pol, f, direction, layout, p, score) {
     if (score) lb = recMerge(lb, lh, score, p);
     const seq = orderLine(lb, axis, ang, direction, p);
     res.lines.push(seq.map(([b, gi]) => ({ box: [b[0] * f, b[1] * f, bw(b) * f, bh(b) * f], wbox: b.slice(0, 4), group: gi,
-                                           conf: score ? score(b) : null })));
+                                           conf: score ? score(b) : null, k: lb.indexOf(b) })));
   }
   return res;
 }
@@ -605,9 +618,9 @@ export function prepCrop(work, wbox, padFrac = PARAMS.crop_pad, size = 64, inner
 // ------------------------------------------------------------------ CNN
 let CURRENT = null;
 
-function parseModel(meta, buf) {
+function parseTensors(meta, buf) {
   const u8 = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
-  if (u8.byteLength !== meta.total_bytes) throw new Error('model.bin has ' + u8.byteLength + ' bytes, expected ' + meta.total_bytes);
+  if (u8.byteLength !== meta.total_bytes) throw new Error(meta.weights_file + ' has ' + u8.byteLength + ' bytes, expected ' + meta.total_bytes);
   const ab = u8.buffer.slice(u8.byteOffset, u8.byteOffset + u8.byteLength);
   const T = {};
   for (const t of meta.tensors) {
@@ -621,6 +634,12 @@ function parseModel(meta, buf) {
     for (let i = 0; i < q.length; i++) w[i] = q[i] * sc[Math.floor(i / per)];
     w.shape = q.shape; T[name] = w;
   }
+  return { T, bytes: u8.byteLength };
+}
+
+function parseModel(meta, buf) {
+  const { T, bytes } = parseTensors(meta, buf);
+  const u8 = { byteLength: bytes };
   const layers = meta.layers.map((L) => Object.assign({}, L, L.weight ? { W: T[L.weight], B: T[L.bias] } : {}));
   const prior = T.prior_logit || new Float32Array(meta.classes.length);
   return { meta, layers, prior, classes: meta.classes, threshold: meta.threshold != null ? meta.threshold : 0.56,
@@ -628,6 +647,12 @@ function parseModel(meta, buf) {
 }
 
 export async function loadModel(src) {
+  const { meta, bin } = await readModelFiles(src);
+  CURRENT = parseModel(meta, bin);
+  return CURRENT;
+}
+
+async function readModelFiles(src) {
   let meta, bin;
   if (typeof src === 'string') {
     const isNode = typeof process !== 'undefined' && process.versions && process.versions.node && !/^https?:/.test(src);
@@ -644,8 +669,7 @@ export async function loadModel(src) {
     meta = typeof src.json === 'string' ? JSON.parse(src.json) : src.json;
     bin = src.bin;
   }
-  CURRENT = parseModel(meta, bin);
-  return CURRENT;
+  return { meta, bin };
 }
 
 function conv3x3ReluPool(x, C, H, Wd, w, b, Cout) {
@@ -705,15 +729,19 @@ function conv3x3ReluPool(x, C, H, Wd, w, b, Cout) {
   return out;
 }
 
-// raw logits (without the prior) of one 64x64 crop
-export function logits(crop, model = CURRENT) {
+// raw logits (without the prior) of one 64x64 crop. tap = { after: n } also keeps the output of the n-th conv layer
+// (after ReLU + max-pool) in tap.map (the facing head branches off the classifier's conv3 map).
+export function logits(crop, model = CURRENT, tap = null) {
   if (!model) throw new Error('call loadModel() first');
   const n = model.norm, sc = Math.fround(n.scale);
   let x = new Float32Array(64 * 64);
   for (let i = 0; i < x.length; i++) x[i] = Math.fround(Math.fround(Math.fround(crop[i] * sc) - n.mean) / n.std);
-  let C = 1, H = 64, W = 64;
+  let C = 1, H = 64, W = 64, nConv = 0;
   for (const L of model.layers) {
-    if (L.type === 'conv3x3') { x = conv3x3ReluPool(x, C, H, W, L.W, L.B, L.out_ch); C = L.out_ch; H >>= 1; W >>= 1; }
+    if (L.type === 'conv3x3') {
+      x = conv3x3ReluPool(x, C, H, W, L.W, L.B, L.out_ch); C = L.out_ch; H >>= 1; W >>= 1;
+      if (tap && ++nConv === tap.after) tap.map = x;
+    }
     else if (L.type === 'global_avg_pool') {
       const f = new Float32Array(C), hw = H * W;
       for (let c = 0; c < C; c++) { let s = 0; for (let i = 0; i < hw; i++) s += x[c * hw + i]; f[c] = s / hw; }
@@ -727,15 +755,15 @@ export function logits(crop, model = CURRENT) {
   return x;
 }
 
-// top-5 of softmax(logits + prior) -> { idx: [5], prob: [5] }
-export function classify(crop, model = CURRENT) {
-  const lo = logits(crop, model), pr = model.prior, n = lo.length, z = new Float64Array(n);
+// top-k (default 5) of softmax(logits + prior) -> { idx: [k], prob: [k] }
+export function classify(crop, model = CURRENT, tap = null, k = 5) {
+  const lo = logits(crop, model, tap), pr = model.prior, n = lo.length, z = new Float64Array(n);
   let mx = -Infinity;
   for (let i = 0; i < n; i++) { z[i] = lo[i] + pr[i]; if (z[i] > mx) mx = z[i]; }
   let s = 0;
   for (let i = 0; i < n; i++) { z[i] = Math.exp(z[i] - mx); s += z[i]; }
   const idx = [], prob = [];
-  for (let t = 0; t < 5; t++) {
+  for (let t = 0; t < k; t++) {
     let bi = -1;
     for (let i = 0; i < n; i++) if ((bi < 0 || z[i] > z[bi]) && !idx.includes(i)) bi = i;
     idx.push(bi); prob.push(z[bi] / s);
@@ -743,38 +771,749 @@ export function classify(crop, model = CURRENT) {
   return { idx, prob };
 }
 
+// ------------------------------------------------------------------ reading direction from the signs' facing (P3 A0)
+// Signs face the beginning of the line. The font drawings (standard orientation) face left = read left to right; a
+// mirrored line (signs facing right) is read right to left, in rows and in columns alike. The facing head (facing.json +
+// facing.bin, int8 like model.bin) branches off the classifier's conv3 map and has one logit per asymmetric class
+// (> 0 = mirrored = faces right); the classifier's top-1 class picks the logit. recognise(img, {direction: 'auto'})
+// segments and classifies once, lets the confident asymmetric signs vote (weight = classifier confidence x clipped
+// logit), and re-orders the boxes it already has (reorder(); the boxes never depend on the direction).
+let FACING = null;
+const VOTE_DEFAULTS = Object.freeze({ min_conf: 0.56, clip: 4.0, temperature: 0.3329, sure: 0.95, min_certainty: 0.55,
+                                      min_votes: 1, max_voters: 48 });   // = facing.json "vote" (chosen on dev pages, facing/tune_vote.py)
+const now = () => (typeof performance !== 'undefined' ? performance : Date).now();
+
+function parseFacing(meta, buf) {
+  const { T, bytes } = parseTensors(meta, buf);
+  const layers = meta.layers.map((L) => Object.assign({}, L, L.weight ? { W: T[L.weight], B: T[L.bias] } : {}));
+  const headOf = new Map();
+  meta.head_classes.forEach((c, h) => headOf.set(c, h));
+  const voters = new Set(meta.vote_classes);
+  return { meta, layers, headOf, voters, after: meta.branch_after_conv, vote: Object.assign({}, VOTE_DEFAULTS, meta.vote || {}),
+           bytes };
+}
+
+// loadFacing('facing.json') or loadFacing({ json, bin }); without it, direction 'auto' falls back to 'ltr'.
+export async function loadFacing(src) {
+  const { meta, bin } = await readModelFiles(src);
+  FACING = parseFacing(meta, bin);
+  return FACING;
+}
+
+// facing logit of one sign from the classifier's conv3 map (Float32Array C*H*W) and the classifier's class index;
+// null when the class has no facing output.
+export function facingFromMap(map, cls, fm = FACING) {
+  if (!fm) throw new Error('call loadFacing() first');
+  const h = fm.headOf.get(cls);
+  if (h === undefined) return null;
+  let x = map, C = fm.meta.input_shape[0], H = fm.meta.input_shape[1], W = fm.meta.input_shape[2];
+  for (const L of fm.layers) {
+    if (L.type === 'conv3x3') { x = conv3x3ReluPool(x, C, H, W, L.W, L.B, L.out_ch); C = L.out_ch; H >>= 1; W >>= 1; }
+    else if (L.type === 'linear') {
+      const o = new Float32Array(L.out_features), fin = L.in_features;
+      for (let k = 0; k < o.length; k++) { let s = L.B[k]; const r = k * fin; for (let i = 0; i < fin; i++) s += L.W[r + i] * x[i]; o[k] = L.relu && s < 0 ? 0 : s; }
+      x = o;
+    } else if (L.type === 'head') {                       // only the row of the class
+      const fin = L.in_features, r = h * fin; let s = L.B[h];
+      for (let i = 0; i < fin; i++) s += L.W[r + i] * x[i];
+      return s;
+    }
+  }
+  throw new Error('facing model without a head layer');
+}
+
+// convenience (tests): crop -> { cls, conf, logit } with the loaded classifier and facing head
+export function facing(crop, model = CURRENT, fm = FACING) {
+  const tap = { after: fm.after }, r = classify(crop, model, tap);
+  return { cls: r.idx[0], conf: r.prob[0], logit: facingFromMap(tap.map, r.idx[0], fm) };
+}
+
+// the vote. signs: recognised signs with .conf, .alts[0].cls and .fmap (conv3 map, kept by recognise for candidates)
+export function voteDirection(signs, fm = FACING, vote = {}) {
+  const V = Object.assign({}, fm ? fm.vote : VOTE_DEFAULTS, vote);
+  const cand = signs.filter((s) => s.fmap && s.conf >= V.min_conf && fm.voters.has(s.alts[0].cls));
+  cand.sort((a, b) => b.conf - a.conf);
+  const used = cand.slice(0, V.max_voters);
+  let E = 0, right = 0;
+  for (const s of used) {
+    const z = facingFromMap(s.fmap, s.alts[0].cls, fm);
+    s.facing = z;
+    E += s.conf * Math.max(-V.clip, Math.min(V.clip, z));
+    if (z > 0) right++;
+  }
+  const pRtl = 1 / (1 + Math.exp(-V.temperature * E));
+  const cert = Math.max(pRtl, 1 - pRtl);
+  const flagged = used.length < V.min_votes || cert < V.min_certainty;
+  const direction = flagged ? 'ltr' : (pRtl > 0.5 ? 'rtl' : 'ltr');
+  return { direction, certainty: direction === 'rtl' ? pRtl : 1 - pRtl, level: flagged ? 'unsure' : (cert >= V.sure ? 'sure' : 'likely'),
+           flagged, votes: used.length, facing_right: right, facing_left: used.length - right, evidence: E, p_rtl: pRtl };
+}
+
+// lines in the order of direction `from` -> the same signs in the order of direction `to` (exactly what segment() gives
+// with `to`: the line order flips for columns, each line is re-ordered by orderLine from its boxes in segment order k)
+function orderSigns(lines, axis, ang, from, to, p = PARAMS) {
+  if (from === to) return lines;
+  const out = lines.map((L) => {
+    const byK = L.signs.slice().sort((a, b) => a.k - b.k);
+    const boxes = byK.map((s) => [s.wbox[0], s.wbox[1], s.wbox[2], s.wbox[3], 0]);
+    const seq = orderLine(boxes, axis, ang, to, p);
+    return Object.assign({}, L, { signs: seq.map(([b, gi]) => Object.assign(byK[boxes.indexOf(b)], { group: gi })) });
+  });
+  return axis === 'columns' ? out.reverse() : out;
+}
+
+// a recognise() result in the other reading direction (cheap: no segmentation, no CNN). The detected direction stays
+// in r.direction_auto. source: 'user' (an override) or 'auto'.
+export function reorder(r, direction, source = 'user') {
+  const to = direction === 'rtl' ? 'rtl' : 'ltr';
+  const lines = orderSigns(r.lines.map((L) => ({ signs: L.signs.map((s) => Object.assign({}, s)) })), r.layout, r.angle || 0,
+                           r.direction, to, Object.assign({}, PARAMS, r.params || {}));
+  const out = Object.assign({}, r, { lines, direction: to, direction_source: source });
+  if (source === 'auto' && r.direction_auto) out.direction_certainty = to === 'rtl' ? r.direction_auto.p_rtl : 1 - r.direction_auto.p_rtl;
+  if (r.decode && r.decode.applied && to !== r.direction && SIGNLM) {      // P3 C2: the decoding depends on the order
+    const d = decodeLines(out.lines, SIGNLM, r.decode.params);
+    out.decode = Object.assign({}, r.decode, { changed: d.changed });
+  }
+  return out;
+}
+
+// ------------------------------------------------------------------ sign detector (P3 B)
+// A small fully convolutional net (det.json + det.bin, int8 like model.bin; detect.py is the Python reference) finds
+// the signs on walls, where the classical binarisation fails: the work image (as in segment()) is area-resampled to a
+// long side <= 640, the net gives stride-4 maps (sign-centre heat, offset, log size), the 3x3 peaks above a threshold
+// are the signs (boxes the classifier cannot read, top-1 < det_floor, are dropped), then the classical layout/ordering
+// steps run on these boxes (no binarisation merges). recognise() with segmenter 'auto' (the default once loadDetector()
+// was called): the detector runs first; more than det_gate signs = a wall or a dense page -> detector result; otherwise
+// the classical segmentation runs too and the larger quality score sum(top-1 probability - sel_floor) wins.
+let DETECTOR = null;
+export const DET_PARAMS = Object.freeze({ det_side: 640, det_thr: 0.40, det_nms: 0.6, det_min_px: 3, det_floor: 0.2, det_gate: 30,
+                                         det_merge: 6, pl_wide: 1.2, pl_min: 0.4, pl_gain: -9.0, pl_count: 1 });   // P3 C1: det_merge, pl_*
+// (= detect.DET_DEFAULTS, chosen on the dev sets only)
+
+export async function loadDetector(src) {
+  const { meta, bin } = await readModelFiles(src);
+  const { T, bytes } = parseTensors(meta, bin);
+  const ops = meta.ops.map((o) => Object.assign({}, o, o.op === 'conv' ? { W: T[o.name + '.weight'], B: T[o.name + '.bias'] } : {}));
+  DETECTOR = { meta, ops, bytes, decode: meta.decode || {} };
+  return DETECTOR;
+}
+
+function areaResize(g, nw, nh) {                    // = det_common.area_resize (same taps and float64 order as prepCrop)
+  const { w: W, h: H, d } = g, tx = axisTaps(W, nw), ty = axisTaps(H, nh);
+  const tmp = new Float64Array(H * nw);
+  for (let j = 0; j < nw; j++) for (let y = 0; y < H; y++) {
+    let acc = 0; for (const [k, wt] of tx[j]) acc = acc + wt * d[y * W + k]; tmp[y * nw + j] = acc;
+  }
+  const out = new Uint8Array(nw * nh);
+  for (let i = 0; i < nh; i++) for (let x = 0; x < nw; x++) {
+    let acc = 0; for (const [k, wt] of ty[i]) acc = acc + wt * tmp[k * nw + x];
+    let v = Math.floor(acc + 0.5); out[i * nw + x] = v < 0 ? 0 : (v > 255 ? 255 : v);
+  }
+  return { w: nw, h: nh, d: out };
+}
+
+function conv3x3(x, C, H, Wd, w, b, Cout, stride, relu) {   // zero padding 1; stride 1 or 2; 4 output channels per pass
+  const Ho = stride === 2 ? H >> 1 : H, Wo = stride === 2 ? Wd >> 1 : Wd, HWo = Ho * Wo;
+  const Hp = H + 2, Wp = Wd + 2, pad = new Float32Array(C * Hp * Wp);
+  for (let c = 0; c < C; c++) for (let y = 0; y < H; y++) pad.set(x.subarray((c * H + y) * Wd, (c * H + y + 1) * Wd), (c * Hp + y + 1) * Wp + 1);
+  const out = new Float32Array(Cout * HWo), acc = new Float64Array(4 * HWo);
+  for (let c0 = 0; c0 < Cout; c0 += 4) {
+    const nb = Math.min(4, Cout - c0);
+    for (let j = 0; j < 4; j++) acc.fill(j < nb ? b[c0 + j] : 0, j * HWo, (j + 1) * HWo);
+    for (let ci = 0; ci < C; ci++) {
+      const base = ci * Hp * Wp;
+      const k = [0, 1, 2, 3].map((j) => ((Math.min(c0 + j, Cout - 1)) * C + ci) * 9);
+      const wa = w.subarray(k[0], k[0] + 9), wb = w.subarray(k[1], k[1] + 9), wc = w.subarray(k[2], k[2] + 9), wd = w.subarray(k[3], k[3] + 9);
+      const a0 = wa[0], a1 = wa[1], a2 = wa[2], a3 = wa[3], a4 = wa[4], a5 = wa[5], a6 = wa[6], a7 = wa[7], a8 = wa[8];
+      const b0 = wb[0], b1 = wb[1], b2 = wb[2], b3 = wb[3], b4 = wb[4], b5 = wb[5], b6 = wb[6], b7 = wb[7], b8 = wb[8];
+      const e0 = wc[0], e1 = wc[1], e2 = wc[2], e3 = wc[3], e4 = wc[4], e5 = wc[5], e6 = wc[6], e7 = wc[7], e8 = wc[8];
+      const d0 = wd[0], d1 = wd[1], d2 = wd[2], d3 = wd[3], d4 = wd[4], d5 = wd[5], d6 = wd[6], d7 = wd[7], d8 = wd[8];
+      for (let y = 0; y < Ho; y++) {
+        const r0 = base + (stride * y) * Wp, r1 = r0 + Wp, r2 = r1 + Wp, o = y * Wo;
+        for (let xx = 0; xx < Wo; xx++) {
+          const q = stride * xx;
+          const p0 = pad[r0 + q], p1 = pad[r0 + q + 1], p2 = pad[r0 + q + 2];
+          const p3 = pad[r1 + q], p4 = pad[r1 + q + 1], p5 = pad[r1 + q + 2];
+          const p6 = pad[r2 + q], p7 = pad[r2 + q + 1], p8 = pad[r2 + q + 2];
+          const i = o + xx;
+          acc[i] += a0 * p0 + a1 * p1 + a2 * p2 + a3 * p3 + a4 * p4 + a5 * p5 + a6 * p6 + a7 * p7 + a8 * p8;
+          acc[i + HWo] += b0 * p0 + b1 * p1 + b2 * p2 + b3 * p3 + b4 * p4 + b5 * p5 + b6 * p6 + b7 * p7 + b8 * p8;
+          acc[i + 2 * HWo] += e0 * p0 + e1 * p1 + e2 * p2 + e3 * p3 + e4 * p4 + e5 * p5 + e6 * p6 + e7 * p7 + e8 * p8;
+          acc[i + 3 * HWo] += d0 * p0 + d1 * p1 + d2 * p2 + d3 * p3 + d4 * p4 + d5 * p5 + d6 * p6 + d7 * p7 + d8 * p8;
+        }
+      }
+    }
+    for (let j = 0; j < nb; j++) {
+      const ob = (c0 + j) * HWo, ab = j * HWo;
+      for (let i = 0; i < HWo; i++) { const v = acc[ab + i]; out[ob + i] = relu && v < 0 ? 0 : v; }
+    }
+  }
+  return out;
+}
+
+function conv1x1(x, C, HW, w, b, Cout, relu) {
+  const out = new Float32Array(Cout * HW), acc = new Float64Array(HW);
+  for (let co = 0; co < Cout; co++) {
+    acc.fill(b[co]);
+    for (let ci = 0; ci < C; ci++) {
+      const wv = w[co * C + ci], xb = ci * HW;
+      for (let i = 0; i < HW; i++) acc[i] += wv * x[xb + i];
+    }
+    const ob = co * HW;
+    for (let i = 0; i < HW; i++) { const v = acc[i]; out[ob + i] = relu && v < 0 ? 0 : v; }
+  }
+  return out;
+}
+
+function up2(x, C, H, W) {
+  const out = new Float32Array(C * 4 * H * W), W2 = 2 * W;
+  for (let c = 0; c < C; c++) for (let y = 0; y < 2 * H; y++) {
+    const src = (c * H + (y >> 1)) * W, dst = (c * 2 * H + y) * W2;
+    for (let xx = 0; xx < W2; xx++) out[dst + xx] = x[src + (xx >> 1)];
+  }
+  return out;
+}
+
+// raw detector output for a work image: { out: Float32Array 5*h*w, h, w, sx, sy, vh, vw } (stride-4 maps)
+export function detectorForward(work, side = DET_PARAMS.det_side, det = DETECTOR) {
+  if (!det) throw new Error('call loadDetector() first');
+  const s = Math.min(1.0, side / Math.max(work.h, work.w));
+  let g = work;
+  if (s < 1.0) g = areaResize(work, Math.max(1, pyRound(work.w * s)), Math.max(1, pyRound(work.h * s)));
+  const Hp = Math.ceil(g.h / 32) * 32, Wp = Math.ceil(g.w / 32) * 32;
+  const x = new Float32Array(Hp * Wp);
+  for (let y = 0; y < Hp; y++) {
+    const sy = Math.min(y, g.h - 1);
+    for (let xx = 0; xx < Wp; xx++) {
+      const v = g.d[sy * g.w + Math.min(xx, g.w - 1)];
+      x[y * Wp + xx] = Math.fround(Math.fround(Math.fround(v / 255) - 0.5) / 0.25);
+    }
+  }
+  const env = { x: { t: x, C: 1, H: Hp, W: Wp } };
+  for (const o of det.ops) {
+    if (o.op === 'conv') {
+      const a = env[o.in];
+      const t = o.k === 3 ? conv3x3(a.t, a.C, a.H, a.W, o.W, o.B, o.cout, o.s, o.relu) : conv1x1(a.t, a.C, a.H * a.W, o.W, o.B, o.cout, o.relu);
+      env[o.out] = { t, C: o.cout, H: o.s === 2 ? a.H >> 1 : a.H, W: o.s === 2 ? a.W >> 1 : a.W };
+    } else if (o.op === 'up2') {
+      const a = env[o.in]; env[o.out] = { t: up2(a.t, a.C, a.H, a.W), C: a.C, H: 2 * a.H, W: 2 * a.W };
+    } else if (o.op === 'add') {
+      const a = env[o.a], b = env[o.b], t = new Float32Array(a.t.length);
+      for (let i = 0; i < t.length; i++) t[i] = a.t[i] + b.t[i];
+      env[o.out] = { t, C: a.C, H: a.H, W: a.W };
+    }
+  }
+  const r = env[det.meta.output];
+  return { out: r.t, h: r.H, w: r.W, sx: g.w / work.w, sy: g.h / work.h, vh: g.h, vw: g.w };
+}
+
+function iouXYWH(a, b) {
+  const x0 = Math.max(a[0], b[0]), y0 = Math.max(a[1], b[1]), x1 = Math.min(a[0] + a[2], b[0] + b[2]), y1 = Math.min(a[1] + a[3], b[1] + b[3]);
+  const i = Math.max(0, x1 - x0) * Math.max(0, y1 - y0), u = a[2] * a[3] + b[2] * b[3] - i;
+  return u > 0 ? i / u : 0.0;
+}
+
+// sign boxes in work pixels: [[x0, y0, x1, y1, area, score]] (= detect.detect_boxes)
+export function detectBoxes(work, p = Object.assign({}, PARAMS, DET_PARAMS), det = DETECTOR) {
+  const F = detectorForward(work, p.det_side, det);
+  const { out, h, w } = F, hw = h * w, S = det.meta.stride || 4;
+  const heat = new Float64Array(hw);
+  for (let i = 0; i < hw; i++) heat[i] = 1 / (1 + Math.exp(-out[i]));
+  const cand = [];
+  for (let y = 0; y < h; y++) {
+    if (y * S >= F.vh) break;
+    for (let x = 0; x < w; x++) {
+      if (x * S >= F.vw) continue;
+      const v = heat[y * w + x];
+      if (v < p.det_thr) continue;
+      let peak = true;
+      for (let dy = -1; dy <= 1 && peak; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const yy = y + dy, xx = x + dx;
+        if (yy < 0 || yy >= h || xx < 0 || xx >= w) continue;
+        if (heat[yy * w + xx] > v) { peak = false; break; }
+      }
+      if (!peak) continue;
+      const i = y * w + x;
+      const cx = (x + out[hw + i]) * S, cy = (y + out[2 * hw + i]) * S, bwv = Math.exp(out[3 * hw + i]) * S, bhv = Math.exp(out[4 * hw + i]) * S;
+      cand.push([v, [(cx - bwv / 2) / F.sx, (cy - bhv / 2) / F.sy, bwv / F.sx, bhv / F.sy]]);
+    }
+  }
+  cand.sort((a, b) => b[0] - a[0]);                 // stable: ties keep the row-major order (like Python)
+  const keep = [];
+  for (const c of cand) if (keep.every((k) => iouXYWH(c[1], k[1]) < p.det_nms)) keep.push(c);
+  const res = [];
+  for (const [s, [bx, by, bwv, bhv]] of keep) {
+    const x0 = Math.max(0, Math.floor(bx + 0.5)), y0 = Math.max(0, Math.floor(by + 0.5));
+    const x1 = Math.min(work.w, Math.floor(bx + bwv + 0.5)), y1 = Math.min(work.h, Math.floor(by + bhv + 0.5));
+    if (x1 - x0 >= p.det_min_px && y1 - y0 >= p.det_min_px) res.push([x0, y0, x1, y1, (x1 - x0) * (y1 - y0), s]);
+  }
+  return res;
+}
+
+// P3 C1: in-line merges on the detector's lines (= detect.merge_det_line); det_merge bit flags in this order: 8 drop a box
+// lying inside a larger one, 1 classical plural strokes, 2 classical overlapping boxes, 16 classical fragments, 4 plural-
+// stroke runs checked by the recogniser (mergePlural). top(box) -> [class, prob].
+export const PLURAL_CLASSES = Object.freeze(new Set([997, 998, 999, 1000, 1001, 1002, 1003, 1004, 1005, 1006, 1019, 1020, 1021,
+  1022, 1023, 1024, 1025, 1026, 1027, 1029, 1030, 1031, 1032, 1033, 1034, 1035, 1036]));   // Z2*, Z3*, Z4*, Z15A-I, Z16A-H
+
+const PLURAL_STROKES = new Map([997, 998, 999, 1000, 1001, 1002, 1003, 1004].map((c) => [c, 3]).concat([[1005, 2], [1006, 2]],
+  [...Array(9).keys()].map((i) => [1019 + i, 2 + i]), [...Array(8).keys()].map((i) => [1029 + i, 2 + i])));   // strokes per class
+
+function dropContained(lb, frac = 0.8) {
+  const out = [];
+  lb.forEach((a, i) => {
+    const aa = bw(a) * bh(a);
+    const inside = lb.some((b, k) => k !== i && bw(b) * bh(b) > aa &&
+      Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])) * Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1])) >= frac * aa);
+    if (!inside) out.push(a);
+  });
+  return out;
+}
+
+// runs of stroke-like detector boxes -> one box when the recogniser reads the union as a plural-stroke sign more surely
+// than its pieces (= detect.merge_plural)
+function mergePlural(lb, lh, p, top) {
+  let B = lb.map((b) => b.slice());
+  for (const vert of [false, true]) {
+    const T = (b) => vert ? [b[1], b[0], b[3], b[2]] : [b[0], b[1], b[2], b[3]];
+    const elig = (b) => { const t = T(b), w = t[2] - t[0], h = t[3] - t[1]; return h >= 3 && h <= p.stroke_hmax * lh && w <= p.pl_wide * h; };
+    const stroke = (b) => { const t = T(b); return (t[3] - t[1]) >= p.stroke_aspect * Math.max(t[2] - t[0], 1); };
+    const idx = [];
+    B.forEach((b, i) => { if (elig(b)) idx.push(i); });
+    idx.sort((i, k) => cmpTuple([T(B[i])[0], T(B[i])[1], i], [T(B[k])[0], T(B[k])[1], k]));
+    const nxt = new Map();
+    for (let ii = 0; ii < idx.length; ii++) {
+      const i = idx[ii], a = T(B[i]), ha = a[3] - a[1];
+      for (let jj = ii + 1; jj < idx.length; jj++) {
+        const k = idx[jj], b = T(B[k]), hb = b[3] - b[1];
+        if (b[0] - a[2] > p.stroke_gap * Math.max(ha, hb)) break;
+        if ((b[0] + b[2]) <= (a[0] + a[2])) continue;
+        if (Math.max(ha, hb) > p.stroke_ratio * Math.min(ha, hb)) continue;
+        if (Math.min(a[3], b[3]) - Math.max(a[1], b[1]) < 0.7 * Math.min(ha, hb)) continue;
+        const y0 = Math.min(a[1], b[1]), y1 = Math.max(a[3], b[3]);
+        let blocked = false;
+        for (let m = 0; m < B.length; m++) {
+          if (m === i || m === k) continue;
+          const c = T(B[m]), cx = (c[0] + c[2]) / 2.0;
+          if ((a[0] + a[2]) / 2.0 < cx && cx < (b[0] + b[2]) / 2.0 && Math.min(c[3], y1) - Math.max(c[1], y0) > 0) { blocked = true; break; }
+        }
+        if (!blocked) nxt.set(i, k);
+        break;
+      }
+    }
+    const hasPrev = new Set(nxt.values()), used = new Set(), runs = [];
+    for (const i of idx) {
+      if (hasPrev.has(i) || !nxt.has(i) || used.has(i)) continue;
+      const r = [i]; used.add(i);
+      while (nxt.has(r[r.length - 1]) && !used.has(nxt.get(r[r.length - 1]))) { const q = nxt.get(r[r.length - 1]); r.push(q); used.add(q); }
+      runs.push(r);
+    }
+    const drop = new Set(), add = [];
+    for (const r of runs) {
+      let s0 = 0;
+      while (r.length - s0 >= 2) {
+        let done = false;
+        for (let L = r.length - s0; L >= 2 && !done; L--) {
+          for (let st = s0; st <= r.length - L; st++) {
+            const sub = r.slice(st, st + L);
+            if (!sub.some((m) => stroke(B[m]))) continue;
+            let u = B[sub[0]].slice();
+            for (const m of sub.slice(1)) u = [Math.min(u[0], B[m][0]), Math.min(u[1], B[m][1]), Math.max(u[2], B[m][2]), Math.max(u[3], B[m][3]), u[4] + B[m][4]].concat(u.slice(5));
+            const tu = T(u);
+            if (tu[2] - tu[0] > 1.3 * lh) continue;
+            const [c, pr] = top(u);
+            let mean = 0; for (const m of sub) mean += top(B[m])[1];
+            mean /= sub.length;
+            if (PLURAL_CLASSES.has(c) && pr >= p.pl_min && (!p.pl_count || L <= PLURAL_STROKES.get(c)) && pr - mean >= p.pl_gain) {
+              if (u.length > 5) u[5] = Math.max(...sub.map((m) => B[m][5]));
+              sub.forEach((m) => drop.add(m)); add.push(u); s0 = st + L; done = true;
+              break;
+            }
+          }
+        }
+        if (!done) break;
+      }
+    }
+    if (drop.size) B = B.filter((_, i) => !drop.has(i)).concat(add);
+  }
+  return B;
+}
+
+function mergeDetLine(lb, lh, p, top) {
+  const m = p.det_merge | 0;
+  if (m <= 0 || lb.length < 2) return lb;
+  let out = lb.map((b) => b.slice());
+  if (m & 8) out = dropContained(out);
+  if (m & 1) out = mergeStrokes(out.map((b) => b.slice(0, 5)), lh, p);
+  if (m & 2) out = mergeOverlapping(out.map((b) => b.slice(0, 5)), p.overlap);
+  if (m & 16) out = mergeFragments(out.map((b) => b.slice(0, 5)), lh, p);
+  if ((m & 4) && top) out = mergePlural(out.map((b) => b.slice(0, 5).concat([0.0])), lh, p, top);
+  return out.map((u) => {
+    let s = 0.0, any = false;
+    for (const b of lb) if (b[0] >= u[0] && b[1] >= u[1] && b[2] <= u[2] && b[3] <= u[3]) { s = any ? Math.max(s, b[5]) : b[5]; any = true; }
+    return u.slice(0, 5).concat([s]);
+  });
+}
+
+// detector boxes -> segment()-style result (layout, angle, lines in reading order) (= detect.order_boxes)
+function orderDetBoxes(boxes, f, direction, layout, p, score, top = null) {
+  const res = { layout: 'rows', polarity: 'detector', factor: f, scale: 0.0, angle: 0.0, lines: [] };
+  if (!boxes.length) return res;
+  const sides = boxes.map((b) => Math.max(bw(b), bh(b))).sort((a, b) => a - b), n = sides.length;
+  const scale = n % 2 ? sides[n >> 1] : (sides[n / 2 - 1] + sides[n / 2]) / 2.0;
+  res.scale = scale;
+  const hyp = {};
+  for (const ax of ['rows', 'columns']) {
+    const ang = skewAngle(boxes, ax, scale, p);
+    const lines = bands(boxes, ax, ang);
+    hyp[ax] = [elongation(boxes, lines, ax, ang), ang, lines];
+  }
+  const axis = (layout === 'rows' || layout === 'columns') ? layout : (hyp.rows[0] >= hyp.columns[0] ? 'rows' : 'columns');
+  const ang = hyp[axis][1];
+  let lines = hyp[axis][2];
+  res.layout = axis; res.angle = ang;
+  const linePos = (L) => { const rc = L.map((i) => rotCoords(boxes[i], axis, ang)); return (Math.min(...rc.map((r) => r[2])) + Math.max(...rc.map((r) => r[3]))) / 2.0; };
+  lines = lines.map((L) => [linePos(L), L]).sort((a, b) => a[0] - b[0]).map((x) => x[1]);
+  if (axis === 'columns' && direction === 'rtl') lines = lines.reverse();
+  for (const L of lines) {
+    let lb = L.map((i) => boxes[i]);
+    if (p.det_merge) {                                     // P3 C1
+      const rc = lb.map((b) => rotCoords(b, axis, ang));
+      lb = mergeDetLine(lb, Math.max(...rc.map((r) => r[3])) - Math.min(...rc.map((r) => r[2])), p, top);
+    }
+    const seq = orderLine(lb, axis, ang, direction, p);
+    res.lines.push(seq.map(([b, gi]) => ({ box: [b[0] * f, b[1] * f, bw(b) * f, bh(b) * f], wbox: b.slice(0, 4), group: gi,
+                                           conf: score ? score(b) : null, k: lb.indexOf(b), det: b[5] })));
+  }
+  return res;
+}
+
+// segmentation with the detector (same result format as segment(); polarity 'detector')
+export function segmentDet(img, opts = {}) {
+  const p = Object.assign({}, PARAMS, DET_PARAMS, opts.params || {});
+  const direction = opts.direction === 'rtl' ? 'rtl' : 'ltr';
+  const [g0, f] = downscale(img.d ? img : toGrey(img), p.max_side);
+  const td = now();
+  const boxes = detectBoxes(g0, p, opts.detector || DETECTOR);
+  const detMs = now() - td;
+  let score = null;
+  if (opts.classify) {
+    const cache = new Map();
+    score = (b) => {
+      const k = b[0] + ',' + b[1] + ',' + b[2] + ',' + b[3];
+      if (!cache.has(k)) cache.set(k, opts.classify(prepCrop(g0, [b[0], b[1], b[2], b[3]], p.crop_pad)));
+      return cache.get(k);
+    };
+  }
+  let top = null;
+  if (opts.classifyTop) {                                   // P3 C1: [class, prob] of a box (plural-stroke merge)
+    const tc = new Map();
+    top = (b) => {
+      const k = b[0] + ',' + b[1] + ',' + b[2] + ',' + b[3];
+      if (!tc.has(k)) tc.set(k, opts.classifyTop(prepCrop(g0, [b[0], b[1], b[2], b[3]], p.crop_pad)));
+      return tc.get(k);
+    };
+  }
+  const kept = score && p.det_floor > 0 ? boxes.filter((b) => score(b) >= p.det_floor) : boxes;   // unreadable = texture
+  const res = orderDetBoxes(kept, f, direction, opts.layout || 'auto', p, score, top);
+  let sc = 0.0;
+  if (score) for (const L of res.lines) for (const s of L) sc += s.conf - p.sel_floor;
+  res.selection_score = sc; res.n_det = boxes.length; res.work = g0; res.det_ms = detMs;
+  return res;
+}
+
+// ------------------------------------------------------------------ dictionary decoding of each line (P3 C2)
+// The recogniser reads every sign on its own. With a sign-sequence model of the corpus (signlm.json + signlm.bin, built
+// by signlm.py from the phone database: unigram/bigram/trigram counts of the signs in written order, interpolated
+// Witten-Bell) each line is decoded jointly: for every sign its top-k candidates; the score of a reading of the line is
+// sum_i [ log p_rec_i(c_i) - mu * log prior(c_i) + lam * log P(c_i | c_i-2, c_i-1) ]. The search is exact over the
+// top-k lattice (states = the last two candidates: k^2 states and k^3 transitions per sign), with forward-backward for
+// each sign's posterior over its candidates. A line starts without context (photos rarely start at a sentence start).
+// mode 'mpm': each sign takes its largest posterior; 'viterbi': the best joint reading. A sign's conf becomes
+// posterior x (the recogniser's probability mass on its top-k), its alts the top 5 by posterior, and uncertain =
+// conf < unc. The recogniser's own candidates stay in sign.rec, so reorder() can decode again in the other order.
+let SIGNLM = null;
+export const LM_DEFAULTS = Object.freeze({ k: 10, lam: 0.35, mu: 0.25, wb: 1.0, order: 3, mode: 'mpm', unc: 0.56 });
+// (= signlm.py LM_DEFAULTS / signlm.json "params", chosen on the dev sets only)
+
+function readVarintPairs(u8, off, n) {
+  const keys = new Float64Array(n), cnt = new Uint32Array(n);
+  let k = 0;
+  for (let i = 0; i < n; i++) {
+    for (let h = 0; h < 2; h++) {
+      let v = 0, mul = 1, b;
+      do { b = u8[off++]; v += (b & 0x7F) * mul; mul *= 128; } while (b & 0x80);
+      if (h === 0) { k += v; keys[i] = k; } else cnt[i] = v;
+    }
+  }
+  return { keys, cnt, off };
+}
+
+function bsearch(keys, key) {
+  let lo = 0, hi = keys.length - 1;
+  while (lo <= hi) { const m = (lo + hi) >> 1, v = keys[m]; if (v === key) return m; if (v < key) lo = m + 1; else hi = m - 1; }
+  return -1;
+}
+
+function parseSignLM(meta, buf) {
+  const u8 = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+  if (u8.byteLength !== meta.total_bytes) throw new Error(meta.weights_file + ' has ' + u8.byteLength + ' bytes, expected ' + meta.total_bytes);
+  const V = meta.V, u = new Float64Array(V), dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+  let N = 0;
+  for (let i = 0; i < V; i++) { u[i] = dv.getUint32(4 * i, true); N += u[i]; }
+  const bi = readVarintPairs(u8, meta.offsets.bi, meta.n_bi), tri = readVarintPairs(u8, meta.offsets.tri, meta.n_tri);
+  const c1 = new Float64Array(V), t1 = new Float64Array(V);
+  for (let i = 0; i < bi.keys.length; i++) { const a = Math.floor(bi.keys[i] / V); c1[a] += bi.cnt[i]; t1[a] += 1; }
+  const c2 = new Float64Array(bi.keys.length), t2 = new Float64Array(bi.keys.length), noCtx = [];
+  const ts = new Int32Array(bi.keys.length).fill(-1), te = new Int32Array(bi.keys.length);   // trigram range per context
+  for (let i = 0; i < tri.keys.length; i++) {
+    const ab = Math.floor(tri.keys[i] / V), j = bsearch(bi.keys, ab);
+    if (j < 0) { noCtx.push(ab); continue; }
+    c2[j] += tri.cnt[i]; t2[j] += 1;
+    if (ts[j] < 0) ts[j] = i;
+    te[j] = i + 1;
+  }
+  if (noCtx.length) throw new Error('signlm: trigram contexts without a bigram (' + noCtx.length + ')');
+  return { meta, V, nCls: meta.n_cls, u, N, bi, tri, c1, t1, c2, t2, ts, te, params: Object.assign({}, LM_DEFAULTS, meta.params || {}),
+           bytes: u8.byteLength };
+}
+
+// loadSignLM('signlm.json') or loadSignLM({ json, bin }); without it recognise() keeps the recogniser's own choices.
+export async function loadSignLM(src) {
+  const { meta, bin } = await readModelFiles(src);
+  SIGNLM = parseSignLM(meta, bin);
+  return SIGNLM;
+}
+
+// interpolated Witten-Bell (= signlm.SignLM; the same operations in the same order)
+function lmP1(lm, c) { return (lm.u[c] + 1.0) / (lm.N + lm.V); }
+function lmP2(lm, b, c, wb) {
+  const n = lm.c1[b];
+  if (n === 0) return lmP1(lm, c);
+  const t = wb * lm.t1[b], j = bsearch(lm.bi.keys, b * lm.V + c);
+  return ((j >= 0 ? lm.bi.cnt[j] : 0) + t * lmP1(lm, c)) / (n + t);
+}
+function lmP3(lm, a, b, c, wb) {
+  const j = bsearch(lm.bi.keys, a * lm.V + b), n = j >= 0 ? lm.c2[j] : 0;
+  if (n === 0) return lmP2(lm, b, c, wb);
+  const t = wb * lm.t2[j], q = bsearch(lm.tri.keys, (a * lm.V + b) * lm.V + c);
+  return ((q >= 0 ? lm.tri.cnt[q] : 0) + t * lmP2(lm, b, c, wb)) / (n + t);
+}
+export function signLMLogP(ctx, c, lm = SIGNLM, params = {}) {      // tests: log P(c | ctx) with ctx = [] | [b] | [a, b]
+  const P = Object.assign({}, lm.params, params);
+  if (P.order >= 3 && ctx.length >= 2) return Math.log(lmP3(lm, ctx[ctx.length - 2], ctx[ctx.length - 1], c, P.wb));
+  if (P.order >= 2 && ctx.length >= 1) return Math.log(lmP2(lm, ctx[ctx.length - 1], c, P.wb));
+  return Math.log(lmP1(lm, c));
+}
+
+function lse(xs) {
+  let m = -Infinity;
+  const n = xs.length;
+  for (let i = 0; i < n; i++) if (xs[i] > m) m = xs[i];
+  if (m === -Infinity) return m;
+  let s = 0;
+  for (let i = 0; i < n; i++) s += Math.exp(xs[i] - m);
+  return m + Math.log(s);
+}
+
+// one line: cands[i] = class ids (best first, <= k), probs[i] = their recogniser probabilities.
+// -> { choice: [index into cands[i]], post: [[posterior per candidate]] }   (= signlm.decode_lattice)
+export function decodeCandidates(cands, probs, lm = SIGNLM, params = {}, model = CURRENT) {
+  const P = Object.assign({}, lm.params, params), n = cands.length, lam = P.lam, mu = P.mu, wb = P.wb, order = P.order;
+  if (!n) return { choice: [], post: [] };
+  const lp = (ctx, c) => (order >= 3 && ctx.length >= 2) ? Math.log(lmP3(lm, ctx[0], ctx[1], c, wb))
+    : ((order >= 2 && ctx.length >= 1) ? Math.log(lmP2(lm, ctx[ctx.length - 1], c, wb)) : Math.log(lmP1(lm, c)));
+  const E = cands.map((C, i) => C.map((c, r) => Math.log(Math.max(probs[i][r], 1e-30)) - (mu ? mu * (model.prior[c] / 0.5) : 0)));
+  const K = cands.map((C) => C.length);
+  // L[i][p][q][r] log P; i = 0: [r], i = 1: [q][r]. Fast path (same numbers as lp): P2 once per (q, r), the trigram
+  // context's index and its contiguous range of trigrams once per (p, q).
+  const L0 = cands[0].map((c) => lp([], c));
+  const Lt = [];                                         // i >= 1: flat arrays
+  const V = lm.V, bk = lm.bi.keys, tk = lm.tri.keys;
+  const searchIn = (keys, lo, hi, key) => { hi--; while (lo <= hi) { const m = (lo + hi) >> 1, v = keys[m]; if (v === key) return m; if (v < key) lo = m + 1; else hi = m - 1; } return -1; };
+  for (let i = 1; i < n; i++) {
+    const kp = i >= 2 ? K[i - 2] : 1, kq = K[i - 1], kr = K[i], t = new Float64Array(kp * kq * kr);
+    const p2 = new Float64Array(kq * kr);
+    for (let q = 0; q < kq; q++) for (let r = 0; r < kr; r++) p2[q * kr + r] = order >= 2 ? lmP2(lm, cands[i - 1][q], cands[i][r], wb) : lmP1(lm, cands[i][r]);
+    for (let p = 0; p < kp; p++) for (let q = 0; q < kq; q++) {
+      const a = i >= 2 ? cands[i - 2][p] : -1, b = cands[i - 1][q];
+      const jx = (i >= 2 && order >= 3) ? bsearch(bk, a * V + b) : -1, nn = jx >= 0 ? lm.c2[jx] : 0;
+      for (let r = 0; r < kr; r++) {
+        let pr = p2[q * kr + r];
+        if (nn !== 0) {
+          const tt = wb * lm.t2[jx], qx = searchIn(tk, lm.ts[jx], lm.te[jx], (a * V + b) * V + cands[i][r]);
+          pr = ((qx >= 0 ? lm.tri.cnt[qx] : 0) + tt * pr) / (nn + tt);
+        }
+        t[(p * kq + q) * kr + r] = Math.log(pr);
+      }
+    }
+    Lt.push(t);
+  }
+  // forward (alpha) and viterbi (v) over states (q, r) stored flat q * kr + r; i = 0: [r]
+  const A = [], Vt = [], BP = [];
+  A.push(L0.map((x, r) => lam * x + E[0][r])); Vt.push(A[0].slice()); BP.push(null);
+  for (let i = 1; i < n; i++) {
+    const kp = i >= 2 ? K[i - 2] : 1, kq = K[i - 1], kr = K[i], t = Lt[i - 1];
+    const a = new Float64Array(kq * kr), v = new Float64Array(kq * kr), bp = new Int32Array(kq * kr);
+    const xs = new Float64Array(kp);
+    for (let q = 0; q < kq; q++) for (let r = 0; r < kr; r++) {
+      let best = -Infinity, arg = 0;
+      for (let p = 0; p < kp; p++) {
+        const prevA = i >= 2 ? A[i - 1][p * kq + q] : A[0][q], prevV = i >= 2 ? Vt[i - 1][p * kq + q] : Vt[0][q];
+        const tr = lam * t[(p * kq + q) * kr + r] + E[i][r];
+        xs[p] = prevA + tr;
+        const y = prevV + tr;
+        if (y > best) { best = y; arg = p; }
+      }
+      a[q * kr + r] = lse(xs); v[q * kr + r] = best; bp[q * kr + r] = arg;
+    }
+    A.push(a); Vt.push(v); BP.push(bp);
+  }
+  // backward
+  const B = new Array(n);
+  B[n - 1] = new Float64Array(A[n - 1].length);
+  for (let i = n - 1; i >= 2; i--) {
+    const kp = K[i - 2], kq = K[i - 1], kr = K[i], t = Lt[i - 1], b = new Float64Array(kp * kq);
+    const xs = new Float64Array(kr);
+    for (let p = 0; p < kp; p++) for (let q = 0; q < kq; q++) {
+      for (let r = 0; r < kr; r++) xs[r] = lam * t[(p * kq + q) * kr + r] + E[i][r] + B[i][q * kr + r];
+      b[p * kq + q] = lse(xs);
+    }
+    B[i - 1] = b;
+  }
+  if (n >= 2) {
+    const kq = K[0], kr = K[1], t = Lt[0], b = new Float64Array(kq);
+    for (let q = 0; q < kq; q++) { const xs = []; for (let r = 0; r < kr; r++) xs.push(lam * t[q * kr + r] + E[1][r] + B[1][q * kr + r]); b[q] = lse(xs); }
+    B[0] = b;
+  }
+  const Z = lse(Array.from(A[n - 1]));
+  const post = [];
+  for (let i = 0; i < n; i++) {
+    if (i === 0) { post.push(Array.from(A[0], (x, r) => Math.exp(x + B[0][r] - Z))); continue; }
+    const kq = K[i - 1], kr = K[i], m = [];
+    for (let r = 0; r < kr; r++) { const xs = []; for (let q = 0; q < kq; q++) xs.push(A[i][q * kr + r] + B[i][q * kr + r] - Z); m.push(Math.exp(lse(xs))); }
+    post.push(m);
+  }
+  let choice;
+  if (P.mode === 'viterbi') {
+    if (n === 1) choice = [argmax(Vt[0])];
+    else {
+      const kr = K[n - 1]; let s = argmax(Vt[n - 1]), q = Math.floor(s / kr), r = s % kr;
+      choice = [r, q];
+      for (let i = n - 1; i >= 2; i--) { const p = BP[i][q * K[i] + r]; choice.push(p); r = q; q = p; }
+      choice.reverse();
+    }
+  } else choice = post.map(argmax);
+  return { choice, post };
+}
+function argmax(a) { let b = 0; for (let i = 1; i < a.length; i++) if (a[i] > a[b]) b = i; return b; }
+
+// decode recognise() lines in place (signs need .rec = { cls, prob }: the recogniser's top-k). -> { changed, signs }
+export function decodeLines(lines, lm = SIGNLM, params = {}, model = CURRENT) {
+  const P = Object.assign({}, lm.params, params), C = model.classes;
+  let changed = 0, nSigns = 0;
+  for (const L of lines) {
+    const S = L.signs.filter((s) => s.rec && s.rec.cls.length);
+    if (!S.length) continue;
+    const cands = S.map((s) => s.rec.cls.slice(0, P.k)), probs = S.map((s) => s.rec.prob.slice(0, P.k));
+    const { choice, post } = decodeCandidates(cands, probs, lm, P, model);
+    S.forEach((s, i) => {
+      let mass = 0; for (const x of probs[i]) mass += x;
+      const idx = cands[i].map((_, j) => j).sort((x, y) => (post[i][y] - post[i][x]) || (x - y));
+      if (idx[0] !== choice[i]) { idx.splice(idx.indexOf(choice[i]), 1); idx.unshift(choice[i]); }
+      const alts = idx.slice(0, 5).map((j) => ({ char: C[cands[i][j]].char, codepoint: C[cands[i][j]].codepoint, conf: post[i][j] * mass, cls: cands[i][j] }));
+      if (cands[i][choice[i]] !== s.rec.cls[0]) changed++;
+      nSigns++;
+      Object.assign(s, { char: alts[0].char, codepoint: alts[0].codepoint, conf: alts[0].conf, uncertain: alts[0].conf < P.unc, alts,
+                         p_rec: probs[i][choice[i]] });
+    });
+  }
+  return { changed, signs: nSigns };
+}
+
 // full pipeline: photo -> lines of recognised signs in reading order
+//   opts.direction: 'ltr' | 'rtl' (given by the user) | 'auto' (decided from the signs' facing when loadFacing() was called)
+//   result: { layout, direction, direction_source: 'user'|'auto'|'default (no facing model)', direction_certainty (auto),
+//             direction_votes (auto: signs that voted), direction_flag (auto: null or 'too little evidence'),
+//             direction_auto: { direction, certainty, level 'sure'|'likely'|'unsure', flagged, votes, facing_right,
+//             facing_left, evidence, p_rtl }, polarity, scale, angle, lines: [{ signs: [{ char, codepoint, conf,
+//             uncertain, alts, box, group, wbox, k, facing? }] }], stats }
 export function recognise(imageData, opts = {}) {
   const model = opts.model || CURRENT;
   if (!model) throw new Error('call loadModel() first');
   const dirIn = opts.direction || 'ltr';
-  const direction = dirIn === 'rtl' ? 'rtl' : 'ltr';          // 'auto': no facing detector yet -> ltr
-  const cache = new Map();
-  const t0 = (typeof performance !== 'undefined' ? performance : Date).now();
+  const fm = opts.facing === undefined ? FACING : opts.facing;
+  const auto = dirIn === 'auto' && !!fm;
+  const direction = dirIn === 'rtl' ? 'rtl' : 'ltr';          // 'auto' segments in ltr order, then re-orders
+  const p = Object.assign({}, PARAMS, opts.params || {});
+  const cache = new Map(), maps = new WeakMap();
+  const keepConf = auto ? Math.min(fm.vote.min_conf, opts.vote && opts.vote.min_conf != null ? opts.vote.min_conf : 1) : 1;
+  const lm = opts.signlm === undefined ? SIGNLM : opts.signlm;                 // P3 C2: null = the recogniser's own choices
+  const lmP = lm ? Object.assign({}, lm.params, opts.lm || {}) : null, kTop = lm ? Math.max(5, lmP.k) : 5;
+  const t0 = now();
   let nCnn = 0, msCnn = 0;
   const cls = (crop) => {
     let h = 0; for (let i = 0; i < crop.length; i += 7) h = (h * 31 + crop[i]) | 0;
     const key = h + ':' + crop.length;
     let hit = cache.get(key);
     if (hit) for (const e of hit) if (e.crop.every((v, i) => v === crop[i])) return e.res;
-    const tc = (typeof performance !== 'undefined' ? performance : Date).now();
-    const res = classify(crop, model);
-    msCnn += (typeof performance !== 'undefined' ? performance : Date).now() - tc; nCnn++;
+    const tc = now();
+    const tap = auto ? { after: fm.after } : null;
+    const res = classify(crop, model, tap, kTop);
+    if (tap && res.prob[0] >= keepConf && fm.voters.has(res.idx[0])) maps.set(res, tap.map);   // vote candidates only
+    msCnn += now() - tc; nCnn++;
     if (!hit) cache.set(key, hit = []);
     hit.push({ crop, res });
     return res;
   };
-  const seg = segment(imageData, { direction, layout: opts.layout, params: opts.params, classify: (crop) => cls(crop).prob[0] });
+  // P3 B: classical segmentation, the detector, or both ('auto', default with a detector): the larger quality score wins
+  const det = opts.detector === undefined ? DETECTOR : opts.detector;
+  const mode = det ? (opts.segmenter || 'auto') : 'classic';
+  const grey = imageData.d ? imageData : toGrey(imageData);
+  const sopts = { direction, layout: opts.layout, params: opts.params, classify: (crop) => cls(crop).prob[0], detector: det,
+                  classifyTop: (crop) => { const r = cls(crop); return [r.idx[0], r.prob[0]]; } };
+  let seg, scores = null;
+  if (mode === 'classic') seg = segment(grey, sopts);
+  else if (mode === 'detector') seg = segmentDet(grey, sopts);
+  else {
+    const b = segmentDet(grey, sopts), gp = Object.assign({}, DET_PARAMS, opts.params || {});
+    if (b.lines.reduce((n, L) => n + L.length, 0) > gp.det_gate) { seg = b; scores = { classic: null, detector: b.selection_score, gate: true }; }
+    else {
+      const a = segment(grey, sopts);
+      scores = { classic: a.selection_score, detector: b.selection_score, gate: false };
+      seg = b.selection_score > a.selection_score ? b : a;
+      seg.det_ms = b.det_ms;
+    }
+  }
   const C = model.classes;
   const lines = seg.lines.map((L) => ({
     signs: L.map((s) => {
-      const r = cls(prepCrop(seg.work, s.wbox, PARAMS.crop_pad));
-      const alts = r.idx.map((k, t) => ({ char: C[k].char, codepoint: C[k].codepoint, conf: r.prob[t], cls: k }));
-      return { char: alts[0].char, codepoint: alts[0].codepoint, conf: r.prob[0], uncertain: r.prob[0] < model.threshold,
-               alts, box: s.box, group: s.group };
+      const r = cls(prepCrop(seg.work, s.wbox, p.crop_pad));
+      const alts = r.idx.slice(0, 5).map((k, t) => ({ char: C[k].char, codepoint: C[k].codepoint, conf: r.prob[t], cls: k }));
+      const o = { char: alts[0].char, codepoint: alts[0].codepoint, conf: r.prob[0], uncertain: r.prob[0] < model.threshold,
+                  alts, box: s.box, group: s.group, wbox: s.wbox, k: s.k };
+      if (lm) o.rec = { cls: r.idx.slice(0, lmP.k), prob: r.prob.slice(0, lmP.k) };     // the recogniser's own top-k (P3 C2)
+      if (maps.has(r)) Object.defineProperty(o, 'fmap', { value: maps.get(r), enumerable: false });
+      return o;
     }),
   }));
-  return { layout: seg.layout, direction, direction_source: dirIn === 'auto' ? 'default (no facing detector)' : 'user',
-           polarity: seg.polarity, scale: seg.scale * seg.factor, lines,
-           stats: { cnn_crops: nCnn, cnn_ms: msCnn, total_ms: (typeof performance !== 'undefined' ? performance : Date).now() - t0 } };
+  const res = { layout: seg.layout, direction, direction_source: dirIn === 'auto' ? 'default (no facing model)' : 'user',
+                polarity: seg.polarity, scale: seg.scale * seg.factor, angle: seg.angle || 0, params: opts.params || null, lines,
+                segmenter: seg.polarity === 'detector' ? 'detector' : 'classic', segmenter_mode: mode, segmenter_scores: scores,
+                stats: { cnn_crops: nCnn, cnn_ms: msCnn, det_ms: seg.det_ms != null ? seg.det_ms : null } };
+  if (auto) {
+    const tf = now();
+    const v = voteDirection(lines.flatMap((L) => L.signs), fm, opts.vote);
+    if (v.direction !== direction) res.lines = orderSigns(lines, seg.layout, res.angle, direction, v.direction, p);
+    Object.assign(res, { direction: v.direction, direction_source: 'auto', direction_certainty: v.certainty, direction_votes: v.votes,
+                         direction_flag: v.flagged ? 'too little evidence' : null, direction_auto: v });
+    res.stats.facing_ms = now() - tf;
+  }
+  if (lm) {                                                    // P3 C2: decode each line in its final reading order
+    const tl = now(), d = decodeLines(res.lines, lm, lmP, model);
+    res.decode = { applied: true, params: lmP, changed: d.changed };
+    res.stats.decode_ms = now() - tl;
+  } else res.decode = { applied: false };
+  res.stats.total_ms = now() - t0;
+  return res;
 }

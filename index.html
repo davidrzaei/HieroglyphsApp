@@ -603,6 +603,79 @@ details.orig>summary{font-weight:500;font-size:.86rem;color:var(--muted)}
 .edits .secondary{padding:3px 10px;font-size:.8rem}
 .ohead h2 .pill{vertical-align:middle;margin-left:4px;font-family:var(--body)}
 .pill.lvl{white-space:normal;text-align:center}
+.pill.dir{text-transform:none;letter-spacing:0;margin-left:6px;vertical-align:1px} .pill.dir.c-ok{border-color:var(--ok)} .pill.dir.c-warn{border-color:var(--warn)} .pill.dir.c-bad{border-color:var(--bad)}
+/* P3 A: markér for at læse. Fotoet fylder arket; ét felt pr. fundet tegn. Samme tokens, piller og ark som resten af appen. */
+#photo{position:relative}
+.phead{display:flex;align-items:center;gap:10px;min-width:0}
+.phead .note{flex:1;min-width:0}
+.photowrap{position:relative;margin:0 auto;flex:none;touch-action:pan-y;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+.photowrap .photoimg{width:100%;height:100%;max-width:none;margin:0}
+.photowrap .photoimg img{width:100%;height:100%;max-height:none;pointer-events:none;-webkit-user-drag:none}
+.layer{position:absolute;inset:0}
+.sg{position:absolute;border-radius:2px;outline:none;cursor:text}
+.sg::before{content:"";position:absolute;inset:0;border:1px solid var(--lapis);border-radius:2px;opacity:.32}
+.sg.unc::before{border:1.5px solid var(--warn);opacity:1}
+.sg.unc.bad::before{border-color:var(--bad)}
+.sg.pick::before{border:1.5px solid var(--muted);opacity:.9}
+.sg.ins::before{border:1.5px dashed var(--guess);opacity:1;background:repeating-linear-gradient(45deg,var(--guess-hatch) 0 2px,transparent 2px 5px)}
+.sg.on::after{content:"";position:absolute;inset:-1px;border-radius:2px;background:var(--lapis);opacity:.34}
+.sg.on::before{opacity:1}
+.sg.unc.on::before{opacity:1}
+.sg:focus-visible{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--lapis)}
+.hbar{position:absolute;background:var(--lapis);pointer-events:none;z-index:2}
+.hdl{position:absolute;width:40px;height:40px;transform:translate(-50%,-50%);touch-action:none;cursor:grab;z-index:3}
+.hdl::after{content:"";position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--lapis);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.hbar[hidden],.hdl[hidden],.selbar[hidden],.rsheet[hidden]{display:none}
+.selbar{position:absolute;z-index:4;display:flex;align-items:stretch;background:var(--surface);border:1px solid var(--line);border-radius:999px;box-shadow:0 6px 18px rgba(0,0,0,.22);padding:3px;white-space:nowrap}
+.selbar button{border:0;background:none;padding:7px 11px;font-size:.88rem;font-weight:500;color:var(--ink);border-radius:999px}
+.selbar button.on{color:var(--lapis);font-weight:600}
+.selbar button:hover,.selbar button:focus-visible{background:var(--lapis-soft)}
+.selbar i{width:1px;background:var(--line);margin:7px 0;flex:none}
+.dirarrow{position:absolute;top:6px;left:6px;display:flex;align-items:center;height:24px;padding:0 4px;border-radius:999px;background:var(--surface);border:1px solid var(--line);box-shadow:0 1px 4px rgba(0,0,0,.15);z-index:1;pointer-events:none}
+.dirarrow.rtl{left:auto;right:6px}
+.dirarrow svg{width:18px;height:18px;stroke:var(--lapis);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.dirarrow svg.sm{width:14px;height:14px}
+.selstat{display:flex;align-items:center;gap:10px;min-height:44px}
+.selstat .grow{flex:1;min-width:0}
+.selstat b{display:block;font-size:.92rem;font-weight:600}
+.selstat small{display:block;color:var(--muted);font-size:.8rem;line-height:1.35}
+.fixpop{position:absolute;z-index:5;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 22px rgba(0,0,0,.25);padding:4px 10px;width:300px;max-width:100%}
+.fixbox .signrow{border-bottom:0}
+.fixbox small.note{font-size:.8rem}
+.rsheet{position:absolute;left:0;right:0;bottom:0;max-height:58%;background:var(--surface);border-radius:18px 18px 0 0;border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(0,0,0,.18);display:flex;flex-direction:column;z-index:6}
+.rsheet::before{content:"";position:absolute;top:6px;left:50%;width:36px;height:4px;margin-left:-18px;border-radius:2px;background:var(--line)}
+.rshead{display:flex;align-items:center;gap:8px;padding:10px 6px 0 14px;flex:none}
+.rshead .grow{flex:1}
+.rsbody{padding:2px 14px 14px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;min-height:0}
+.rsbody .btns{display:flex;flex-wrap:wrap;gap:8px}
+.rsbody .rhead .pill.lvl{max-width:60%}
+.selrow{display:flex;flex-wrap:wrap;gap:3px;align-items:flex-end}
+.selrow.rtl{flex-direction:row-reverse}
+.ssg{border:1px solid transparent;background:none;border-radius:8px;padding:2px 3px 1px;display:flex;flex-direction:column;align-items:center;min-width:30px}
+.ssg .gl{font-size:1.7rem;line-height:1.15}
+.ssg .cbar{width:100%;margin:2px 0 0}
+.ssg[aria-pressed="true"]{border-color:var(--lapis);background:var(--lapis-soft)}
+.lbrk{width:1px;align-self:stretch;background:var(--line);margin:0 4px}
+/* P3 E: rammen, før fotoet læses (som en dokumentscanner). Fotoet med en firkant; udenfor dæmpes; fire hjørner trækkes. */
+.framewrap{position:relative;margin:4px auto 6px;flex:none;touch-action:pan-y;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+.framewrap .photoimg{width:100%;height:100%;max-width:none;margin:0}
+.framewrap .photoimg img{width:100%;height:100%;max-height:none;pointer-events:none;-webkit-user-drag:none}
+.fshade{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible;border-radius:10px}
+.fshade .out{fill:var(--scrim)}
+.fshade .under{fill:none;stroke:rgba(0,0,0,.35);stroke-width:4;stroke-linejoin:round}
+.fshade .edge{fill:none;stroke:var(--lapis);stroke-width:2;stroke-linejoin:round}
+.framewrap.busy .fshade .edge{stroke-dasharray:6 5}
+.fh{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border:0;padding:0;background:none;touch-action:none;cursor:grab;z-index:2;border-radius:50%}
+.fh::after{content:"";position:absolute;left:50%;top:50%;width:16px;height:16px;margin:-11px 0 0 -11px;border-radius:50%;background:var(--surface);border:3px solid var(--lapis);box-shadow:0 1px 4px rgba(0,0,0,.35);transition:transform .12s var(--ease)}
+.fh.drag{cursor:grabbing} .fh.drag::after{transform:scale(1.25)}
+.fh:focus{outline:none} .fh:focus-visible::after{box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--lapis)}
+.framebtns{display:flex;flex-wrap:wrap;gap:8px}
+.framebtns button{flex:1 1 140px}
+.hframe{display:inline-block;position:relative;width:22px;height:18px;border:1.5px solid var(--lapis);border-radius:2px;background:var(--lapis-soft);transform:perspective(40px) rotateX(18deg)}
+.hsel{display:flex;gap:3px}
+.hsel i{position:relative;width:13px;height:17px;border:1px solid var(--line);border-radius:2px}
+.hsel i.on{background:var(--lapis-soft);border-color:var(--lapis)}
+.hsel i.unc{border:1.5px solid var(--bad)}
 @media (prefers-reduced-motion: reduce){.ready #fieldwrap,.ready .kbd,.ready .drawer,.ready .dpane,.ready .sheet,.ready .scrim,.ready #intro,.ready #menubtn svg,.ready .page,.ready .tabind{transition:none}}
 /* Indlæsning af databasen: samme sprog som Dictionary-forsiden (eyebrow, banner.info, bar) */
 .boot{display:flex;flex-direction:column;gap:10px;padding-top:6px}
@@ -758,6 +831,7 @@ body.app #menubtn{top:calc(8px + env(safe-area-inset-top))}
         <div class="sheet" id="sheet" role="dialog" aria-label="Photo" inert>
           <div class="ohead"><h2>Read from a photo <span class="pill g">Experimental</span></h2><button type="button" class="iconbtn" data-act="closeover" aria-label="Close photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
           <div class="pad" id="photo"></div>
+          <div class="rsheet" id="rsheet" role="region" aria-labelledby="rstitle" hidden></div>
         </div>
         <div class="loupe" id="loupe" aria-hidden="true" hidden><div class="lin"></div></div>
         <div class="toast" id="toast" role="status" hidden></div>
@@ -3962,6 +4036,7 @@ function clearWithUndo() {
   if (!state.mstack[m]) return;
   const empty = !state.mstack[m].length && !state.buf.length && !(state.text || '').length;
   if (empty) return resetMode();
+  photoUndo = null;
   undoSnap = { m, stack: state.mstack[m].slice(), last: state.last[m], lastQ: state.lastQ[m], buf: state.buf.slice(), quads: copyQuads(state.quads || []), text: state.text, scanCtx: state.scanCtx, searched: state.searched, top: results.scrollTop };
   resetMode();
   const t = $('#toast'); t.classList.add('undo'); t.innerHTML = '<span>' + esc(cap(m)) + ' cleared</span><button type="button" data-act="undo">Undo</button>';
@@ -3998,16 +4073,23 @@ function setMode(m) {
   } else { results.innerHTML = state.searched ? '<p class="empty">' + HINT[m].replace('{lang}', LANGS[S.lang]) + '</p>' : ''; afterShow(); }
 }
 
-/* ---------- foto (beslutning 23) ----------
-   Genkendelsen er den rigtige: photo/hiero_ocr.js med model.json + model.bin (fra S/r4/photo/js/), indlæst første gang arket bruges.
-   Den finder tegnene, sætter dem i læserækkefølge og giver hvert tegn fem bud med sikkerhed. Appen deler tegnene i ord med sin egen
-   ordopdeling. Brugeren retter direkte: vælger et andet bud, sletter et tegn eller sætter et tabt tegn (▨) ind, som søgningen udfylder.
-   Prøverne er to syntetiske sider fra genkenderens testsæt (tegnet med Noto og NewGardiner, begge OFL; teksten fra AED, CC BY-SA). */
+/* ---------- foto (beslutning 23, ændret 19/10 af produktejeren: "markér for at læse", P3 A) ----------
+   Genkendelsen er den rigtige: photo/hiero_ocr.js med model.json + model.bin (+ facing.* til læseretningen, + det.* = tegnfinderen til
+   vægfotos, P3 B), indlæst første gang arket bruges. Tegnfinderen kører først; finder den mere end 30 tegn (en væg eller en tæt side),
+   bruges dens tegn, ellers kører også den klassiske opdeling, og den med flest sikkert genkendte tegn vinder (r.segmenter).
+   Den finder tegnene, sætter dem i læserækkefølge og giver hvert tegn fem bud med sikkerhed. Appen læser IKKE hele billedet: de fundne
+   tegn vises som et markerbart lag på fotoet (en svag ramme pr. tegn, appens usikkerhedsmærke på usikre tegn, en pil for læseretningen),
+   og brugeren markerer den del, der skal læses, som når man markerer tekst. Kun markeringen læses (Read), kopieres (Copy) eller søges
+   (Search). Rettelser sker direkte i markeringen: et andet bud, slet, eller et tabt tegn (▨), som søgningen udfylder.
+   Prøverne er tre syntetiske sider fra genkenderens sæt (tegnet med Noto og NewGardiner, begge OFL; teksten fra AED, CC BY-SA);
+   P3 er en spejlet linje (læses fra højre), som læseretningen (P3 A0) finder selv.
+   P3 C: tegnfinderens bud på flertalsstreger samles til ét tegn (C1), og hver linje læses samlet med tegnfølgerne fra korpusset (C2). */
 const cc = (c, st) => st === 'restored' ? 'guess' : (c >= .85 ? 'ok' : (c >= .6 ? 'warn' : 'bad'));
 const pct = c => Math.round(c * 100) + '%';
 const SAMPLES = [
   { id: 'P1', title: 'Printed page', sub: 'Clean print, one uncertain sign', url: 'photo/samples/p1.png', dir: 'ltr' },
   { id: 'P2', title: 'Carved relief', sub: 'Shadows and worn edges', url: 'photo/samples/p2.png', dir: 'ltr' },
+  { id: 'P3', title: 'Mirrored line', sub: 'The signs face right: read right to left', url: 'photo/samples/p3.png', dir: 'rtl' },
 ];
 const SCANS = {};
 /* genkenderens kodepunkt (hex) -> tegnets id; grundtegnet foretrækkes frem for en variant med samme kodepunkt */
@@ -4019,44 +4101,277 @@ function umap() {
   return UMAP;
 }
 let OCR = null;
+/* vægtene som binær fil; en vært, der ikke serverer .bin, får dem som base64-tekst (<fil>.b64.txt) */
+async function fetchWeights(base, file, bytes) {
+  try { const r = await fetch(new URL(file, base)); if (r.ok) { const a = await r.arrayBuffer(); if (a.byteLength === bytes) return a; } } catch (e) { /* værten serverer ikke binære filer */ }
+  const t = (await (await fetch(new URL(file + '.b64.txt', base))).text()).trim(), s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i);
+  return u.buffer;
+}
 async function loadOCR() {
   if (OCR) return OCR;
   const base = new URL('photo/', location.href), mod = await import(new URL('hiero_ocr.js', base).href);
   const json = await (await fetch(new URL('model.json', base))).json();
-  let bin = null;
-  try { const r = await fetch(new URL(json.weights_file, base)); if (r.ok) { const a = await r.arrayBuffer(); if (a.byteLength === json.total_bytes) bin = a; } } catch (e) { /* værten serverer ikke binære filer */ }
-  if (!bin) { const t = (await (await fetch(new URL(json.weights_file + '.b64.txt', base))).text()).trim(), s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); bin = u.buffer; }
-  await mod.loadModel({ json, bin });
+  await mod.loadModel({ json, bin: await fetchWeights(base, json.weights_file, json.total_bytes) });
+  /* læseretningen (P3 A0): tegnenes vending, facing.json + facing.bin. Mangler den, læser "Automatic" fra venstre og siger det. */
+  try { const fj = await (await fetch(new URL('facing.json', base))).json(); await mod.loadFacing({ json: fj, bin: await fetchWeights(base, fj.weights_file, fj.total_bytes) }); } catch (e) { /* uden retningsmodel */ }
+  /* tegnfinderen til vægfotos (P3 B): det.json + det.bin. Mangler den, bruges den klassiske opdeling alene (som før). */
+  try { const dj = await (await fetch(new URL('det.json', base))).json(); await mod.loadDetector({ json: dj, bin: await fetchWeights(base, dj.weights_file, dj.total_bytes) }); } catch (e) { /* uden tegnfinder */ }
+  /* tegnfølgerne fra korpusset (P3 C2): signlm.json + signlm.bin, tegn-tre-grammer fra databasens sætninger (bygget af photo/signlm.py).
+     Hver linje læses samlet: blandt hvert tegns ti bud vælges det, som passer bedst med genkendelsen og nabotegnene. Mangler filen,
+     beholder hvert tegn genkenderens eget første bud (som før). */
+  try { const lj = await (await fetch(new URL('signlm.json', base))).json(); await mod.loadSignLM({ json: lj, bin: await fetchWeights(base, lj.weights_file, lj.total_bytes) }); } catch (e) { /* uden tegnfølger */ }
   return (OCR = mod);
 }
-/* Et foto læses: tegnes på et lærred (højst 1600 px på den lange led, som genkenderen alligevel bruger), genkendes og gemmes som en aflæsning. */
+/* genkenderens tegn -> arkets tegn; id = tegnets felt i arbejdsbilledet, så rettelser og markering følger tegnet, når rækkefølgen skifter.
+   unc = genkenderens eget usikkerhedsflag (sikkerhed under modellens tærskel, i dag 0,56). */
+function scanSigns(r, W, H) {
+  const U = umap(), signs = [];
+  r.lines.forEach((L, li) => L.signs.forEach(x => {
+    const alts = []; x.alts.forEach(a => { const c = U[String(a.codepoint).toUpperCase()]; if (c && !alts.some(y => y[0] === c)) alts.push([c, a.conf]); });
+    if (alts.length) signs.push({ id: x.wbox.join(','), c: alts[0][0], orig: alts[0][0], conf: alts[0][1], unc: !!x.uncertain, status: 'intact', alts, line: li, box: [x.box[0] / W * 100, x.box[1] / H * 100, x.box[2] / W * 100, x.box[3] / H * 100] });
+  }));
+  return signs;
+}
+/* Læseretningen skiftes uden ny genkendelse: genkenderen sætter de samme tegn i den anden rækkefølge (reorder). Valgte bud, sletninger
+   og markeringen følger tegnet; et indsat tabt tegn bliver mellem de to tegn, det stod mellem (ellers ved det tegn, der fulgte efter). */
+function scanReorder(sc, want) {
+  if (!OCR || !sc.r) return;
+  const to = want === 'ltr' || want === 'rtl' ? want : sc.r.direction;
+  const r = to === sc.r.direction ? sc.r : OCR.reorder(sc.r, to), fresh = scanSigns(r, sc.W, sc.H);
+  const old = new Map(sc.signs.filter(x => !x.ins).map(x => [x.id, x])), del = sc.deleted || new Set(), out = [];
+  /* tegnfølgerne afhænger af rækkefølgen (P3 C2): et tegn, brugeren ikke har rettet, får den nye læsning; et valgt bud bliver stående */
+  fresh.forEach(x => { if (del.has(x.id)) return; const o = old.get(x.id);
+    if (o) { o.line = x.line; if (o.c === o.orig) Object.assign(o, { c: x.c, orig: x.orig, conf: x.conf, unc: x.unc, alts: x.alts }); out.push(o); } else out.push(x); });
+  sc.signs.forEach((x, i) => {
+    if (!x.ins) return;
+    const pv = sc.signs.slice(0, i).reverse().find(y => !y.ins), nx = sc.signs.slice(i + 1).find(y => !y.ins);
+    const ip = pv ? out.findIndex(y => y.id === pv.id) : -1, ix = nx ? out.findIndex(y => y.id === nx.id) : -1;
+    let at = ip >= 0 && ix >= 0 && Math.abs(ip - ix) === 1 ? Math.max(ip, ix) : (ix >= 0 ? ix : (ip >= 0 ? ip + 1 : out.length));
+    const nb = out[at] || out[at - 1]; if (nb) x.line = nb.line;
+    out.splice(at, 0, x);
+  });
+  sc.signs = out; sc.dir = to; sc.dirSel = want;
+}
+/* Et foto læses: tegnes på et lærred (højst 1600 px på den lange led, som genkenderen alligevel bruger), genkendes og gemmes som en aflæsning.
+   Retningen findes altid automatisk (tegnenes vending); har brugeren valgt en retning, sættes tegnene bagefter i den rækkefølge.
+   Intet markeres og intet læses: brugeren markerer selv det, der skal læses.
+   P3 E: opts.quad = rammen fra rammetrinnet (lærredets pixels): firkanten rettes op til et rektangel, og det rettede billede genkendes og
+   vises; uden quad læses hele fotoet som før. opts.pc = lærredet, rammetrinnet allerede har tegnet (samme pixels som her);
+   opts.prev = aflæsningen, en ny ramme erstatter ("Adjust frame"): Undo giver den tilbage. */
 let photoURL = null;
-async function readPhoto(meta, blob) {
-  const dir = state.photoDir || S.dir;
-  Object.assign(state, { scan: null, scanErr: null, scanBusy: meta.title }); renderPhoto();
+async function photoCanvas(blob) {
+  const bmp = await createImageBitmap(blob), k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+  const W = Math.max(1, Math.round(bmp.width * k)), H = Math.max(1, Math.round(bmp.height * k));
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const cx = cv.getContext('2d', { willReadFrequently: true }); cx.fillStyle = '#fff'; cx.fillRect(0, 0, W, H); cx.drawImage(bmp, 0, 0, W, H);
+  if (bmp.close) bmp.close();
+  return { cv, cx, W, H };
+}
+async function readPhoto(meta, blob, opts = {}) {
+  const want = state.photoDir || 'auto';
+  Object.assign(state, { scan: null, frame: null, scanErr: null, scanBusy: meta.title, readOpen: false, fixId: null }); renderPhoto();
   await new Promise(r => setTimeout(r, 40));
   try {
     const ocr = await loadOCR();
     if (!blob) blob = await (await fetch(meta.url)).blob();
-    const bmp = await createImageBitmap(blob), k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
-    const W = Math.max(1, Math.round(bmp.width * k)), H = Math.max(1, Math.round(bmp.height * k));
-    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-    const cx = cv.getContext('2d', { willReadFrequently: true }); cx.fillStyle = '#fff'; cx.fillRect(0, 0, W, H); cx.drawImage(bmp, 0, 0, W, H);
-    const r = ocr.recognise(cx.getImageData(0, 0, W, H), { direction: dir }), U = umap(), signs = [];
-    r.lines.forEach((L, li) => L.signs.forEach(x => {
-      const alts = []; x.alts.forEach(a => { const c = U[String(a.codepoint).toUpperCase()]; if (c && !alts.some(y => y[0] === c)) alts.push([c, a.conf]); });
-      if (alts.length) signs.push({ c: alts[0][0], orig: alts[0][0], conf: alts[0][1], status: 'intact', alts, line: li, box: [x.box[0] / W * 100, x.box[1] / H * 100, x.box[2] / W * 100, x.box[3] / H * 100] });
-    }));
-    SCANS[meta.id] = { id: meta.id, title: meta.title, sub: meta.sub, url: meta.url, src: [meta, blob], dir, lines: r.lines.length, ms: Math.round(r.stats.total_ms), signs, dels: 0 };
-    state.scan = meta.id; state.scanWord = 0;
-    trace('Foto læst'); step(['scan', 'scan_line'], 'Billedet og de aflæste linjer gemmes med samlet sikkerhed. Genkendelsen sker på enheden (' + signs.length + ' tegn, ' + Math.round(r.stats.total_ms) + ' ms).');
-    step(['scan_sign', 'scan_sign_candidate'], 'Hvert tegn har placering, sikkerhed og fem bud. Appen deler tegnene i ord med sin egen ordopdeling.');
+    const pc = opts.pc || await photoCanvas(blob);
+    let W = pc.W, H = pc.H, img = pc.cx.getImageData(0, 0, W, H), url = meta.url, frame = opts.frame ? { quad: copyQuad(opts.frame), whole: true, W, H } : null;
+    if (opts.quad && !isWholeQuad(opts.quad, W, H)) {
+      const t0 = performance.now(); img = warpQuad(img, opts.quad); W = img.width; H = img.height;
+      frame = { quad: copyQuad(opts.quad), whole: false, W: pc.W, H: pc.H, ms: Math.round(performance.now() - t0) };
+      url = await imgURL(img);
+    } else if (opts.quad) frame = { quad: copyQuad(opts.quad), whole: true, W, H };
+    const r = ocr.recognise(img, { direction: 'auto' });
+    const sc = { id: meta.id, title: meta.title, sub: meta.sub, url, src: [meta, blob], frame, dir: r.direction, dirSel: 'auto', auto: r.direction_auto || null, layout: r.layout,
+                 r, W, H, lines: r.lines.length, ms: Math.round(r.stats.total_ms + (frame && frame.ms || 0)), seg: r.segmenter || 'classic', signs: scanSigns(r, W, H), dels: 0, deleted: new Set(), sel: new Set(), nIns: 0 };
+    if (want !== 'auto') scanReorder(sc, want);
+    SCANS[meta.id] = sc; const signs = sc.signs;
+    state.scan = meta.id; $('#photo').scrollTop = 0;
+    trace('Foto læst');
+    if (frame && !frame.whole) step([], 'Rammen rettes op: firkanten afbildes på et rektangel ' + W + ' × ' + H + ' px (homografi, bilineær sampling, ' + frame.ms + ' ms). Kun det rettede udsnit genkendes og vises.');
+    step(['scan', 'scan_line'], 'Billedet og de fundne linjer gemmes med samlet sikkerhed. Genkendelsen sker på enheden (' + signs.length + ' tegn, ' + Math.round(r.stats.total_ms) + ' ms).');
+    step(['scan'], sc.seg === 'detector' ? 'Tegnene er fundet af tegnfinderen (et lille netværk til vægfotos, P3 B).' : 'Tegnene er fundet af den klassiske opdeling (rene tryk og tegnede kopier).');
+    if (sc.auto) step(['scan'], 'Læseretningen findes af tegnenes vending (' + sc.auto.votes + ' tegn stemte, ' + (sc.auto.direction === 'rtl' ? 'højre mod venstre' : 'venstre mod højre') + ', ' + pct(sc.auto.certainty) + '). Brugerens valg af retning gælder frem for den fundne.');
+    if (r.decode && r.decode.applied) step(['scan_sign_candidate'], 'Hver linje er læst samlet med tegnfølgerne fra databasens sætninger: blandt hvert tegns ti bud er det valgt, der passer bedst med genkendelsen og nabotegnene (' + r.decode.changed + ' tegn fik et andet bud end genkenderens første, ' + Math.round(r.stats.decode_ms) + ' ms). Sikkerheden er den samlede.');
+    step(['scan_sign', 'scan_sign_candidate'], 'Hvert tegn har placering, sikkerhed og fem bud. Tegnene vises som et markerbart lag på fotoet. Intet læses, før brugeren markerer noget.');
   } catch (e) { state.scanErr = String((e && e.message) || e); trace('Foto kunne ikke læses'); }
   state.scanBusy = null; renderPhoto();
+  if (opts.prev && state.scan === opts.prev.id) { photoUndo = { swap: opts.prev, readOpen: !!opts.prevRead, photoDir: state.photoDir }; photoToast('Read again with the new frame'); }
 }
-/* Ordene i en aflæsning: appens ordopdeling linje for linje; tegn, der ikke hører til et ord, står hver for sig. */
-function scanWords(sc) {
-  const s = sc.signs, out = []; let a = 0;
+
+/* ---------- P3 E: rammen, før fotoet læses (som en dokumentscanner) ----------
+   Et foto fra kamera eller galleri vises først med en ramme med fire hjørner. Appen foreslår rammen selv: tegnfinderen kører alene (ingen
+   genkendelse) på lærredet, og rammen er det oprette felt om den største sammenhængende gruppe af sikre fund (+ nære grupper), lidt
+   udvidet; finder den for lidt, eller fylder feltet næsten hele fotoet, står rammen om hele fotoet. Brugeren trækker hjørnerne (finger,
+   mus; piletasterne flytter et hjørne med fokus). Read retter firkanten op og læser kun den; "Use whole photo" er den gamle vej.
+   Prøverne er allerede beskåret og springer rammen over; "Adjust frame" i resultatet åbner den med den sidste ramme. Rammen er ikke en
+   hjælp til at analysere tegnene (beslutning 23), kun udsnittet af fotoet. Parametrene er valgt på syntetiske udviklingsbilleder
+   (r4/photo/e_work), aldrig på brugerfotos. */
+const FRAME = { side: 640, thr: 0.5, link: 1.5, add: 0.1, addGap: 3.0, pad: 0.6, minN: 3, maxCover: 0.9 };
+const copyQuad = q => q.map(p => [p[0], p[1]]);
+const fullQuad = (W, H) => [[0, 0], [W, 0], [W, H], [0, H]];
+const isWholeQuad = (q, W, H) => fullQuad(W, H).every((p, i) => Math.abs(p[0] - q[i][0]) < 0.5 && Math.abs(p[1] - q[i][1]) < 0.5);
+/* den foreslåede ramme ud fra tegnfinderens fund [x0, y0, x1, y1, areal, sikkerhed]; null = hele fotoet */
+function autoFrame(boxes, W, H, o = FRAME) {
+  const B = boxes.filter(b => b[5] >= o.thr);
+  if (B.length < o.minN) return null;
+  const sz = B.map(b => Math.sqrt((b[2] - b[0]) * (b[3] - b[1]))).sort((a, b) => a - b), m = sz[sz.length >> 1];
+  const gap = (a, b) => Math.max(0, Math.max(a[0], b[0]) - Math.min(a[2], b[2]), Math.max(a[1], b[1]) - Math.min(a[3], b[3]));
+  const box = L => L.reduce((a, b) => [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[2], b[2]), Math.max(a[3], b[3])], [1e18, 1e18, -1e18, -1e18]);
+  const par = B.map((_, i) => i), f = i => (par[i] === i ? i : (par[i] = f(par[i])));
+  for (let i = 0; i < B.length; i++) for (let j = i + 1; j < B.length; j++) if (gap(B[i], B[j]) <= o.link * m) par[f(i)] = f(j);
+  const G = new Map(); B.forEach((b, i) => { const r = f(i); if (!G.has(r)) G.set(r, { s: 0, b: [] }); const g = G.get(r); g.s += b[5]; g.b.push(b); });
+  const gs = [...G.values()].sort((a, b) => b.s - a.s), keep = gs[0].b.slice();
+  gs.slice(1).forEach(g => { if (g.s >= o.add * gs[0].s && gap(box(keep), box(g.b)) <= o.addGap * m) keep.push(...g.b); });   /* et register eller en kolonne på den anden side af et brud */
+  if (keep.length < o.minN) return null;
+  const k = box(keep), d = o.pad * m, x0 = Math.max(0, k[0] - d), y0 = Math.max(0, k[1] - d), x1 = Math.min(W, k[2] + d), y1 = Math.min(H, k[3] + d);
+  if ((x1 - x0) * (y1 - y0) > o.maxCover * W * H) return null;
+  return { quad: [[x0, y0], [x1, y0], [x1, y1], [x0, y1]], n: keep.length };
+}
+/* enhedskvadratet afbildet på firkanten (Heckbert): (u, v) -> (x, y); hjørnerne i rækkefølgen øverst til venstre, øverst til højre,
+   nederst til højre, nederst til venstre */
+function squareToQuad(q) {
+  const [[x0, y0], [x1, y1], [x2, y2], [x3, y3]] = q, sx = x0 - x1 + x2 - x3, sy = y0 - y1 + y2 - y3;
+  if (Math.abs(sx) < 1e-9 && Math.abs(sy) < 1e-9) return [x1 - x0, x2 - x1, x0, y1 - y0, y2 - y1, y0, 0, 0];
+  const dx1 = x1 - x2, dx2 = x3 - x2, dy1 = y1 - y2, dy2 = y3 - y2, den = dx1 * dy2 - dx2 * dy1, g = (sx * dy2 - dx2 * sy) / den, h = (dx1 * sy - sx * dy1) / den;
+  return [x1 - x0 + g * x1, x3 - x0 + h * x3, x0, y1 - y0 + g * y1, y3 - y0 + h * y3, y0, g, h];
+}
+/* det rettede billedes størrelse: middel af de modstående siders længde (formatet følger rammen), højst 1600 px, aldrig forstørret */
+function frameSize(q, max = 1600) {
+  const L = (p, r) => Math.hypot(p[0] - r[0], p[1] - r[1]), w = (L(q[0], q[1]) + L(q[3], q[2])) / 2, h = (L(q[0], q[3]) + L(q[1], q[2])) / 2, k = Math.min(1, max / Math.max(w, h));
+  return [Math.max(8, Math.round(w * k)), Math.max(8, Math.round(h * k))];
+}
+/* firkanten rettet op: hver pixel i rektanglet hentes fra fotoet gennem homografien (pixelmidter), bilineært mellem de fire naboer */
+function warpQuad(img, q, size) {
+  const [w, h] = size || frameSize(q), [a, b, c, d, e, f, g, hh] = squareToQuad(q), W = img.width, H = img.height, S = img.data, out = new Uint8ClampedArray(w * h * 4);
+  for (let y = 0; y < h; y++) {
+    const v = (y + 0.5) / h;
+    for (let x = 0; x < w; x++) {
+      const u = (x + 0.5) / w, z = g * u + hh * v + 1;
+      let sx = (a * u + b * v + c) / z - 0.5, sy = (d * u + e * v + f) / z - 0.5;
+      sx = sx < 0 ? 0 : (sx > W - 1 ? W - 1 : sx); sy = sy < 0 ? 0 : (sy > H - 1 ? H - 1 : sy);
+      const x0 = Math.floor(sx), y0 = Math.floor(sy), x1 = Math.min(W - 1, x0 + 1), y1 = Math.min(H - 1, y0 + 1), fx = sx - x0, fy = sy - y0;
+      const i00 = (y0 * W + x0) * 4, i10 = (y0 * W + x1) * 4, i01 = (y1 * W + x0) * 4, i11 = (y1 * W + x1) * 4, o = (y * w + x) * 4;
+      for (let k = 0; k < 4; k++) { const t = S[i00 + k] + (S[i10 + k] - S[i00 + k]) * fx, bt = S[i01 + k] + (S[i11 + k] - S[i01 + k]) * fx; out[o + k] = t + (bt - t) * fy; }   /* Uint8ClampedArray runder selv til nærmeste */
+    }
+  }
+  return new ImageData(out, w, h);
+}
+/* det rettede billede som billedfil til laget (kun til visning; genkendelsen bruger pixelene direkte) */
+async function imgURL(img) {
+  const cv = document.createElement('canvas'); cv.width = img.width; cv.height = img.height; cv.getContext('2d').putImageData(img, 0, 0);
+  const b = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.92)); return b ? URL.createObjectURL(b) : cv.toDataURL('image/jpeg', 0.92);
+}
+/* rammetrinnet: from = aflæsningen, der justeres ("Adjust frame"); ellers et nyt foto, og rammen foreslås */
+let frameURL = null, FG = null;
+async function framePhoto(meta, blob, from) {
+  if (frameURL) { URL.revokeObjectURL(frameURL); frameURL = null; }
+  const F = { meta, blob, url: meta.url, pc: null, quad: null, auto: null, busy: true, moved: false, from: from || null, fromRead: !!state.readOpen, ms: null };
+  if (blob && from) F.url = frameURL = URL.createObjectURL(blob);
+  Object.assign(state, { scan: null, frame: F, scanErr: null, scanBusy: null, readOpen: false, fixId: null }); renderPhoto();
+  await new Promise(r => setTimeout(r, 30));
+  try {
+    if (!F.blob) F.blob = await (await fetch(meta.url)).blob();
+    F.pc = await photoCanvas(F.blob);
+    F.quad = from && from.frame && from.frame.W === F.pc.W && from.frame.H === F.pc.H ? copyQuad(from.frame.quad) : fullQuad(F.pc.W, F.pc.H);
+    if (state.frame !== F) return;
+    if (from) { F.busy = false; trace('Foto: juster rammen'); step([], 'Rammetrinnet åbnes igen med den sidste ramme. Read læser igen; den nuværende aflæsning kan fås tilbage med Undo.'); return renderPhoto(); }
+    renderPhoto(); await new Promise(r => setTimeout(r, 40));
+    const t0 = performance.now();
+    try {
+      const ocr = await loadOCR(), g = ocr.toGrey(F.pc.cx.getImageData(0, 0, F.pc.W, F.pc.H));
+      const boxes = ocr.detectBoxes(g, Object.assign({}, ocr.PARAMS, ocr.DET_PARAMS, { det_side: FRAME.side }));
+      F.auto = autoFrame(boxes, F.pc.W, F.pc.H); F.nDet = boxes.length;
+    } catch (e) { F.auto = null; }
+    F.ms = Math.round(performance.now() - t0);
+    if (state.frame !== F) return;
+    if (F.auto && !F.moved) F.quad = copyQuad(F.auto.quad);
+    F.busy = false;
+    trace('Foto: rammen foreslås'); step([], 'Tegnfinderen kører alene (ingen genkendelse, ' + F.ms + ' ms): ' + (F.auto ? 'rammen lægges om de ' + F.auto.n + ' sikre fund i den største sammenhængende gruppe, lidt udvidet.' : 'for få sikre fund, så rammen står om hele fotoet.') + ' Brugeren kan trække hjørnerne; intet er læst endnu.');
+    renderPhoto();
+  } catch (e) { if (state.frame === F) { state.frame = null; state.scanErr = String((e && e.message) || e); renderPhoto(); } }
+}
+const CORNER = ['Top-left', 'Top-right', 'Bottom-right', 'Bottom-left'];
+const cornerLabel = (F, i) => CORNER[i] + ' corner of the frame, ' + Math.round(F.quad[i][0] / F.pc.W * 100) + ' % from the left, ' + Math.round(F.quad[i][1] / F.pc.H * 100) + ' % from the top';
+function renderFrame() {
+  const el = $('#photo'), F = state.frame;
+  let h = '<div class="phead"><button type="button" class="backbtn" data-act="frameback"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>' + (F.from ? 'Back' : 'Photos') + '</span></button><p class="note grow">' + esc(F.meta.title) + ' · frame the inscription</p></div>';
+  if (!F.pc) { FG = null; el.innerHTML = h + '<p class="note">Opening the photo…</p>'; return renderRead(); }
+  const cs = getComputedStyle(el), aw = Math.max(120, el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 28);
+  const ah = Math.max(160, $('#sheet').clientHeight - $('#sheet .ohead').offsetHeight - 210), k = Math.min(aw / F.pc.W, ah / F.pc.H);
+  FG = { k, PW: Math.max(40, Math.floor(F.pc.W * k)), PH: Math.max(30, Math.floor(F.pc.H * k)) };
+  h += '<div class="framewrap' + (F.busy ? ' busy' : '') + '" style="width:' + FG.PW + 'px;height:' + FG.PH + 'px"><div class="photoimg"><img src="' + esc(F.url) + '" alt="' + esc(F.meta.title) + '" draggable="false"></div>' +
+    '<svg class="fshade" viewBox="0 0 ' + FG.PW + ' ' + FG.PH + '" aria-hidden="true"><path class="out" fill-rule="evenodd"/><polygon class="under"/><polygon class="edge"/></svg>' +
+    CORNER.map((c, i) => '<button type="button" class="fh" data-fc="' + i + '" aria-describedby="fhelp"></button>').join('') + '</div>';
+  const msg = F.busy ? 'Finding the inscription…' : (F.from ? 'Your last frame.' : (F.auto ? 'Frame suggested around the ' + F.auto.n + ' signs the app found (' + (F.ms / 1000).toFixed(1) + ' s).' : 'No clear inscription found, so the frame holds the whole photo.'));
+  h += '<p class="note" id="fhelp" aria-live="polite">' + esc(msg) + ' Drag the corners to the edges of the inscription; the app straightens the frame before reading it. A focused corner moves with the arrow keys.</p>';
+  h += '<div class="framebtns"><button type="button" class="primary" data-act="frameread"' + (F.busy ? ' disabled' : '') + '>Read</button><button type="button" class="secondary" data-act="framewhole"' + (F.busy ? ' disabled' : '') + '>Use whole photo</button></div>';
+  el.innerHTML = h; paintFrame(); renderRead();
+}
+/* kun rammen tegnes om (også mens et hjørne trækkes): skyggen udenfor, kanten og de fire hjørner */
+function paintFrame() {
+  const F = state.frame, wrap = $('#photo .framewrap'); if (!F || !FG || !wrap) return;
+  const P = F.quad.map(p => [p[0] * FG.k, p[1] * FG.k]), pts = P.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  wrap.querySelector('.out').setAttribute('d', 'M0 0H' + FG.PW + 'V' + FG.PH + 'H0Z M' + P.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L') + 'Z');
+  wrap.querySelector('.under').setAttribute('points', pts); wrap.querySelector('.edge').setAttribute('points', pts);
+  wrap.querySelectorAll('.fh').forEach(b => { const i = Number(b.dataset.fc); b.style.left = P[i][0] + 'px'; b.style.top = P[i][1] + 'px'; b.setAttribute('aria-label', cornerLabel(F, i)); });
+}
+/* et hjørne må flyttes, så længe firkanten forbliver konveks (ingen krydsende sider) og ikke falder sammen */
+function quadOK(q) {
+  let sgn = 0;
+  for (let i = 0; i < 4; i++) { const a = q[i], b = q[(i + 1) % 4], c = q[(i + 2) % 4], cr = (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0]);
+    if (Math.abs(cr) < 1e-6 || Math.hypot(b[0] - a[0], b[1] - a[1]) < 8) return false; if (sgn && Math.sign(cr) !== sgn) return false; sgn = Math.sign(cr); }
+  return sgn > 0;
+}
+function moveCorner(i, x, y) {
+  const F = state.frame; if (!F || !F.pc) return false;
+  const q = copyQuad(F.quad); q[i] = [Math.max(0, Math.min(F.pc.W, x)), Math.max(0, Math.min(F.pc.H, y))];
+  if (!quadOK(q)) return false;
+  F.quad = q; F.moved = true; paintFrame(); return true;
+}
+function frameRead(whole) {
+  const F = state.frame; if (!F || !F.pc || F.busy) return;
+  trace(whole ? 'Foto: hele fotoet' : 'Foto: læs rammen');
+  step([], whole ? 'Hele fotoet læses, som før rammetrinnet fandtes.' : 'Firkanten rettes op til et rektangel og læses; resten af fotoet læses ikke.');
+  return readPhoto(F.meta, F.blob, whole ? { pc: F.pc, frame: F.quad, prev: F.from, prevRead: F.fromRead } : { pc: F.pc, quad: F.quad, prev: F.from, prevRead: F.fromRead });
+}
+function frameBack() {
+  const F = state.frame; if (!F) return;
+  state.frame = null;
+  if (F.from) { state.scan = F.from.id; state.readOpen = F.fromRead; trace('Foto: rammen uændret'); return renderPhoto(); }
+  photoUndo = { frame: F }; renderPhoto(); photoToast('Photo closed');
+}
+function frameAdjust() {
+  const sc = curScan(); if (!sc) return;
+  return framePhoto(sc.src[0], sc.src[1], sc);
+}
+const FP = { c: -1 };
+photoElFrame();
+function photoElFrame() {
+  const el = $('#photo');
+  el.addEventListener('pointerdown', e => {
+    const b = e.target.closest('.fh'); if (!b || !state.frame || !FG) return;
+    e.preventDefault(); const i = Number(b.dataset.fc), q = state.frame.quad[i];
+    FP.c = i; FP.pid = e.pointerId; FP.x = e.clientX; FP.y = e.clientY; FP.q = [q[0], q[1]]; FP.b = b; b.classList.add('drag'); b.focus({ preventScroll: true });
+    try { b.setPointerCapture(e.pointerId); } catch (x) { /* ingen aktiv markør */ }
+  });
+  el.addEventListener('pointermove', e => {
+    if (FP.c < 0 || e.pointerId !== FP.pid || !FG) return; e.preventDefault();
+    moveCorner(FP.c, FP.q[0] + (e.clientX - FP.x) / FG.k, FP.q[1] + (e.clientY - FP.y) / FG.k);
+  });
+  const end = e => { if (FP.c < 0 || e.pointerId !== FP.pid) return; if (FP.b) FP.b.classList.remove('drag'); FP.c = -1; trace('Foto: hjørne trukket'); step([], 'Rammens hjørne flyttes; intet læses, før brugeren trykker Read.'); };
+  el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+  el.addEventListener('touchmove', e => { if (FP.c >= 0) e.preventDefault(); }, { passive: false });
+  el.addEventListener('keydown', e => {
+    const b = e.target.closest && e.target.closest('.fh'); if (!b || !state.frame || !state.frame.pc) return;
+    const dv = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key]; if (!dv) return;
+    e.preventDefault(); const F = state.frame, i = Number(b.dataset.fc), st = Math.max(1, Math.round(Math.max(F.pc.W, F.pc.H) / 200)) * (e.shiftKey ? 5 : 1);
+    moveCorner(i, F.quad[i][0] + dv[0] * st, F.quad[i][1] + dv[1] * st);
+  });
+}
+/* Ordene i en række tegn fra fotoet: appens ordopdeling linje for linje; tegn, der ikke hører til et ord, står hver for sig. */
+function wordsOf(s) {
+  const out = []; let a = 0;
   while (a < s.length) {
     let b = a; while (b < s.length && s[b].line === s[a].line) b++;
     let p = a;
@@ -4067,15 +4382,339 @@ function scanWords(sc) {
   }
   return out.map(w => Object.assign(w, { conf: Math.min(...s.slice(w.at, w.at + w.n).map(x => x.c !== x.orig ? 1 : x.conf)) }));
 }
-const scanConf = sc => sc.signs.length ? sc.signs.reduce((a, x) => a + (x.c !== x.orig ? 1 : x.conf), 0) / sc.signs.length : 0;
+const scanWords = sc => wordsOf(sc.signs);
+const confOf = list => list.length ? list.reduce((a, x) => a + (x.c !== x.orig ? 1 : x.conf), 0) / list.length : 0;
 const scanEdited = sc => (sc.dels || 0) + sc.signs.filter(x => x.c !== x.orig).length;
+
+/* ---------- markeringen ----------
+   Markeringen er en mængde af tegn (deres id), ikke et udsnit af indekser: skifter læseretningen, bliver de samme tegn markeret og står i
+   den nye rækkefølge. Håndtagene står ved det første og det sidste markerede tegn; trækkes et håndtag, gælder markeringen igen fra det
+   andet håndtag til tegnet under fingeren, tegn for tegn i læserækkefølgen og videre fra linje til linje, som når man markerer tekst. */
+const curScan = () => (state.scan && SCANS[state.scan]) || null;
+const selIdx = sc => { const o = []; sc.signs.forEach((x, i) => { if (sc.sel.has(x.id)) o.push(i); }); return o; };
+const selSigns = sc => sc.signs.filter(x => sc.sel.has(x.id));
+const selKey = sc => selSigns(sc).map(x => x.id + '=' + x.c).join('|');
+function selRange(sc, i, j) { const a = Math.max(0, Math.min(i, j)), b = Math.min(sc.signs.length - 1, Math.max(i, j)); sc.sel = new Set(sc.signs.slice(a, b + 1).map(x => x.id)); }
+function selWord(sc, i) { const w = scanWords(sc).find(x => i >= x.at && i < x.at + x.n); if (w) selRange(sc, w.at, w.at + w.n - 1); }
+function selLine(sc, i) { const L = sc.signs[i].line; let a = i, b = i; while (a > 0 && sc.signs[a - 1].line === L) a--; while (b < sc.signs.length - 1 && sc.signs[b + 1].line === L) b++; selRange(sc, a, b); }
+function selAll(sc) { sc.sel = new Set(sc.signs.map(x => x.id)); }
+const mainVal = c => { if (isLost(c)) return 'lost sign'; const v = valuesOf(c)[0]; return v ? (v.t ? tl(v.t) : (v.n || '')) : ((SG[c] && SG[c].d) || ''); };
+const signLabel = x => scCode(x.c) + (x.ins ? ', added by you' : ', ' + mainVal(x.c) + (x.c !== x.orig ? ', chosen by you' : (x.unc ? ', uncertain' : '')));
+/* Et tabt tegn, brugeren har sat ind, har intet felt i billedet: det tegnes som et lille skraveret felt i kanten af nabotegnet. */
+function dispBoxes(sc) {
+  const s = sc.signs, cols = sc.layout === 'columns', rtl = sc.dir === 'rtl';
+  return s.map((x, i) => {
+    if (x.box) return x.box;
+    let j = i + 1; while (j < s.length && !s[j].box) j++;
+    let p = i - 1; while (p >= 0 && !s[p].box) p--;
+    const nx = j < s.length && s[j].line === x.line ? s[j] : null, pv = p >= 0 ? s[p] : (j < s.length ? s[j] : null), ref = nx || pv;
+    if (!ref) return [2, 2, 4, 6];
+    const before = ref === nx && j > i, k = before ? j - i : i - p, b = ref.box, w = b[2] * .42, h = b[3] * .42;
+    let l, t;
+    if (cols) { l = b[0] + (b[2] - w) / 2; t = before ? b[1] - h * 1.2 * k : b[1] + b[3] + h * (1.2 * k - 1); }
+    else { t = b[1] + (b[3] - h) / 2; l = before !== rtl ? b[0] - w * 1.2 * k : b[0] + b[2] + w * (1.2 * k - 1); }
+    return [Math.max(0, Math.min(100 - w, l)), Math.max(0, Math.min(100 - h, t)), w, h];
+  });
+}
+/* Fotoets lag: ét felt pr. tegn (svag ramme), usikre tegn med appens usikkerhedsfarve, egne valg grå, indsatte tabte tegn skraveret. */
+let PG = null;
+const PH = { p: null, h: null, last: null, kanchor: null };      /* fotoets gestus: tryk/træk (p), håndtag (h), sidste tryk (dobbelttryk), tastaturets anker */
+function layerHTML(sc) {
+  const foc = sc.signs.findIndex(x => x.id === sc.focus);
+  return sc.signs.map((x, i) => { const b = PG.B[i];
+    const k = x.ins ? ' ins' : (x.c !== x.orig ? ' pick' : (x.unc ? ' unc ' + cc(x.conf) : ''));
+    return '<span class="sg' + k + '" role="option" tabindex="' + (i === (foc < 0 ? 0 : foc) ? 0 : -1) + '" data-si="' + i + '" aria-selected="false" aria-label="' + esc(signLabel(x)) + '" style="left:' + b[0].toFixed(2) + '%;top:' + b[1].toFixed(2) + '%;width:' + b[2].toFixed(2) + '%;height:' + b[3].toFixed(2) + '%"></span>'; }).join('');
+}
+function dirArrow(sc) {
+  const cols = sc.layout === 'columns', rtl = sc.dir === 'rtl';
+  const lab = 'Reading direction: ' + (cols ? 'in columns, top to bottom, the columns from ' : '') + (rtl ? 'right to left' : 'left to right');
+  const svg = (d, cls) => '<svg viewBox="0 0 24 24" aria-hidden="true"' + (cls ? ' class="' + cls + '"' : '') + '><path d="' + d + '"/></svg>';
+  return '<span class="dirarrow' + (rtl ? ' rtl' : '') + '" role="img" aria-label="' + lab + '" title="' + lab + '">' + (cols ? svg('M12 4v15M7 14l5 5 5-5') : '') + svg(rtl ? 'M20 12H5M10 7l-5 5 5 5' : 'M4 12h15M14 7l5 5-5 5', cols ? 'sm' : '') + '</span>';
+}
+const pxBox = b => [b[0] / 100 * PG.PW, b[1] / 100 * PG.PH, b[2] / 100 * PG.PW, b[3] / 100 * PG.PH];
+/* Markeringen tegnes uden at bygge arket om (også mens et håndtag trækkes): felterne, håndtagene, linjen med handlinger og status. */
+let readT = 0;
+function paintSel(sc) {
+  const wrap = $('#photo .photowrap'); if (!wrap || !PG || PG.sc !== sc) return;
+  const ix = selIdx(sc), any = ix.length > 0, cols = sc.layout === 'columns', rtl = sc.dir === 'rtl';
+  wrap.querySelectorAll('.sg').forEach(el => { const x = sc.signs[Number(el.dataset.si)], on = !!x && sc.sel.has(x.id); el.classList.toggle('on', on); el.setAttribute('aria-selected', String(on)); });
+  wrap.classList.toggle('hassel', any);
+  const hs = wrap.querySelectorAll('.hdl'), bars = wrap.querySelectorAll('.hbar'), bar = wrap.querySelector('.selbar');
+  [...hs, ...bars].forEach(e => { e.hidden = !any; });
+  if (any) {
+    const put = (hb, knob, b, end) => {
+      if (cols) { const y = end ? b[1] + b[3] : b[1]; Object.assign(hb.style, { left: b[0] + 'px', top: (y - 1) + 'px', width: b[2] + 'px', height: '2px' }); knob.style.left = (b[0] + (end ? b[2] : 0)) + 'px'; knob.style.top = (y + (end ? 9 : -9)) + 'px'; }
+      else { const x = end !== rtl ? b[0] + b[2] : b[0]; Object.assign(hb.style, { left: (x - 1) + 'px', top: b[1] + 'px', width: '2px', height: b[3] + 'px' }); knob.style.left = x + 'px'; knob.style.top = (b[1] + b[3] + 9) + 'px'; }
+    };
+    put(bars[0], hs[0], pxBox(PG.B[ix[0]]), false); put(bars[1], hs[1], pxBox(PG.B[ix[ix.length - 1]]), true);
+  }
+  const busy = !!((PH.p && PH.p.mode) || PH.h);
+  bar.hidden = !any || busy || (state.fixId && state.fixWhere === 'photo');
+  if (!bar.hidden) {
+    let l = 1e9, t = 1e9, r = -1e9, btm = -1e9; ix.forEach(i => { const b = pxBox(PG.B[i]); l = Math.min(l, b[0]); t = Math.min(t, b[1]); r = Math.max(r, b[0] + b[2]); btm = Math.max(btm, b[1] + b[3]); });
+    const bw = bar.offsetWidth, bh = bar.offsetHeight, W = PG.PW;
+    bar.style.left = Math.round(bw >= W ? (W - bw) / 2 : Math.max(0, Math.min(W - bw, (l + r) / 2 - bw / 2))) + 'px';
+    const up = cols ? 26 : 12;      /* in columns the start handle sits above the first sign */
+    bar.style.top = Math.round(t - bh - up >= -wrap.offsetTop + 4 ? t - bh - up : btm + 24) + 'px';
+  }
+  const st = $('#selstat'), n = ix.length;
+  if (st) {
+    const nl = new Set(ix.map(i => sc.signs[i].line)).size, unit = cols ? ['column', 'columns'] : ['line', 'lines'];
+    const html = any ? '<span class="grow"><b>' + n + ' sign' + (n === 1 ? '' : 's') + ' selected' + (nl > 1 ? ' in ' + nl + ' ' + unit[1] : '') + '</b><small>Drag a handle to select more or less.</small></span><button type="button" class="linkbtn" data-act="selclear">Clear</button>'
+      : '<span class="grow"><b>Select the signs you want to read</b><small>Tap a sign for its word, double-tap for its whole ' + unit[0] + ', or hold and drag. Nothing is read until you select.</small></span><button type="button" class="secondary" data-act="selall">Select all</button>';
+    if (st.dataset.k !== html) { st.innerHTML = html; st.dataset.k = html; }
+  }
+  if (state.readOpen && selKey(sc) !== sc.readKey) { clearTimeout(readT); readT = setTimeout(renderRead, 300); }
+}
+/* ---------- rettelser i markeringen: fem bud, slet, sæt et tabt tegn ind (på fotoet og i læsearket) ---------- */
+function fixHTML(sc, x) {
+  const cls = signCls(x), p = signPct(x), id = esc(x.id);
+  const st = x.ins ? '<span class="pill">added by you</span>' : (x.c !== x.orig ? '<span class="pill">chosen by you</span>' : '<span class="conf c-' + cls + '">' + (S.conf && p != null ? pct(p) + ' ' : '') + CCWORD[cls] + '</span>');
+  const alts = x.alts.length > 1 ? '<div class="alts" role="group" aria-label="Candidates">' + x.alts.slice(0, 5).map(a => '<button type="button" data-palt="' + id + '|' + a[0] + '" aria-pressed="' + (x.c === a[0]) + '"><span class="gl sm">' + chOf(a[0]) + '</span>' + esc(CODE(a[0])) + (S.conf ? ' ' + pct(a[1]) : '') + '</button>').join('') + '</div>' : '';
+  return '<div class="fixbox"><div class="signrow"><span class="gl">' + chOf(x.c) + '</span><div><span class="mono">' + esc(scCode(x.c)) + '</span> ' + st + (x.ins ? '' : ' <small class="note">' + esc(mainVal(x.c)) + '</small>') + alts +
+    '<div class="edits"><button type="button" class="secondary" data-pdel="' + id + '">Delete</button><button type="button" class="secondary" data-pins="' + id + '|0" aria-label="Insert a lost sign before this sign">Insert ▨ before</button><button type="button" class="secondary" data-pins="' + id + '|1" aria-label="Insert a lost sign after this sign">Insert ▨ after</button></div></div></div></div>';
+}
+function placeFix() {
+  const pop = $('#photo .fixpop'), sc = curScan(); if (!pop || !sc || !PG) return;
+  const i = sc.signs.findIndex(x => x.id === state.fixId); if (i < 0) return pop.remove();
+  const b = pxBox(PG.B[i]), fw = pop.offsetWidth, fh = pop.offsetHeight;
+  pop.style.left = Math.round(Math.max(0, Math.min(PG.PW - fw, b[0] + b[2] / 2 - fw / 2))) + 'px';
+  pop.style.top = Math.round(b[1] + b[3] / 2 > PG.PH / 2 && b[1] - fh - 8 > -$('#photo .photowrap').offsetTop ? b[1] - fh - 8 : b[1] + b[3] + 8) + 'px';
+}
+function closeFix() {
+  if (!state.fixId) return; const where = state.fixWhere; state.fixId = null;
+  if (where === 'photo') { const p = $('#photo .fixpop'); if (p) p.remove(); const sc = curScan(); if (sc) paintSel(sc); } else renderRead();
+}
+function openFix(id, where) { state.fixId = id; state.fixWhere = where; if (where === 'photo') renderPhoto(); else renderRead(); }
+/* Fortryd (beslutning 26): en rettelse, en ryddet markering eller et lukket foto kan sættes tilbage i 5 sekunder: tegn, rettelser,
+   læseretning og markering, som de var. */
+let photoUndo = null;
+function photoSnap() {
+  const sc = curScan(); if (!sc) return;
+  photoUndo = { id: sc.id, signs: sc.signs.map(x => Object.assign({}, x)), dels: sc.dels, deleted: new Set(sc.deleted), dir: sc.dir, dirSel: sc.dirSel, sel: new Set(sc.sel), nIns: sc.nIns, readOpen: !!state.readOpen, photoDir: state.photoDir };
+}
+function photoToast(label) {
+  const t = $('#toast'); undoSnap = null; t.classList.add('undo'); t.innerHTML = '<span>' + esc(label) + '</span><button type="button" data-act="pundo">Undo</button>';
+  t.style.bottom = (state.kbOpen ? 10 : $('.tabs').offsetHeight + 10) + 'px'; t.hidden = false;
+  clearTimeout(toast.h); toast.h = setTimeout(() => { t.hidden = true; t.classList.remove('undo'); photoUndo = null; }, 5000);
+}
+function runPhotoUndo() {
+  const u = photoUndo, t = $('#toast'); photoUndo = null; clearTimeout(toast.h); t.hidden = true; t.classList.remove('undo');
+  /* P3 E: et lukket rammetrin, eller aflæsningen før en ny ramme (fotoet, rammen, rettelserne og markeringen, uden ny genkendelse) */
+  if (u && u.frame) { if (!state.sheet) setOverlay('sheet'); Object.assign(state, { scan: null, frame: u.frame, readOpen: false, fixId: null }); trace('Foto: fortrudt'); step([], 'Rammetrinnet står igen med rammen, som den var.'); return renderPhoto(); }
+  if (u && u.swap) { SCANS[u.swap.id] = u.swap; if (!state.sheet) setOverlay('sheet'); Object.assign(state, { scan: u.swap.id, frame: null, readOpen: u.readOpen, fixId: null, photoDir: u.photoDir });
+    trace('Foto: fortrudt'); step([], 'Aflæsningen før den nye ramme står igen: rammen, billedet, rettelserne, læseretningen og markeringen. Intet blev genkendt igen.'); return renderPhoto(); }
+  const sc = u && SCANS[u.id]; if (!sc) return;
+  Object.assign(sc, { signs: u.signs, dels: u.dels, deleted: u.deleted, dir: u.dir, dirSel: u.dirSel, sel: u.sel, nIns: u.nIns });
+  if (!state.sheet) setOverlay('sheet');
+  Object.assign(state, { scan: u.id, readOpen: u.readOpen, fixId: null, photoDir: u.photoDir });
+  trace('Foto: fortrudt'); step([], 'Fotoet, rettelserne, læseretningen og markeringen står igen, som de stod. Intet blev genkendt igen.');
+  renderPhoto();
+}
+function photoFix(kind, id, arg) {
+  const sc = curScan(); if (!sc) return; const i = sc.signs.findIndex(x => x.id === id); if (i < 0) return; const x = sc.signs[i];
+  if (kind === 'alt' && x.c === arg) return;
+  photoSnap(); let label;
+  if (kind === 'alt') { x.c = arg; label = 'Sign changed to ' + CODE(arg); trace('Foto: andet bud'); step(['scan_sign_candidate'], 'Brugeren vælger et andet af fotoets bud for tegnet: ' + CODE(arg) + '. Laget og læsningen af markeringen følger med.'); }
+  else if (kind === 'del') { sc.signs.splice(i, 1); if (!x.ins) { sc.dels++; sc.deleted.add(x.id); } sc.sel.delete(x.id); if (state.fixId === id) state.fixId = null; label = 'Sign deleted'; trace('Foto: tegn slettet'); step(['scan_sign'], 'Tegnet tages ud af aflæsningen og af markeringen.'); }
+  else { const n = { id: 'n' + (++sc.nIns), ins: true, c: '?', orig: null, conf: 1, unc: false, status: 'inserted', alts: [], line: x.line, box: null };
+    sc.signs.splice(i + (arg === '1' ? 1 : 0), 0, n); if (sc.sel.has(x.id)) sc.sel.add(n.id); label = 'Lost sign inserted'; trace('Foto: tabt tegn sat ind'); step(['scan_sign'], 'Et tabt tegn (▨) sættes ind ' + (arg === '1' ? 'efter' : 'før') + ' tegnet. Søgningen udfylder det fra kendte ord og sætninger.'); }
+  renderPhoto(); photoToast(label);
+}
+/* ---------- læsearket: kun markeringen ----------
+   Tegnene på en række, appens ordopdeling, translitteration, oversættelse (med MT-mærket), de tre sikkerhedstrin (beslutning 24) og
+   "Also in", når en kendt sætning passer. Læsningen regnes én gang pr. tegnfølge. */
+const READC = new Map();
+function readOf(codes) {
+  const key = codes.join('-'); if (READC.has(key)) return READC.get(key);
+  const cs = codes.map(c => isLost(c) ? c : canon(c)), hit = cs.some(isLost) ? null : sentenceByKey(cs.join('-'));
+  let r;
+  if (hit) r = { kind: 'known', s: hit };
+  else { const a = analyse(cs, []); r = { kind: 'prop', a, fits: sentenceFits(cs).slice(0, 2) }; }
+  if (READC.size > 40) READC.clear(); READC.set(key, r); return r;
+}
+const rword = (codes, small, cls) => '<span class="gw' + (cls ? ' ' + cls : '') + '">' + G(codes) + '<small>' + small + '</small></span>';
+function readHTML(sc) {
+  const sel = selSigns(sc), n = sel.length, cols = sc.layout === 'columns';
+  let h = '<div class="rshead"><p class="eyebrow grow" id="rstitle">Reading of the selection' + (n ? ' · ' + n + ' sign' + (n === 1 ? '' : 's') : '') + '</p><button type="button" class="iconbtn" data-act="readclose" aria-label="Close the reading"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div class="rsbody">';
+  if (!n) return h + '<p class="note">Nothing is selected. Select signs on the photo to read them.</p></div>';
+  h += '<div class="selrow' + (isRtl() ? ' rtl' : '') + '" role="group" aria-label="The selected signs in reading order. Tap one to correct it.">' + sel.map((x, k) => (k && sel[k - 1].line !== x.line ? '<i class="lbrk" aria-hidden="true" title="New ' + (cols ? 'column' : 'line') + '"></i>' : '') +
+    '<button type="button" class="ssg" data-fix="' + esc(x.id) + '" aria-pressed="' + (state.fixId === x.id && state.fixWhere === 'sheet') + '" aria-label="' + esc(signLabel(x)) + '"><span class="gl">' + chOf(x.c) + '</span>' + cbar([x]) + '</button>').join('') + '</div>';
+  const fx = state.fixWhere === 'sheet' && state.fixId && sel.find(x => x.id === state.fixId);
+  h += fx ? fixHTML(sc, fx) : '<p class="note">' + esc(scanSummary({ signs: sel })) + (S.conf ? ' · <span class="conf c-' + cc(confOf(sel)) + '">reading ' + pct(confOf(sel)) + '</span>' : '') + '. Tap a sign to correct it.</p>';
+  const R = readOf(sel.map(x => x.c));
+  if (R.kind === 'known') {
+    const s = R.s, ws = s.toks.filter(t => t.written).sort((a, b) => (a.wp || 0) - (b.wp || 0)), vars = DB.passageOthers(s);
+    h += '<div class="rhead"><p class="eyebrow grow">Known sentence</p><span class="pill lvl">found in the sources</span></div>';
+    h += withDir(false, () => '<div class="gline' + (isRtl() ? ' rtl' : '') + '">' + ws.map(t => rword(t.spo.signs.map(x => x.c), esc(tl(t.spo.t)))).join('') + '</div>');
+    h += '<p class="trl">' + T(s.t) + '</p>' + (s.free || s.lit ? '<p class="trn">' + trText(s.tr, s.free || s.lit) + '</p>' + trFoot(s.tr, { kind: 'sentence', id: s.id }) : '<p class="note">No translation in the source.</p>');
+    h += '<p class="note">' + esc(s.src.work) + ', ' + esc(s.src.witness) + (s.src.line ? ', ' + esc(s.src.line) : '') + '</p>';
+    if (vars.length) h += '<p class="note alsoin">Also in ' + vars.map(id => { const o = DB.sentenceLite(id); return o ? '<button type="button" class="linkbtn" data-sen="' + id + '">' + esc(o.src.workId !== s.src.workId ? o.src.work + ', ' : '') + esc(o.src.witness) + '</button>' : ''; }).filter(Boolean).join(', ') + '</p>';
+  } else {
+    const a = R.a, lvl = a.pattern ? '<span class="pill g lvl">composed from known words and a known pattern</span>' : (a.real.length ? '<span class="pill g lvl">guess</span>' : '');
+    h += '<div class="rhead"><p class="eyebrow grow">Not a known sentence</p>' + lvl + '</div>';
+    h += '<div class="gline' + (isRtl() ? ' rtl' : '') + '">' + a.words.map(w => w.kind === 'word' ? rword(w.codes, esc(tl(w.t)), 'guess') : rword(w.codes, w.kind === 'gap' ? 'lost word' : (w.kind === 'lacuna' ? (w.codes[0] === '*' ? 'lost signs' : 'lost') : (w.guess ? '<span class="tl guess-text">' + esc(tl(w.guess.t)) + '?</span>' : 'unknown')))).join('') + '</div>';
+    if (a.real.length) h += '<p class="trl guess-text">' + T(joinT(a.words)) + '</p>';
+    if (a.pattern) h += '<p class="trn guess-text">' + esc(a.pattern.free) + '</p><p class="note">The app\'s proposal from the grammar. It is not an attested translation.</p>';
+    else h += '<p class="note">' + (a.real.length ? 'No translation is proposed: the selected words do not form a sentence the app can analyse.' : 'None of the selected signs could be read as a word.') + ' Search shows more.</p>';
+    if (R.fits.length) h += '<p class="eyebrow">' + (R.fits.length > 1 ? 'Known sentences this could be' : 'A known sentence this could be') + '</p>' + R.fits.map(fitSentRow).join('');
+  }
+  return h + '<div class="btns"><button type="button" class="secondary" data-act="selsearch">Open in Search</button><button type="button" class="secondary" data-act="selcopy">Copy</button></div></div>';
+}
+function renderRead() {
+  clearTimeout(readT);
+  const el = $('#rsheet'), sc = curScan(), on = !!(sc && state.readOpen && state.sheet);
+  el.hidden = !on; $('#sheet').classList.toggle('reading', on);
+  if (!on) { $('#photo').style.paddingBottom = ''; return; }
+  const top = (el.querySelector('.rsbody') || {}).scrollTop || 0;
+  el.innerHTML = readHTML(sc); sc.readKey = selKey(sc);
+  const body = el.querySelector('.rsbody'); if (body) body.scrollTop = top;
+  $('#photo').style.paddingBottom = (el.offsetHeight + 14) + 'px';
+}
+function selRead() {
+  const sc = curScan(); if (!sc || !sc.sel.size) return;
+  const sel = selSigns(sc); state.readOpen = true; state.fixId = null;
+  trace('Foto: læs markeringen'); step(['scan_sign'], 'Kun de ' + sel.length + ' markerede tegn læses, i læserækkefølgen: ' + CODES(sel.map(x => x.c)) + '. Resten af fotoet læses ikke.');
+  step(['sentence', 'spelling', 'sentence_translation'], 'Tegnene slås op som en sætning: kendt sætning, ellers appens egen opdeling og forslag. Ændres markeringen, læses den igen.');
+  const p = $('#photo .fixpop'); if (p) p.remove();
+  renderRead(); paintSel(sc);
+  const wrap = $('#photo .photowrap'), pad = $('#photo'), ix = selIdx(sc);
+  if (wrap && ix.length) { const b = pxBox(PG.B[ix[0]]); pad.scrollTop = Math.max(0, wrap.offsetTop + b[1] - 70); }
+}
+async function selCopy() {
+  const sc = curScan(); if (!sc || !sc.sel.size) return;
+  const sel = selSigns(sc), mdc = [], uni = [[]];
+  sel.forEach((x, k) => { if (k && sel[k - 1].line !== x.line) { mdc.push('!'); uni.push([]); } mdc.push(isLost(x.c) ? '//' : CODE(x.c)); uni[uni.length - 1].push(isLost(x.c) ? '▨' : ((SG[x.c] && SG[x.c].ch) || '')); });
+  const text = mdc.join('-') + '\n' + uni.map(l => l.join('')).join('\n');
+  state.copied = text; let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch (e) {
+    try { const ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;left:0;top:0;opacity:0'; document.body.appendChild(ta); ta.select(); ok = document.execCommand('copy'); ta.remove(); } catch (e2) { ok = false; }
+  }
+  trace('Foto: kopier markeringen'); step([], 'De ' + sel.length + ' markerede tegn kopieres som MdC-koder (' + mdc.join('-') + ') og som Unicode-tegn. Intet gemmes.');
+  toast(ok ? 'Copied as MdC codes and Unicode signs' : 'Could not copy. Your browser blocked it.');
+}
+function selSearch() {
+  const sc = curScan(); if (!sc || !sc.sel.size) return;
+  const ctx = scanCtxOf(sc, selSigns(sc)); state.scanCtx = ctx;
+  trace('Foto: søg med markeringen'); step(['scan_sign'], 'Kun de markerede tegn sættes i feltet (' + ctx.codes.length + ' af ' + sc.signs.length + '), med fotoets sikkerhed for hvert ord og tegn.');
+  load('sentence', ctx.codes, ctx.quads);
+}
+function selClear(undo) {
+  const sc = curScan(); if (!sc || !sc.sel.size) return;
+  if (undo) photoSnap();
+  sc.sel = new Set(); state.fixId = null; paintSel(sc); if (state.readOpen) renderRead();
+  const p = $('#photo .fixpop'); if (p) p.remove();
+  if (undo) photoToast('Selection cleared');
+}
+function selSelectAll() { const sc = curScan(); if (!sc) return; selAll(sc); state.fixId = null; const p = $('#photo .fixpop'); if (p) p.remove(); trace('Foto: alt markeret'); step([], 'Alle ' + sc.signs.length + ' tegn er markeret, i læserækkefølgen. Det er det samme, som appen før læste af hele fotoet.'); paintSel(sc); }
+function photoBack() {
+  const sc = curScan(); if (sc) photoSnap();
+  Object.assign(state, { scan: null, readOpen: false, fixId: null }); renderPhoto();
+  if (sc) photoToast('Photo closed');
+}
+
+/* ---------- markering med finger, mus og tastatur (pointer events) ----------
+   Tryk = ordet (appens ordopdeling af linjen); dobbelttryk = hele linjen/kolonnen; et langt tryk (mus: tryk og træk) begynder en markering
+   ved tegnet; håndtagene trækkes tegn for tegn i læserækkefølgen. Et tryk på et usikkert tegn i markeringen åbner rettelsen. */
+function ptIn(e) { const r = $('#photo .photowrap').getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+/* tegnet ved et punkt: nærmeste ramme; ligger punktet i flere rammer (tegnfinderens rammer kan overlappe lidt, P3 B), vinder
+   tegnet med den nærmeste midte, så et smalt tegn ved siden af et bredt kan trykkes */
+function nearest(pt, max) {
+  let best = -1, bd = 1e9, bc = 1e9;
+  PG.B.forEach((b0, i) => { const b = pxBox(b0), dx = Math.max(b[0] - pt[0], 0, pt[0] - b[0] - b[2]), dy = Math.max(b[1] - pt[1], 0, pt[1] - b[1] - b[3]), d = Math.hypot(dx, dy),
+    c = Math.hypot(pt[0] - b[0] - b[2] / 2, pt[1] - b[1] - b[3] / 2); if (d < bd - 1e-9 || (d <= bd + 1e-9 && c < bc)) { bd = d; bc = c; best = i; } });
+  return max != null && bd > max ? -1 : best;
+}
+function focusSign(sc, i) {
+  const el = $('#photo .sg[data-si="' + i + '"]'); if (!el) return; sc.focus = sc.signs[i].id;
+  $('#photo').querySelectorAll('.sg[tabindex="0"]').forEach(x => { x.tabIndex = -1; }); el.tabIndex = 0; el.focus({ preventScroll: true });
+}
+function photoTap(sc, i) {
+  const now = performance.now(), last = PH.last;
+  if (i < 0) { PH.last = null; if (state.fixId && state.fixWhere === 'photo') return closeFix(); return selClear(true); }
+  const x = sc.signs[i];
+  if (last && last.id === x.id && now - last.t < 350) { PH.last = null; selLine(sc, i); if (state.fixId) closeFix(); trace('Foto: dobbelttryk'); step([], 'Hele ' + (sc.layout === 'columns' ? 'kolonnen' : 'linjen') + ' med tegnet markeres.'); paintSel(sc); return focusSign(sc, i); }
+  PH.last = { id: x.id, t: now };
+  if (sc.sel.has(x.id) && (x.unc || x.ins || x.c !== x.orig)) { focusSign(sc, i); return openFix(x.id, 'photo'); }
+  if (state.fixId) closeFix();
+  selWord(sc, i); trace('Foto: tryk'); step([], 'Ordet med tegnet markeres (appens egen ordopdeling af linjen). Intet læses endnu.'); paintSel(sc); focusSign(sc, i);
+}
+const photoEl = $('#photo');
+photoEl.addEventListener('pointerdown', e => {
+  const sc = curScan(); if (!sc || !PG || !e.target.closest('.photowrap')) return;
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  PH.kanchor = null;
+  const hd = e.target.closest('.hdl');
+  if (hd) { e.preventDefault(); const ix = selIdx(sc); if (!ix.length) return; try { hd.setPointerCapture(e.pointerId); } catch (x) { /* ingen aktiv markør */ } PH.h = { pid: e.pointerId, anchor: sc.signs[hd.dataset.h === 's' ? ix[ix.length - 1] : ix[0]].id }; if (state.fixId) closeFix(); return; }
+  if (e.target.closest('.selbar, .fixpop')) return;
+  const pt = ptIn(e), el = e.target.closest('.sg'), si = el ? nearest(pt) : nearest(pt, e.pointerType === 'mouse' ? 4 : 12);
+  PH.p = { pid: e.pointerId, x: e.clientX, y: e.clientY, si, type: e.pointerType, mode: null };
+  if (e.pointerType === 'mouse') { e.preventDefault(); if (si >= 0) { try { e.target.closest('.photowrap').setPointerCapture(e.pointerId); } catch (x) { /* ingen aktiv markør */ } } }
+  else if (si >= 0) PH.p.timer = setTimeout(() => { const p = PH.p; if (!p || p.mode) return; p.mode = 'lp'; p.anchor = si; PH.last = null; if (state.fixId) closeFix(); selRange(sc, si, si);
+    trace('Foto: langt tryk'); step([], 'Markeringen begynder ved tegnet, med et håndtag i hver ende.'); paintSel(sc); try { if (navigator.vibrate) navigator.vibrate(8); } catch (x) { /* ingen vibration */ } }, 450);
+});
+photoEl.addEventListener('pointermove', e => {
+  const sc = curScan(); if (!sc || !PG) return;
+  if (PH.h && e.pointerId === PH.h.pid) { e.preventDefault(); const j = nearest(ptIn(e)), a = sc.signs.findIndex(x => x.id === PH.h.anchor); if (j >= 0 && a >= 0) { selRange(sc, a, j); paintSel(sc); } return; }
+  const p = PH.p; if (!p || e.pointerId !== p.pid) return;
+  if (!p.mode) {
+    const d = Math.hypot(e.clientX - p.x, e.clientY - p.y);
+    if (p.type !== 'mouse') { if (d > 10) { clearTimeout(p.timer); PH.p = null; } return; }      /* fingeren ruller arket */
+    if (d <= 4 || p.si < 0) return;
+    p.mode = 'drag'; p.anchor = p.si; PH.last = null; if (state.fixId) closeFix();
+  }
+  e.preventDefault();
+  const j = nearest(ptIn(e)); if (j >= 0) { selRange(sc, p.anchor, j); paintSel(sc); }
+});
+function pointerEnd(e, cancel) {
+  const sc = curScan();
+  if (PH.h && e.pointerId === PH.h.pid) { PH.h = null; if (sc) { paintSel(sc); trace('Foto: håndtag trukket'); step([], 'Markeringen går nu fra det ene håndtag til det andet, tegn for tegn i læserækkefølgen og videre fra linje til linje.'); } return; }
+  const p = PH.p; if (!p || e.pointerId !== p.pid) return;
+  clearTimeout(p.timer); PH.p = null; if (!sc) return;
+  if (p.mode) { if (p.mode === 'drag') { trace('Foto: markeret med træk'); step([], 'Markeringen går fra tegnet, hvor trækket begyndte, til tegnet under markøren, i læserækkefølgen.'); } paintSel(sc); const ix = selIdx(sc); if (ix.length) focusSign(sc, ix[ix.length - 1]); return; }
+  if (cancel || Math.hypot(e.clientX - p.x, e.clientY - p.y) > 10) return;
+  photoTap(sc, p.si);
+}
+photoEl.addEventListener('pointerup', e => pointerEnd(e, false));
+photoEl.addEventListener('pointercancel', e => pointerEnd(e, true));
+photoEl.addEventListener('touchmove', e => { if ((PH.p && PH.p.mode) || PH.h) e.preventDefault(); }, { passive: false });      /* mens der markeres, ruller arket ikke */
+photoEl.addEventListener('contextmenu', e => { if (e.target.closest('.photowrap')) e.preventDefault(); });
+photoEl.addEventListener('keydown', e => {
+  const sc = curScan(); if (!sc || !PG) return;
+  if (e.key === 'Escape' && (state.fixId || sc.sel.size)) { e.stopPropagation(); e.preventDefault(); if (state.fixId) return closeFix(); return selClear(true); }
+  const el = e.target.closest && e.target.closest('.sg'); if (!el) return;
+  const i = Number(el.dataset.si), rows = sc.layout !== 'columns', rtl = sc.dir === 'rtl', N = sc.signs.length;
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'A')) { e.preventDefault(); return selSelectAll(); }
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); return photoTap(sc, i); }
+  const fwd = rows ? [rtl ? 'ArrowLeft' : 'ArrowRight', 'ArrowDown'] : ['ArrowDown', rtl ? 'ArrowLeft' : 'ArrowRight'];
+  const back = rows ? [rtl ? 'ArrowRight' : 'ArrowLeft', 'ArrowUp'] : ['ArrowUp', rtl ? 'ArrowRight' : 'ArrowLeft'];
+  const to = from => fwd.includes(e.key) ? from + 1 : (back.includes(e.key) ? from - 1 : (e.key === 'Home' ? 0 : (e.key === 'End' ? N - 1 : null)));
+  if (to(i) == null) return;
+  e.preventDefault();
+  let j = Math.max(0, Math.min(N - 1, to(i)));
+  /* Shift + pil flytter den løse ende af markeringen ét tegn; ankeret er den anden ende (som i tekst). En markering lavet med finger
+     eller mus har ankeret i sin begyndelse og den løse ende i sin slutning. */
+  if (e.shiftKey) {
+    const ix = selIdx(sc), ka = PH.kanchor ? sc.signs.findIndex(x => x.id === PH.kanchor) : -1;
+    let a = i;
+    if (ix.length && ka >= 0 && sc.sel.has(PH.kanchor)) a = ka;
+    else if (ix.length && sc.sel.has(sc.signs[i].id)) { a = ix[0]; j = Math.max(0, Math.min(N - 1, to(ix[ix.length - 1]))); }
+    PH.kanchor = sc.signs[a].id;
+    selRange(sc, a, j); if (state.fixId) closeFix(); paintSel(sc);
+    trace('Foto: markering med tastatur'); step([], 'Shift og en piletast flytter markeringens ende ét tegn i læserækkefølgen.');
+  }
+  focusSign(sc, j);
+});
+
 /* ---------- fotoaflæsningen følger med ind i resultatet ----------
    Når tegnene kommer fra et foto, huskes aflæsningens sikkerhed for sætningen, hvert ord og hvert tegn, så længe feltet står, som fotoet gav det.
-   I resultatet vises den på tre niveauer: en linje øverst for hele aflæsningen, en tynd streg under hvert ord med ét stykke pr. tegn, og tegnene enkeltvis, når man åbner et ord eller linjen øverst. */
+   I resultatet vises den på tre niveauer: en linje øverst for hele aflæsningen, en tynd streg under hvert ord med ét stykke pr. tegn, og tegnene enkeltvis, når man åbner et ord eller linjen øverst.
+   P3 A: kun markeringen kommer med (Search); ref = tegnets id på fotoet, så et valgt bud i resultatet også rettes på fotoet. */
 const CCWORD = { ok: 'sure', warn: 'uncertain', bad: 'doubtful', guess: 'restored' };
-function scanCtxOf(sc) {
-  const words = scanWords(sc), signs = sc.signs.map((x, i) => ({ key: sc.id + ':' + i, orig: x.orig, c: x.c, conf: x.conf, status: x.status, alts: x.alts }));
-  return { id: sc.id, title: sc.title, conf: scanConf(sc), signs, words, quads: [], codes: signs.map(s => s.c), open: false };
+function scanCtxOf(sc, list) {
+  list = list || sc.signs;
+  const words = wordsOf(list), signs = list.map(x => ({ key: sc.id + ':' + x.id, ref: x.id, orig: x.orig, c: x.c, conf: x.conf, status: x.status, alts: x.alts }));
+  return { id: sc.id, title: sc.title, conf: confOf(list), signs, words, quads: [], codes: signs.map(s => s.c), open: false };
 }
 const scanLive = () => { const c = state.scanCtx; return c && S.mode === 'sentence' && state.view === 'search' && state.panel === 'search' && state.buf.length === c.codes.length && state.buf.every((x, i) => x === c.codes[i]) ? c : null; };
 /* Et tegn, brugeren selv har valgt et andet bud for (eller sat ind), har ikke længere aflæsningens sikkerhed. */
@@ -4136,46 +4775,64 @@ function scanWordPage(at, n) {
 }
 function scanSwap(i, code) {
   const ctx = state.scanCtx, s = ctx && ctx.signs[i]; if (!s || s.c === code) return;
-  s.c = code; ctx.codes[i] = code; const sc = SCANS[ctx.id]; if (sc && sc.signs[i]) sc.signs[i].c = code;
-  state.fillNote = 'Brugeren har valgt et andet af fotoets bud for tegn ' + (i + 1) + ': ' + CODE(code) + '. Linjen læses igen med det nye tegn. Valget kan sendes som rettelse fra fotoet.';
+  s.c = code; ctx.codes[i] = code; const sc = SCANS[ctx.id], y = sc && sc.signs.find(z => z.id === s.ref); if (y) y.c = code;
+  state.fillNote = 'Brugeren har valgt et andet af fotoets bud for tegn ' + (i + 1) + ': ' + CODE(code) + '. Linjen læses igen med det nye tegn. Valget følger med tilbage til fotoet og kan sendes som rettelse.';
   load('sentence', ctx.codes, ctx.quads);
 }
-const DIROPT = [['ltr', 'Left to right'], ['rtl', 'Right to left']];
+const DIROPT = [['auto', 'Automatic'], ['ltr', 'Left to right'], ['rtl', 'Right to left']];
+const DIRNAME = { ltr: 'Left to right', rtl: 'Right to left' };
+const DIRLVL = { sure: 'ok', likely: 'warn', unsure: 'bad' };
+/* Retningsfeltet: Automatic er standard; pillen viser den fundne retning og hvor sikker den er, også når brugeren har valgt selv. */
+function dirField(sc) {
+  const sel = sc ? sc.dirSel : (state.photoDir || 'auto'), a = sc && sc.auto;
+  const pill = !sc ? '' : (a ? '<span class="pill dir c-' + DIRLVL[a.level] + '" title="Found from the way ' + a.votes + ' sign' + (a.votes === 1 ? '' : 's') + ' face">' + DIRNAME[a.direction] + ' · ' + a.level + (S.conf ? ' ' + pct(a.certainty) : '') + '</span>'
+    : '<span class="pill dir">' + DIRNAME[sc.r ? sc.r.direction : 'ltr'] + ' · default</span>');
+  let help = 'The signs face the start of the line. Automatic tells the direction from the way they face; choose one to override it.';
+  if (sc && a && sel === 'auto') help = a.flagged ? 'Too few signs show which way they face, so the app reads left to right. Choose the direction if that is wrong.'
+    : 'Found from the way ' + a.votes + ' sign' + (a.votes === 1 ? '' : 's') + ' face: they face the start of the line. Choose a direction to override it; your selection stays.';
+  else if (sc && sel !== 'auto') help = 'Your choice' + (a ? '; the app found ' + DIRNAME[a.direction].toLowerCase() + ' (' + a.level + ')' : '') + '. Choose Automatic to go back.';
+  else if (sc && !a) help = 'The direction model did not load, so Automatic reads left to right.';
+  return '<div class="field dirfield"><label for="photodir">Reading direction' + pill + '</label><select id="photodir">' + DIROPT.map(o => '<option value="' + o[0] + '"' + (sel === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select><small>' + esc(help) + '</small></div>';
+}
 function renderPhoto() {
   const el = $('#photo');
-  if (state.scanBusy) { el.innerHTML = '<p class="eyebrow">Reading: ' + esc(state.scanBusy) + '</p><p class="note">Finding the signs and putting them in reading order. A large photo can take a few seconds.</p>'; return; }
-  const sc = state.scan && SCANS[state.scan];
+  if (state.scanBusy) { el.innerHTML = '<p class="eyebrow">Reading: ' + esc(state.scanBusy) + '</p><p class="note">Finding the signs and putting them in reading order. A large photo can take a few seconds.</p>'; PG = null; return renderRead(); }
+  if (state.frame) { PG = null; return renderFrame(); }
+  FG = null;
+  const sc = curScan();
   if (!sc) {
-    el.innerHTML = '<p class="note">Take a photo of an inscription or choose one from your gallery. The app finds the signs itself, puts them in reading order and marks the uncertain ones. Tap a sign to choose another candidate, delete it, or insert a lost sign.</p>' +
-      '<p class="banner info">Experimental. Clean printed pages and drawn copies read well. Photos of carved or worn walls do not yet: in a test on ten wall photos the app found only 12 % of the signs.</p>' +
+    Object.assign(state, { readOpen: false, fixId: null }); PG = null;
+    el.innerHTML = '<p class="note">Take a photo of an inscription or choose one from your gallery. The app suggests a frame around the inscription and straightens it; then it finds the signs itself and shows them on the photo in reading order. Select the part you want to read, the way you select text: only what you select is read.</p>' +
+      '<p class="banner info">Experimental. Clean printed pages and drawn copies read well. Carved walls are harder: in a test on ten wall photos the app found about half of the signs (54 %, up from 12 %), and a reading of a whole wall still needs many corrections. Select the parts that were read well.</p>' +
       (state.scanErr ? '<p class="banner err">The photo could not be read. ' + esc(state.scanErr) + '</p>' : '') +
-      '<div class="photoin"><label class="primary" for="photofile">Take or choose a photo</label><input type="file" id="photofile" accept="image/*" capture="environment"></div>' +
-      '<div class="field"><label for="photodir">Reading direction</label><select id="photodir">' + DIROPT.map(o => '<option value="' + o[0] + '"' + ((state.photoDir || S.dir) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select><small>The signs face the start of the line. The app cannot yet tell the direction from the photo.</small></div>' +
+      '<div class="photoin"><label class="primary" for="photocam">Take a photo</label><input type="file" id="photocam" accept="image/*" capture="environment"><label class="secondary" for="photofile">Choose from gallery</label><input type="file" id="photofile" accept="image/*"></div>' +
+      dirField(null) +
       '<p class="eyebrow">Sample photos</p>' + SAMPLES.map(s => '<button type="button" class="rowbtn" data-scan="' + s.id + '"><img class="thumb" src="' + s.url + '" alt=""><span class="grow">' + esc(s.title) + '<small>' + esc(s.sub) + '</small></span></button>').join('');
-    return;
+    return renderRead();
   }
-  const words = scanWords(sc), rtl = sc.dir === 'rtl', wi = Math.max(0, Math.min(state.scanWord, words.length - 1)), cw = words[wi], edited = scanEdited(sc), conf = scanConf(sc);
-  let h = '<button type="button" class="backbtn" data-act="scanback"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>Photos</span></button>';
-  h += '<div class="photoimg"><img src="' + esc(sc.url) + '" alt="' + esc(sc.title) + '">' + sc.signs.map((x, i) => x.box ? '<i class="' + (x.c !== x.orig ? 'ok' : cc(x.conf)) + (cw && i >= cw.at && i < cw.at + cw.n ? ' on' : '') + '" style="left:' + x.box[0].toFixed(2) + '%;top:' + x.box[1].toFixed(2) + '%;width:' + x.box[2].toFixed(2) + '%;height:' + x.box[3].toFixed(2) + '%"></i>' : '').join('') + '</div>';
-  h += '<p class="note">' + esc(sc.title) + ' · ' + sc.signs.length + ' sign' + (sc.signs.length === 1 ? '' : 's') + ' in ' + sc.lines + ' line' + (sc.lines === 1 ? '' : 's') + ' · read ' + (rtl ? 'right to left' : 'left to right') + (S.conf && sc.signs.length ? ' · <span class="conf c-' + cc(conf) + '">reading ' + pct(conf) + '</span>' : '') + '</p>';
-  if (!cw) { el.innerHTML = h + '<p class="banner err">No signs were found in this photo. Try a sharper photo, straight on, with the signs filling most of the picture.</p>'; return; }
-  h += '<p class="eyebrow">Digital reading. Tap a word.</p><div class="words">' + words.map((w, k) => {
-    const codes = sc.signs.slice(w.at, w.at + w.n).map(x => x.c), g = codes.some(isLost) ? null : GROUPS[codes.map(canon).join('-')];
-    return '<button type="button" class="wchip" data-sw="' + k + '" aria-pressed="' + (k === wi) + '"><span class="gl sm' + (rtl ? ' rtl' : '') + '">' + codes.map(chOf).join('') + '</span>' +
-      '<span class="tl">' + (g ? esc(tl(g[0].t)) : '?') + '</span>' + (S.conf ? '<span class="conf c-' + cc(w.conf) + '">' + pct(w.conf) + '</span><span class="bar"><i class="b-' + cc(w.conf) + '" style="width:' + pct(w.conf) + '"></i></span>' : '') + '</button>';
-  }).join('') + '</div>';
-  h += '<p class="eyebrow">Signs in the selected word</p><div>' + sc.signs.slice(cw.at, cw.at + cw.n).map((x, k) => {
-    const i = cw.at + k, c = cc(x.conf), last = i === sc.signs.length - 1;
-    const state1 = x.orig == null ? '<span class="pill">added by you</span>' : (x.c !== x.orig ? '<span class="pill">changed by you</span>' : (S.conf ? '<span class="conf c-' + c + '">' + pct(x.conf) + ' ' + CCWORD[c] + '</span>' : (c !== 'ok' ? '<span class="pill">' + CCWORD[c] + '</span>' : '')));
-    return '<div class="signrow"><span class="gl">' + chOf(x.c) + '</span><div><span class="mono">' + esc(scCode(x.c)) + '</span> ' + state1 +
-      (x.alts.length > 1 ? '<div class="alts" style="margin-top:4px">' + x.alts.map(a => '<button type="button" data-alt="' + i + '|' + a[0] + '" aria-pressed="' + (x.c === a[0]) + '"><span class="gl sm">' + chOf(a[0]) + '</span>' + esc(CODE(a[0])) + (S.conf ? ' ' + pct(a[1]) : '') + '</button>').join('') + '</div>' : '') +
-      '<div class="edits"><button type="button" class="secondary" data-sdel="' + i + '">Delete</button><button type="button" class="secondary" data-sins="' + i + '" aria-label="Insert a lost sign before this sign">Insert ▨ before</button>' + (last ? '<button type="button" class="secondary" data-sins="' + (i + 1) + '" aria-label="Insert a lost sign after this sign">Insert ▨ after</button>' : '') + '</div></div></div>';
-  }).join('') + '</div>';
-  if (S.conf) h += '<div class="legend"><span class="c-ok">■ sure</span><span class="c-warn">■ uncertain</span><span class="c-bad">■ doubtful</span></div>';
-  h += '<div style="display:flex;flex-wrap:wrap;gap:8px"><button type="button" class="primary" data-act="scanlook">Look up this reading</button><button type="button" class="secondary" data-act="scansuggest"' + (edited ? '' : ' disabled') + '>Send correction</button></div>';
-  if (!edited) h += '<p class="note">Is a sign wrong? Pick another candidate, delete it or insert a lost sign, then send the correction.</p>';
-  h += '<p class="note">Read on this device in ' + (sc.ms / 1000).toFixed(1) + ' s. The photo is not uploaded.</p>';
+  const rtl = sc.dir === 'rtl', cols = sc.layout === 'columns', edited = scanEdited(sc), unit = cols ? ['column', 'columns'] : ['line', 'lines'];
+  /* fotoet fylder arket: så bredt som arket og så højt, at linjen under det stadig kan ses */
+  const cs = getComputedStyle(el), aw = Math.max(120, el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight));
+  const ah = Math.max(160, $('#sheet').clientHeight - $('#sheet .ohead').offsetHeight - 170), k = Math.min(aw / sc.W, ah / sc.H);
+  PG = { sc, B: dispBoxes(sc), PW: Math.max(40, Math.floor(sc.W * k)), PH: Math.max(30, Math.floor(sc.H * k)) };
+  let h = '<div class="phead"><button type="button" class="backbtn" data-act="scanback"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span>Photos</span></button><p class="note grow">' + esc(sc.title) + ' · ' + sc.signs.length + ' sign' + (sc.signs.length === 1 ? '' : 's') + ' in ' + sc.lines + ' ' + unit[sc.lines === 1 ? 0 : 1] + ' · read ' + (rtl ? 'right to left' : 'left to right') + (S.conf && sc.signs.length ? ' · <span class="conf c-' + cc(confOf(sc.signs)) + '">' + pct(confOf(sc.signs)) + '</span>' : '') + '</p></div>';
+  if (!sc.signs.length) {
+    el.innerHTML = h + '<div class="photowrap" style="width:' + PG.PW + 'px;height:' + PG.PH + 'px"><div class="photoimg"><img src="' + esc(sc.url) + '" alt="' + esc(sc.title) + '"></div></div><p class="banner err">No signs were found in this photo. Try a sharper photo, straight on, with the signs filling most of the picture.</p>' + dirField(sc) +
+      '<div class="framebtns"><button type="button" class="secondary" data-act="frameadj">Adjust frame</button></div>';
+    return renderRead();
+  }
+  const fx = state.fixId && state.fixWhere === 'photo' ? sc.signs.find(x => x.id === state.fixId) : null;
+  h += '<div class="photowrap" style="width:' + PG.PW + 'px;height:' + PG.PH + 'px"><div class="photoimg"><img src="' + esc(sc.url) + '" alt="' + esc(sc.title) + '" draggable="false">' +
+    '<div class="layer" role="listbox" aria-multiselectable="true" aria-label="Signs found in the photo, in reading order. Arrow keys move, Shift and an arrow key select, Enter selects a word.">' + layerHTML(sc) + '</div></div>' + dirArrow(sc) +
+    '<span class="hbar" hidden></span><span class="hbar" hidden></span><span class="hdl" data-h="s" role="presentation" hidden></span><span class="hdl" data-h="e" role="presentation" hidden></span>' +
+    '<div class="selbar" role="toolbar" aria-label="Selection" hidden><button type="button" class="on" data-act="selread">Read</button><i></i><button type="button" data-act="selcopy">Copy</button><i></i><button type="button" data-act="selsearch">Search</button><i></i><button type="button" data-act="selall">Select all</button></div>' +
+    (fx ? '<div class="fixpop" role="dialog" aria-label="Correct this sign">' + fixHTML(sc, fx) + '</div>' : '') + '</div>';
+  h += '<div class="selstat" id="selstat" aria-live="polite"></div>';
+  h += dirField(sc);
+  h += '<div style="display:flex;flex-wrap:wrap;gap:8px"><button type="button" class="secondary" data-act="frameadj">Adjust frame</button><button type="button" class="secondary" data-act="scansuggest"' + (edited ? '' : ' disabled') + '>Send correction</button></div>';
+  h += '<p class="note">' + (edited ? '' : 'Is a sign wrong? Select it and tap it to pick another candidate, delete it or insert a lost sign. ') + (sc.frame && !sc.frame.whole ? 'The framed part was straightened and read' : 'Read') + ' on this device in ' + (sc.ms / 1000).toFixed(1) + ' s. The photo is not uploaded.</p>';
   el.innerHTML = h;
+  paintSel(sc); placeFix(); renderRead();
 }
 
 /* ---------- gemt, indstillinger, lag ---------- */
@@ -4328,7 +4985,11 @@ function renderHelp() {
       row('<span class="gl sm rtl">' + ch('G17') + ch('D21') + '</span>', 'Mirrored line', 'The source writes this line from right to left. Settings → Writing direction reverses every line. What you write is always shown as you wrote it.'),
       row(gl((q => q.every(c => c && INK[c]) ? quadSVG(q, { t: 'v', k: [0, 1] }) : ch('N35') + ch('X1'))([GCODE('N35'), GCODE('X1')])), 'Stacked signs', 'Settings → Sign layout → In quadrats lets the app stack small signs. The sources write everything in a row.')]) +
     sec('Photo', [
-      row('<span class="pill g">Experimental</span>', 'Experimental', 'Reading from a photo works on clean printed pages and drawn copies, not yet on carved or worn walls. Uncertain signs are marked; tap one to correct it.')]) +
+      row('<span class="pill g">Experimental</span>', 'Experimental', 'Reading from a photo works on clean printed pages and drawn copies. On carved walls it finds about half of the signs so far.'),
+      row('<span class="hframe" aria-hidden="true"></span>', 'Frame', 'A photo from the camera or the gallery first shows a frame. The app suggests it around the signs it finds; drag the four corners to the edges of the inscription, or use the whole photo. The app straightens the framed part before reading it, so a slanted or tapering surface reads as straight lines. Adjust frame in the result goes back; Undo brings the earlier reading back.'),
+      row('<span class="hsel" aria-hidden="true"><i></i><i class="on"></i><i class="on"></i><i class="unc"></i></span>', 'Select to read', 'The app frames every sign it found on the photo; uncertain signs have a coloured frame. Nothing is read until you select: tap a sign for its word, double-tap for its line, or hold and drag. Drag the handles to select more or less. Read, Copy and Search use only the selection. Tap an uncertain sign in the selection to correct it.'),
+      row('<span class="gl sm">' + ch('G17') + ch('D21') + '</span>', 'Read line by line', 'Each sign is first recognised on its own. Then every line is read as a whole: for each sign the app weighs its ten best guesses against the sign sequences of the texts in the database, so a sign that fits its neighbours wins. The certainty shown is the combined one.'),
+      row('<span class="pill dir c-ok">Right to left · sure</span>', 'Reading direction', 'Signs face the start of the line. Automatic tells the direction from the way the people, animals and other one-sided signs face, and says how sure it is. With too few such signs it reads left to right and says so. Choosing a direction puts the same signs in the other order.')]) +
     sec('Name frames', Object.keys(ENCL).map(k => row(gl('<span class="encl ' + k + '">' + ch('N5') + '</span>'), esc(ENCL[k].label), cap(ENCL[k].what) + '. The signs inside are read as one name.'))) +
     sec('Keyboard', [
       row(key($('#kfirst').dataset.act === 'lacuna' ? '<span class="lac">▨</span>' : '▨'), 'Lost', 'Marks one lost sign. Hold it for lost signs or a lost word.'),
@@ -4344,7 +5005,7 @@ function setOverlay(which) {
   $('#drawer').inert = !state.drawer; $('#sheet').inert = !state.sheet;
   $('#menubtn').setAttribute('aria-expanded', state.drawer); $('#menubtn').setAttribute('aria-label', state.drawer ? 'Close the menu' : 'Open the menu');
   if (state.drawer) $('#histcount').textContent = state.hist.length ? String(state.hist.length) : '';
-  if (state.sheet) { state.scan = null; renderPhoto(); }
+  if (state.sheet) { state.scan = null; state.frame = null; renderPhoto(); } else renderRead();
   layout();
 }
 function setView(v) {
@@ -4411,6 +5072,7 @@ document.addEventListener('click', e => {
     return;
   }
   const d = b.dataset;
+  if ((d.sen || d.sp) && b.closest('#rsheet')) setOverlay(null);      /* P3 A: et link i læsearket åbner i appen; fotoet lukkes først */
   if (b.id === 'cam') return setOverlay('sheet');
   if (b.id === 'menubtn') return setOverlay(state.drawer ? null : 'drawer');
   if (d.reading || d.ireading) {
@@ -4446,10 +5108,10 @@ document.addEventListener('click', e => {
   if (d.favdel) { state.favs = state.favs.filter(x => favKey(x) !== d.favdel); trace('Favorit'); step(['favorite'], 'Rækken slettes.'); return renderSaved(); }
   if (d.hist) { const x = state.hist[Number(d.hist)]; return load(x.mode, x.codes, x.quads); }
   if (d.scan) { const m = SAMPLES.find(x => x.id === d.scan); trace('Foto: ' + m.title); return readPhoto(m); }
-  if (d.sw) { state.scanWord = Number(d.sw); return renderPhoto(); }
-  if (d.alt) { const p = d.alt.split('|'), sc = SCANS[state.scan], x = sc && sc.signs[Number(p[0])]; if (x) x.c = p[1]; return renderPhoto(); }
-  if (d.sdel) { const sc = SCANS[state.scan], i = Number(d.sdel), x = sc && sc.signs[i]; if (!x) return; sc.signs.splice(i, 1); if (x.orig != null) sc.dels++; trace('Foto: tegn slettet'); return renderPhoto(); }
-  if (d.sins) { const sc = SCANS[state.scan], i = Number(d.sins), ref = sc && (sc.signs[i] || sc.signs[i - 1]); if (!ref) return; sc.signs.splice(i, 0, { c: '?', orig: null, conf: 1, status: 'inserted', alts: [], line: ref.line, box: null }); trace('Foto: tabt tegn sat ind'); return renderPhoto(); }
+  if (d.fix !== undefined) { const on = state.fixId === d.fix && state.fixWhere === 'sheet'; state.fixId = on ? null : d.fix; state.fixWhere = 'sheet'; const p = $('#photo .fixpop'); if (p) p.remove(); return renderRead(); }
+  if (d.palt) { const p = d.palt.split('|'); return photoFix('alt', p[0], p[1]); }
+  if (d.pdel) return photoFix('del', d.pdel);
+  if (d.pins) { const p = d.pins.split('|'); return photoFix('ins', p[0], p[1]); }
   if (d.suggest) { const g = SUGG[d.suggest], host = b.closest('p') || b, nx = host.nextElementSibling; if (!g) return; if (nx && nx.classList.contains('sugform')) return nx.remove();
     host.insertAdjacentHTML('afterend', '<div class="sugform"><label class="eyebrow" for="sf-' + d.suggest + '">Your correction</label><textarea id="sf-' + d.suggest + '">' + esc(g.text) + '</textarea>' + (g.orig ? '<small class="note">The source (' + esc(g.orig.langName) + '): ' + esc(g.orig.text) + '</small>' : '') + '<div class="btns"><button type="button" class="primary" data-sugsend="' + d.suggest + '">Send</button><button type="button" class="secondary" data-sugcancel="1">Cancel</button></div></div>');
     trace('Rettelsesforslag'); step([], 'Formularen er udfyldt med maskinoversættelsen' + (g.orig ? ' og kildens egen ordlyd' : '') + '. Brugeren retter teksten og sender.'); return host.nextElementSibling.querySelector('textarea').focus(); }
@@ -4474,11 +5136,21 @@ document.addEventListener('click', e => {
     case 'undo': return runUndo();
     case 'histback': case 'paneback': return setDrawerPane(null);
     case 'pop': state.stack.pop(); return rerender();
-    case 'scanback': state.scan = null; return renderPhoto();
-    case 'scanlook': { const sc = SCANS[state.scan]; if (!sc || !sc.signs.length) return; const ctx = scanCtxOf(sc); state.scanCtx = ctx; return load('sentence', ctx.codes, ctx.quads); }
+    case 'scanback': return photoBack();
+    case 'frameread': return frameRead(false);
+    case 'framewhole': return frameRead(true);
+    case 'frameback': return frameBack();
+    case 'frameadj': return frameAdjust();
+    case 'selread': return selRead();
+    case 'readclose': state.readOpen = false; state.fixId = null; return renderRead();
+    case 'selcopy': return selCopy();
+    case 'selsearch': return selSearch();
+    case 'selall': return selSelectAll();
+    case 'selclear': return selClear(true);
+    case 'pundo': return runPhotoUndo();
     case 'scanopen': { const id = state.scanCtx && state.scanCtx.id; setOverlay('sheet'); if (id) { state.scan = id; renderPhoto(); } return; }
     case 'scansuggest': {
-      const n = scanEdited(SCANS[state.scan]); state.sugg++;
+      const n = scanEdited(SCANS[state.scan]); if (!n) return; state.sugg++;
       trace('Rettelse sendt'); step(['suggestion'], 'Ny række med status "new" og en beskåret kopi af billedet.'); step(['suggestion_item'], n + ' punkt(er): udsnittets placering, appens bud og dit forslag. Punktet peger ikke på scanningen.'); step([], 'Rettelsen venter på godkendelse. Intet i indholdet ændres endnu.');
       return toast('Correction queued for review (' + n + ' sign' + (n > 1 ? 's' : '') + ')');
     }
@@ -4488,9 +5160,9 @@ document.addEventListener('click', e => {
 document.addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('scanbox') && state.scanCtx) state.scanCtx.open = e.target.open; }, true);
 document.addEventListener('toggle', e => { const el = e.target; if (el.classList && el.classList.contains('part') && lastLine && lastLine.parts[el.dataset.pk]) lastLine.parts[el.dataset.pk].open = el.open; }, true);
 document.addEventListener('change', e => {
-  if (e.target.id === 'photofile') { const f = e.target.files && e.target.files[0]; if (!f) return; if (photoURL) URL.revokeObjectURL(photoURL); photoURL = URL.createObjectURL(f);
-    trace('Foto valgt'); return readPhoto({ id: 'U' + (++state.seq), title: 'Your photo', sub: f.name, url: photoURL }, f); }
-  if (e.target.id === 'photodir') { state.photoDir = e.target.value; return; }
+  if (e.target.id === 'photofile' || e.target.id === 'photocam') { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return; if (photoURL) URL.revokeObjectURL(photoURL); photoURL = URL.createObjectURL(f);
+    trace('Foto valgt'); step([], 'Et foto fra kamera eller galleri vises først med en ramme (P3 E); prøverne springer rammen over.'); return framePhoto({ id: 'U' + (++state.seq), title: 'Your photo', sub: f.name, url: photoURL }, f); }
+  if (e.target.id === 'photodir') { state.photoDir = e.target.value; const sc = state.scan && SCANS[state.scan]; if (sc) { scanReorder(sc, e.target.value); trace('Foto: læseretning ' + e.target.value); renderPhoto(); } return; }
   const k = e.target.dataset && e.target.dataset.set; if (!k) return;
   S[k] = k === 'conf' ? e.target.value === 'true' : (k === 'hist' ? Number(e.target.value) : e.target.value);
   if (k === 'hist' && state.hist.length > S.hist) state.hist.length = S.hist;
@@ -4522,7 +5194,8 @@ dragScroll(pagesEl, true); dragScroll(tabsEl, false); dragScroll($('#bcats'), fa
 let bticking = false;
 PANELS.browse.addEventListener('scroll', () => { if (bticking) return; bticking = true; requestAnimationFrame(() => { bticking = false; if (state.view === 'browse' && state.stack.length === 2) syncBcats(); }); });
 phone.addEventListener('scroll', () => { phone.scrollTop = 0; phone.scrollLeft = 0; });
-window.addEventListener('resize', () => { fit(); layout(); kbGo(kbIdx, false); });
+let photoRT = 0;
+window.addEventListener('resize', () => { fit(); layout(); kbGo(kbIdx, false); if (state.sheet && (state.scan || state.frame)) { clearTimeout(photoRT); photoRT = setTimeout(renderPhoto, 120); } });
 
 /* ---------- sidepanel ----------
    Eksemplerne er rigtige sætninger og ord fra databasen. Sætninger findes efter deres læsning (sentence_reading.translit), tegn efter
@@ -4591,7 +5264,8 @@ function doBack() {
   if (!$('#quadpop').hidden) return setQuadPop(false);
   if (state.kbOpen) return setKb(false);
   if (state.drawer && state.drawerPane) return setDrawerPane(null);
-  if (state.sheet && state.scan) { state.scan = null; return renderPhoto(); }
+  if (state.sheet && state.frame) return frameBack();
+  if (state.sheet && state.scan) { if (state.fixId) return closeFix(); if (state.readOpen) { state.readOpen = false; return renderRead(); } return photoBack(); }
   if (state.drawer || state.sheet) return setOverlay(null);
   if (state.view !== 'saved' && state.stack.length > 1) { state.stack.pop(); return rerender(); }
   if (state.view !== 'browse') return setView('browse');
@@ -4633,7 +5307,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasure)
 /* F: the corpus model (word pairs from the sentences, DB.LM) is built in small slices while the page is idle, so the first sentence
    search does not have to wait for it (it finishes at once if a search needs it earlier) */
 (function lmIdle() { if (DB.LM.step(1000)) return; if (window.requestIdleCallback) requestIdleCallback(lmIdle, { timeout: 400 }); else setTimeout(lmIdle, 40); })();
-window.__app = { load, restart, renderField, renderRecent, S, state, analyse, D, DB, sortKey, INK, QUADS, quadSVG, canBack, GCODE, CODE, refresh, setMode, setView, setDrawerPane, setOverlay, openLemma, openSentence, openSign, rerender };
+window.__app = { SCANS, PHOTO: { readPhoto, framePhoto, frameRead, frameBack, frameAdjust, moveCorner, warpQuad, squareToQuad, frameSize, autoFrame, photoCanvas, FRAME, fgeo: () => FG, loadOCR, photoFix, selAll, selRange, selWord, selLine, selSigns, selIdx, scanWords, paintSel, renderPhoto, renderRead, readOf, nearest, curScan, PH, geo: () => PG }, load, restart, renderField, renderRecent, S, state, analyse, D, DB, sortKey, INK, QUADS, quadSVG, canBack, GCODE, CODE, refresh, setMode, setView, setDrawerPane, setOverlay, openLemma, openSentence, openSign, rerender };
 
 }
 boot();
@@ -4723,7 +5397,7 @@ boot();
 </div>
 <script>
 (function () {
-  const LOG = [{"version": "2026-10-21", "items": ["The app now opens with a splash screen with its icon while the dictionary is loaded, instead of showing the loading steps."]}, {"version": "2026-10-19", "title": "More English translations", "items": ["45,889 sentences now have an English translation, up from 13,141. The new ones are machine-translated from the German of the source and marked as such.", "The dictionary is downloaded again once (about 71 MB, so Wi-Fi is a good idea)."]}, {"version": "2026-10-12.3", "items": ["The app starts faster: it reads the dictionary on the phone straight away instead of waiting for the internet, and the copy is read up to ten times faster.", "The Check for updates button in Settings is no longer hidden behind the phone's navigation bar."]}, {"version": "2026-10-12.2", "items": ["A clearer start screen while the dictionary downloads and opens, with progress in percent.", "This window now waits until the app is ready."]}, {"version": "2026-10-12", "title": "Read from a photo", "items": ["The camera button now really recognises the signs in a photo, on the phone and without internet. Two example photos are included to try it.", "Better sentence reading: the app chooses words by how they are used in the known texts.", "Words show example sentences, other spellings grouped by form, and where the information comes from, with a link to the source.", "Names show the most important facts (for kings: dynasty and years). \"Did you mean\" suggests a similar sign when nothing is found.", "An updated dictionary. It is downloaded again once (about 66 MB)."]}, {"version": "2026-10-10.3", "items": ["Settings has a Check for updates button, so you can get a new version straight away.", "Fixed: the app again stores itself on the phone, so it opens without internet and updates itself."]}, {"version": "2026-10-10.2", "title": "The whole dictionary", "items": ["The app now uses the full database: 5,364 signs, 31,643 words and 47,087 sentences from 7,405 texts.", "The first start downloads the dictionary once (about 66 MB, so Wi-Fi is a good idea). After that it opens from the copy on your phone, also without internet.", "Signs from Unicode's extended list are now shown with the NewGardiner font."]}, {"version": "2026-10-10", "items": ["After an update, this window shows what has changed."]}, {"version": "2026-10-06", "title": "New version of the app", "items": ["A menu with History, Help and Settings (the button at the top right).", "Recently used signs on the keyboard.", "Hold a finger on what you have written to magnify it and move the cursor.", "Sort menus in the Dictionary and in Saved.", "The app now updates itself when a new version is published."]}];
+  const LOG = [{"version": "2026-10-26", "title": "Better reading from photos", "items": ["Before a photo is read you can set a frame around the text, like a document scanner: drag the four corners and the photo is straightened.", "The app finds the reading direction itself from the way the signs face. A third sample photo shows a line read right to left.", "A sign finder for photos of walls and reliefs, and better guesses from which signs usually follow each other in the known texts.", "Correct the reading directly on the photo: choose between five suggestions, delete a sign or insert a lost one."]}, {"version": "2026-10-21", "items": ["The app now opens with a splash screen with its icon while the dictionary is loaded, instead of showing the loading steps."]}, {"version": "2026-10-19", "title": "More English translations", "items": ["45,889 sentences now have an English translation, up from 13,141. The new ones are machine-translated from the German of the source and marked as such.", "The dictionary is downloaded again once (about 71 MB, so Wi-Fi is a good idea)."]}, {"version": "2026-10-12.3", "items": ["The app starts faster: it reads the dictionary on the phone straight away instead of waiting for the internet, and the copy is read up to ten times faster.", "The Check for updates button in Settings is no longer hidden behind the phone's navigation bar."]}, {"version": "2026-10-12.2", "items": ["A clearer start screen while the dictionary downloads and opens, with progress in percent.", "This window now waits until the app is ready."]}, {"version": "2026-10-12", "title": "Read from a photo", "items": ["The camera button now really recognises the signs in a photo, on the phone and without internet. Two example photos are included to try it.", "Better sentence reading: the app chooses words by how they are used in the known texts.", "Words show example sentences, other spellings grouped by form, and where the information comes from, with a link to the source.", "Names show the most important facts (for kings: dynasty and years). \"Did you mean\" suggests a similar sign when nothing is found.", "An updated dictionary. It is downloaded again once (about 66 MB)."]}, {"version": "2026-10-10.3", "items": ["Settings has a Check for updates button, so you can get a new version straight away.", "Fixed: the app again stores itself on the phone, so it opens without internet and updates itself."]}, {"version": "2026-10-10.2", "title": "The whole dictionary", "items": ["The app now uses the full database: 5,364 signs, 31,643 words and 47,087 sentences from 7,405 texts.", "The first start downloads the dictionary once (about 66 MB, so Wi-Fi is a good idea). After that it opens from the copy on your phone, also without internet.", "Signs from Unicode's extended list are now shown with the NewGardiner font."]}, {"version": "2026-10-10", "items": ["After an update, this window shows what has changed."]}, {"version": "2026-10-06", "title": "New version of the app", "items": ["A menu with History, Help and Settings (the button at the top right).", "Recently used signs on the keyboard.", "Hold a finger on what you have written to magnify it and move the cursor.", "Sort menus in the Dictionary and in Saved.", "The app now updates itself when a new version is published."]}];
   const SEEN = 'hiero-news-seen', STORE = 'hiero-proto-v1';
   if (!LOG.length) return;
   const latest = LOG[0].version;
@@ -4755,7 +5429,7 @@ boot();
 </style>
 <script>
 (function () {
-  const VERSION = "2026-10-21";
+  const VERSION = "2026-10-26";
   const host = document.getElementById('settings');
   if (!host) return;
   const label = v => { const d = new Date(String(v).slice(0, 10) + 'T12:00:00'); return isNaN(d) ? v : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); };

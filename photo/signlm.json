@@ -1,0 +1,36 @@
+{
+ "format": "hiero-signlm-1",
+ "weights_file": "signlm.bin",
+ "total_bytes": 392727,
+ "n_cls": 1072,
+ "V": 1073,
+ "N": 785214,
+ "n_bi": 28563,
+ "n_tri": 136059,
+ "offsets": {
+  "uni": 0,
+  "bi": 4292,
+  "tri": 63921
+ },
+ "params": {
+  "k": 10,
+  "lam": 0.35,
+  "mu": 0.25,
+  "wb": 1.0,
+  "unc": 0.56,
+  "order": 3,
+  "mode": "mpm",
+  "min_bi": 1,
+  "min_tri": 1
+ },
+ "info": {
+  "source": "full/phone/hiero_phone.sqlite sentence_token (written order) + spelling.sign_key / written_key",
+  "db_sha256": "cda5ba5238e673da",
+  "readings": 47087,
+  "sign_tokens": 785214,
+  "min_bi": 1,
+  "min_tri": 1,
+  "built": "2026-10-25",
+  "builder": "r4/photo/signlm.py"
+ }
+}
