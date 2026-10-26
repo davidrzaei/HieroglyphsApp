@@ -1,5 +1,12 @@
 [
   {
+    "version": "2026-10-26.3",
+    "title": "Choose the app's look",
+    "items": [
+      "Settings → Appearance: Classic, Egyptian, Modern or Dark & elegant. The three new looks have hieroglyph icons in the tabs."
+    ]
+  },
+  {
     "version": "2026-10-26.2",
     "items": [
       "Fixed: after an update the tabs at the bottom (Dictionary, Search, Saved) could end up below the screen until the app was restarted."

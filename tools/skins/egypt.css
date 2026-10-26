@@ -1,0 +1,24 @@
+/* Egyptian: papyrus, lapisblå og guld; frise af hieroglyffer i toppen. Altid lys. */
+:root{--bg:#f3ead8;--surface:#faf4e6;--key:#f1e6cf;--line:#e2d3b3;--ink:#2b2116;--muted:#7a6850;--lapis:#1f4e8c;--lapis-soft:#e2e9f1;--fn:#e9dcc0;--tabbar:#f4ead4;--tabsel:#eadbb8;--menu:#efe4cc;--menu-head:#e6d6b3;--gold:#b98a2e}
+body.app{background:var(--surface)}
+.appbar{background:linear-gradient(180deg,#1f4e8c,#173d6e);color:#fff;border-bottom:0;position:relative;padding-bottom:22px}
+.appbar b{color:#fff;font-size:1.3rem;letter-spacing:.02em}
+.appbar b::before{content:"\13153";font-family:var(--glyph);font-weight:400;margin-right:8px;color:#e9c46a;-webkit-text-stroke:.02em currentColor}
+.appbar span{color:#bcd0ea}
+.appbar::after{content:"\132F9\2002\132BD\2002\131F3\2002\132F9\2002\132BD\2002\131F3\2002\132F9\2002\132BD\2002\131F3\2002\132F9\2002\132BD\2002\131F3\2002\132F9\2002\132BD\2002\131F3";position:absolute;left:0;right:0;bottom:0;height:20px;overflow:hidden;white-space:nowrap;text-align:center;font-family:var(--glyph);font-size:.95rem;line-height:20px;color:#e9c46a;background:#173d6e;border-top:1px solid rgba(233,196,106,.45);border-bottom:2px solid var(--gold);-webkit-text-stroke:.02em currentColor}
+#menubtn{color:#fff;top:12px}
+.bigbtn{background:linear-gradient(135deg,#fffaf0,#f3e6c8);border:1px solid #dcc79c;border-left:5px solid var(--gold);box-shadow:0 3px 10px rgba(120,90,30,.12);border-radius:12px}
+.bigbtn .gl{color:var(--lapis);font-size:1.9rem}
+.bigbtn b{color:#3a2a14}
+.bhome::before{content:"Ancient Egyptian dictionary";text-align:center;font-family:var(--display);font-style:italic;color:var(--muted);font-size:1.05rem}
+.tabs{border-top:2px solid var(--gold);box-shadow:none}
+.tabs button[aria-pressed="true"]{color:var(--lapis)}
+.tabind{background:var(--tabsel);border-top:3px solid var(--lapis)}
+.seg button[aria-pressed="true"]{background:linear-gradient(180deg,#245a9e,#1f4e8c)}
+.kbd{background:#efe3c9}
+.key{background:#fffaf0;border-color:#e0cfa9}
+.cathead{border-bottom-color:var(--gold);color:#3a2a14}
+.cathead .mono{color:var(--lapis)}
+#field{background:#fffaf0;border-color:#dcc79c}
+.primary{background:linear-gradient(180deg,#245a9e,#1f4e8c)}
+.drawer-open #menubtn{color:var(--ink)}

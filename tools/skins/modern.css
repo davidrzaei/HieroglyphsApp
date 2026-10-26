@@ -1,0 +1,26 @@
+/* Modern: gradient-top, farvede kort, runde faner og bløde skygger. Altid lys. */
+:root{--bg:#f4f5fb;--surface:#ffffff;--key:#f3f4fa;--line:#e3e5f0;--ink:#1c1d2e;--muted:#6b6f86;--lapis:#4b4fd8;--lapis-soft:#ecebfd;--on-lapis:#fff;--fn:#e8e9f5;--tabbar:#ffffff;--tabsel:#ecebfd;--menu:#f4f4fb;--menu-head:#ebebf7}
+.appbar{background:linear-gradient(120deg,#2d63c8 0%,#6a3fd0 55%,#c0459b 100%);color:#fff;border-bottom:0;border-radius:0 0 22px 22px;min-height:70px;box-shadow:0 8px 20px rgba(90,60,200,.25)}
+.appbar b{color:#fff;font-family:var(--body);font-weight:700;font-size:1.35rem}
+.appbar span{color:rgba(255,255,255,.75)}
+#menubtn{color:#fff;top:14px}
+.bigbtn{border:0;border-radius:20px;padding:20px 16px;min-height:96px;box-shadow:0 10px 24px rgba(40,40,90,.10)}
+.bigbtn[data-browse="signs"]{background:linear-gradient(135deg,#e3edff,#cfdcff)}
+.bigbtn[data-browse="words"]{background:linear-gradient(135deg,#ffeedd,#ffd9c2)}
+.bigbtn .gl{font-size:1.9rem;background:#fff;border-radius:14px;padding:6px 8px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.bigbtn b{font-family:var(--body);font-weight:700}
+.bhome::before{content:"What would you like to explore?";text-align:center;font-weight:700;font-size:1.25rem;margin-bottom:4px}
+.tabs{box-shadow:0 -6px 20px rgba(40,40,90,.08);border-radius:22px 22px 0 0}
+.tabind{display:none}
+.tabs button[aria-pressed="true"]{color:var(--lapis)}
+.tabs button[aria-pressed="true"]::before{background:var(--lapis-soft);border-radius:999px;padding:2px 18px}
+.seg{border:0;background:var(--key);border-radius:999px;padding:4px}
+.seg button{border:0;border-radius:999px;background:none}
+.seg button[aria-pressed="true"]{background:linear-gradient(120deg,#2d63c8,#6a3fd0);box-shadow:0 4px 10px rgba(90,60,200,.3)}
+#field{border-radius:18px;border:0;box-shadow:inset 0 0 0 1px var(--line),0 6px 16px rgba(40,40,90,.06)}
+.key{border:0;border-radius:12px;box-shadow:0 1px 3px rgba(40,40,90,.12)}
+.primary{background:linear-gradient(120deg,#2d63c8,#6a3fd0);border-radius:12px}
+.cathead{border-bottom:0;color:var(--lapis)}
+.cathead .mono{background:var(--lapis-soft);border-radius:8px;padding:0 6px}
+.srow{border-bottom:0;border-radius:12px;margin:2px 0}
+.drawer-open #menubtn{color:var(--ink)}

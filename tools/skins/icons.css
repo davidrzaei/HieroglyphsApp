@@ -1,0 +1,6 @@
+/* Ikoner (hieroglyffer) over fanernes tekst; gælder alle udseender undtagen Classic. */
+.tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 2px 12px}
+.tabs button::before{font-family:var(--glyph);font-size:1.45rem;line-height:1.1;-webkit-text-stroke:.02em currentColor}
+.tabs [data-view="browse"]::before{content:"\133DB"}
+.tabs [data-view="search"]::before{content:"\13079"}
+.tabs [data-view="saved"]::before{content:"\131FC"}

@@ -733,6 +733,121 @@ body.app .phone{position:fixed;top:0;left:0;right:0;bottom:auto;height:var(--app
   window.addEventListener('app-ready', () => { fit(); setTimeout(fit, 300); });
 })();
 </script>
+<!-- Udseende: Settings -> Appearance vælger mellem Classic (prototypens eget) og tre andre udseender. Valget gemmes på telefonen og sættes,
+     før noget vises (data-skin på <html>). Stilarkene ligger i tools/skins/ og afgrænses til hvert valg af build.py. -->
+<style>
+:root[data-skin] .tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 2px 12px}
+:root[data-skin] .tabs button::before{font-family:var(--glyph);font-size:1.45rem;line-height:1.1;-webkit-text-stroke:.02em currentColor}
+:root[data-skin] .tabs [data-view="browse"]::before{content:"\133DB"}
+:root[data-skin] .tabs [data-view="search"]::before{content:"\13079"}
+:root[data-skin] .tabs [data-view="saved"]::before{content:"\131FC"}
+:root[data-skin="dark"]{color-scheme:dark;--bg:#0b121b;--surface:#0f1924;--key:#152230;--line:#24364a;--ink:#efe6d0;--muted:#a3977c;--lapis:#d6b25e;--lapis-soft:#2a2414;--on-lapis:#0f1924;--fn:#1c2a3a;--tabbar:#0c151f;--tabsel:#16212d;--menu:#0c151f;--menu-head:#09111a;--guess:#e2c670;--guess-soft:#383016;--guess-line:#7a6a2c;--err:#eea195;--err-soft:#40211c;--err-line:#7d4138;--phone:#000;--scrim:rgba(0,0,0,.6)}
+:root[data-skin="dark"] body.app{background:var(--surface)}
+:root[data-skin="dark"] .appbar{border-bottom:1px solid #6e5a2c;background:radial-gradient(120% 140% at 50% -40%,#1d2c3e,#0f1924)}
+:root[data-skin="dark"] .appbar b{color:var(--lapis);font-size:1.3rem;letter-spacing:.08em;text-transform:uppercase;font-weight:400}
+:root[data-skin="dark"] .appbar span{color:#7f7560}
+:root[data-skin="dark"] #menubtn{color:var(--lapis)}
+:root[data-skin="dark"] .gl{color:#efe6d0}
+:root[data-skin="dark"] .bigbtn{background:linear-gradient(180deg,#132131,#0f1a26);border:1px solid #3a4a5e;border-radius:6px;box-shadow:inset 0 0 0 1px rgba(214,178,94,.12),0 10px 24px rgba(0,0,0,.35)}
+:root[data-skin="dark"] .bigbtn .gl{color:var(--lapis);font-size:1.8rem}
+:root[data-skin="dark"] .bigbtn b{color:var(--lapis);font-weight:400;letter-spacing:.04em}
+:root[data-skin="dark"] .bhome::before{content:"\132F9";text-align:center;font-family:var(--glyph);font-size:3rem;color:var(--lapis);opacity:.85}
+:root[data-skin="dark"] .tabs{border-top:1px solid #6e5a2c;box-shadow:none}
+:root[data-skin="dark"] .tabind{background:none;border-top:2px solid var(--lapis)}
+:root[data-skin="dark"] .tabs button{color:#7f7560}
+:root[data-skin="dark"] .tabs button[aria-pressed="true"]{color:var(--lapis)}
+:root[data-skin="dark"] .seg{border-color:#3a4a5e}
+:root[data-skin="dark"] .seg button{background:transparent}
+:root[data-skin="dark"] .seg button[aria-pressed="true"]{background:var(--lapis);color:#0f1924}
+:root[data-skin="dark"] .kbd{background:#0c151f}
+:root[data-skin="dark"] .key{background:#132131;border-color:#2a3b50}
+:root[data-skin="dark"] .key .gl{color:#efe6d0}
+:root[data-skin="dark"] #field{background:#132131;border-color:#3a4a5e}
+:root[data-skin="dark"] .cathead{background:var(--surface);border-bottom:1px solid #6e5a2c;color:var(--lapis)}
+:root[data-skin="egypt"]{--bg:#f3ead8;--surface:#faf4e6;--key:#f1e6cf;--line:#e2d3b3;--ink:#2b2116;--muted:#7a6850;--lapis:#1f4e8c;--lapis-soft:#e2e9f1;--fn:#e9dcc0;--tabbar:#f4ead4;--tabsel:#eadbb8;--menu:#efe4cc;--menu-head:#e6d6b3;--gold:#b98a2e}
+:root[data-skin="egypt"] body.app{background:var(--surface)}
+:root[data-skin="egypt"] .appbar{background:linear-gradient(180deg,#1f4e8c,#173d6e);color:#fff;border-bottom:0;position:relative;padding-bottom:22px}
+:root[data-skin="egypt"] .appbar b{color:#fff;font-size:1.3rem;letter-spacing:.02em}
+:root[data-skin="egypt"] .appbar b::before{content:"\13153";font-family:var(--glyph);font-weight:400;margin-right:8px;color:#e9c46a;-webkit-text-stroke:.02em currentColor}
+:root[data-skin="egypt"] .appbar span{color:#bcd0ea}
+:root[data-skin="egypt"] .appbar::after{content:"\132F9\2002\132BD\2002\131F3\2002\132F9\2002\132BD\2002\131F3\2002\132F9\2002\132BD\2002\131F3\2002\132F9\2002\132BD\2002\131F3\2002\132F9\2002\132BD\2002\131F3";position:absolute;left:0;right:0;bottom:0;height:20px;overflow:hidden;white-space:nowrap;text-align:center;font-family:var(--glyph);font-size:.95rem;line-height:20px;color:#e9c46a;background:#173d6e;border-top:1px solid rgba(233,196,106,.45);border-bottom:2px solid var(--gold);-webkit-text-stroke:.02em currentColor}
+:root[data-skin="egypt"] #menubtn{color:#fff;top:12px}
+:root[data-skin="egypt"] .bigbtn{background:linear-gradient(135deg,#fffaf0,#f3e6c8);border:1px solid #dcc79c;border-left:5px solid var(--gold);box-shadow:0 3px 10px rgba(120,90,30,.12);border-radius:12px}
+:root[data-skin="egypt"] .bigbtn .gl{color:var(--lapis);font-size:1.9rem}
+:root[data-skin="egypt"] .bigbtn b{color:#3a2a14}
+:root[data-skin="egypt"] .bhome::before{content:"Ancient Egyptian dictionary";text-align:center;font-family:var(--display);font-style:italic;color:var(--muted);font-size:1.05rem}
+:root[data-skin="egypt"] .tabs{border-top:2px solid var(--gold);box-shadow:none}
+:root[data-skin="egypt"] .tabs button[aria-pressed="true"]{color:var(--lapis)}
+:root[data-skin="egypt"] .tabind{background:var(--tabsel);border-top:3px solid var(--lapis)}
+:root[data-skin="egypt"] .seg button[aria-pressed="true"]{background:linear-gradient(180deg,#245a9e,#1f4e8c)}
+:root[data-skin="egypt"] .kbd{background:#efe3c9}
+:root[data-skin="egypt"] .key{background:#fffaf0;border-color:#e0cfa9}
+:root[data-skin="egypt"] .cathead{border-bottom-color:var(--gold);color:#3a2a14}
+:root[data-skin="egypt"] .cathead .mono{color:var(--lapis)}
+:root[data-skin="egypt"] #field{background:#fffaf0;border-color:#dcc79c}
+:root[data-skin="egypt"] .primary{background:linear-gradient(180deg,#245a9e,#1f4e8c)}
+:root[data-skin="egypt"] .drawer-open #menubtn{color:var(--ink)}
+:root[data-skin="modern"]{--bg:#f4f5fb;--surface:#ffffff;--key:#f3f4fa;--line:#e3e5f0;--ink:#1c1d2e;--muted:#6b6f86;--lapis:#4b4fd8;--lapis-soft:#ecebfd;--on-lapis:#fff;--fn:#e8e9f5;--tabbar:#ffffff;--tabsel:#ecebfd;--menu:#f4f4fb;--menu-head:#ebebf7}
+:root[data-skin="modern"] .appbar{background:linear-gradient(120deg,#2d63c8 0%,#6a3fd0 55%,#c0459b 100%);color:#fff;border-bottom:0;border-radius:0 0 22px 22px;min-height:70px;box-shadow:0 8px 20px rgba(90,60,200,.25)}
+:root[data-skin="modern"] .appbar b{color:#fff;font-family:var(--body);font-weight:700;font-size:1.35rem}
+:root[data-skin="modern"] .appbar span{color:rgba(255,255,255,.75)}
+:root[data-skin="modern"] #menubtn{color:#fff;top:14px}
+:root[data-skin="modern"] .bigbtn{border:0;border-radius:20px;padding:20px 16px;min-height:96px;box-shadow:0 10px 24px rgba(40,40,90,.10)}
+:root[data-skin="modern"] .bigbtn[data-browse="signs"]{background:linear-gradient(135deg,#e3edff,#cfdcff)}
+:root[data-skin="modern"] .bigbtn[data-browse="words"]{background:linear-gradient(135deg,#ffeedd,#ffd9c2)}
+:root[data-skin="modern"] .bigbtn .gl{font-size:1.9rem;background:#fff;border-radius:14px;padding:6px 8px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+:root[data-skin="modern"] .bigbtn b{font-family:var(--body);font-weight:700}
+:root[data-skin="modern"] .bhome::before{content:"What would you like to explore?";text-align:center;font-weight:700;font-size:1.25rem;margin-bottom:4px}
+:root[data-skin="modern"] .tabs{box-shadow:0 -6px 20px rgba(40,40,90,.08);border-radius:22px 22px 0 0}
+:root[data-skin="modern"] .tabind{display:none}
+:root[data-skin="modern"] .tabs button[aria-pressed="true"]{color:var(--lapis)}
+:root[data-skin="modern"] .tabs button[aria-pressed="true"]::before{background:var(--lapis-soft);border-radius:999px;padding:2px 18px}
+:root[data-skin="modern"] .seg{border:0;background:var(--key);border-radius:999px;padding:4px}
+:root[data-skin="modern"] .seg button{border:0;border-radius:999px;background:none}
+:root[data-skin="modern"] .seg button[aria-pressed="true"]{background:linear-gradient(120deg,#2d63c8,#6a3fd0);box-shadow:0 4px 10px rgba(90,60,200,.3)}
+:root[data-skin="modern"] #field{border-radius:18px;border:0;box-shadow:inset 0 0 0 1px var(--line),0 6px 16px rgba(40,40,90,.06)}
+:root[data-skin="modern"] .key{border:0;border-radius:12px;box-shadow:0 1px 3px rgba(40,40,90,.12)}
+:root[data-skin="modern"] .primary{background:linear-gradient(120deg,#2d63c8,#6a3fd0);border-radius:12px}
+:root[data-skin="modern"] .cathead{border-bottom:0;color:var(--lapis)}
+:root[data-skin="modern"] .cathead .mono{background:var(--lapis-soft);border-radius:8px;padding:0 6px}
+:root[data-skin="modern"] .srow{border-bottom:0;border-radius:12px;margin:2px 0}
+:root[data-skin="modern"] .drawer-open #menubtn{color:var(--ink)}
+</style>
+<script>
+(function () {
+  const KEY = 'hiero-skin', root = document.documentElement;
+  const SKINS = [['classic', 'Classic', 'The original look.'], ['egypt', 'Egyptian', 'Papyrus, lapis blue and gold, with a frieze of hieroglyphs.'],
+    ['modern', 'Modern', 'Colourful gradient, coloured cards and round tabs.'], ['dark', 'Dark & elegant', 'Night blue and gold, like a museum showcase. Always dark.']];
+  const BAR = { egypt: '#1f4e8c', modern: '#2d63c8', dark: '#0f1924' };      /* telefonens statuslinje */
+  let skin = 'classic';
+  try { skin = localStorage.getItem(KEY) || 'classic'; } catch (e) {}
+  if (!SKINS.some(s => s[0] === skin)) skin = 'classic';
+  const metas = Array.from(document.querySelectorAll('meta[name="theme-color"]')), orig = metas.map(m => m.content);
+  function apply(s) {
+    skin = s;
+    if (s === 'classic') root.removeAttribute('data-skin'); else root.setAttribute('data-skin', s);
+    metas.forEach((m, i) => { m.content = BAR[s] || orig[i]; });
+  }
+  apply(skin);
+  window.__setSkin = s => { apply(s); try { localStorage.setItem(KEY, s); } catch (e) {} };
+  /* Settings: øverst et felt til udseendet, i samme stil som de andre indstillinger */
+  document.addEventListener('DOMContentLoaded', () => {
+    const host = document.getElementById('settings'); if (!host) return;
+    function add() {
+      if (host.querySelector('.skinbox') || !host.children.length) return;
+      const box = document.createElement('div'); box.className = 'field skinbox';
+      box.innerHTML = '<label for="set-skin">Appearance</label><select id="set-skin">' + SKINS.map(s => '<option value="' + s[0] + '"' + (s[0] === skin ? ' selected' : '') + '>' + s[1] + '</option>').join('') + '</select><small></small>';
+      const note = box.querySelector('small'), sel = box.querySelector('select');
+      const say = () => { note.textContent = (SKINS.find(s => s[0] === sel.value) || [])[2] || ''; };
+      say();
+      sel.addEventListener('change', e => { e.stopPropagation(); window.__setSkin(sel.value); say(); });
+      host.insertBefore(box, host.firstChild);
+    }
+    new MutationObserver(add).observe(host, { childList: true });
+    add();
+  });
+})();
+</script>
 <!-- Splashskærm: dækker hele appen, mens ordbogen åbnes, så man ikke ser indlæsningen. Samme hvide flade og ikon som telefonens egen startskærm (manifest.webmanifest). Fjernes af tools/boot.html. -->
 <style>
 #splash{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#ffffff;color:#17212b;padding:env(safe-area-inset-top) 24px env(safe-area-inset-bottom);transition:opacity .35s ease,visibility .35s}
@@ -5422,7 +5537,7 @@ boot();
 </div>
 <script>
 (function () {
-  const LOG = [{"version": "2026-10-26.2", "items": ["Fixed: after an update the tabs at the bottom (Dictionary, Search, Saved) could end up below the screen until the app was restarted."]}, {"version": "2026-10-26", "title": "Better reading from photos", "items": ["Before a photo is read you can set a frame around the text, like a document scanner: drag the four corners and the photo is straightened.", "The app finds the reading direction itself from the way the signs face. A third sample photo shows a line read right to left.", "A sign finder for photos of walls and reliefs, and better guesses from which signs usually follow each other in the known texts.", "Correct the reading directly on the photo: choose between five suggestions, delete a sign or insert a lost one."]}, {"version": "2026-10-21", "items": ["The app now opens with a splash screen with its icon while the dictionary is loaded, instead of showing the loading steps."]}, {"version": "2026-10-19", "title": "More English translations", "items": ["45,889 sentences now have an English translation, up from 13,141. The new ones are machine-translated from the German of the source and marked as such.", "The dictionary is downloaded again once (about 71 MB, so Wi-Fi is a good idea)."]}, {"version": "2026-10-12.3", "items": ["The app starts faster: it reads the dictionary on the phone straight away instead of waiting for the internet, and the copy is read up to ten times faster.", "The Check for updates button in Settings is no longer hidden behind the phone's navigation bar."]}, {"version": "2026-10-12.2", "items": ["A clearer start screen while the dictionary downloads and opens, with progress in percent.", "This window now waits until the app is ready."]}, {"version": "2026-10-12", "title": "Read from a photo", "items": ["The camera button now really recognises the signs in a photo, on the phone and without internet. Two example photos are included to try it.", "Better sentence reading: the app chooses words by how they are used in the known texts.", "Words show example sentences, other spellings grouped by form, and where the information comes from, with a link to the source.", "Names show the most important facts (for kings: dynasty and years). \"Did you mean\" suggests a similar sign when nothing is found.", "An updated dictionary. It is downloaded again once (about 66 MB)."]}, {"version": "2026-10-10.3", "items": ["Settings has a Check for updates button, so you can get a new version straight away.", "Fixed: the app again stores itself on the phone, so it opens without internet and updates itself."]}, {"version": "2026-10-10.2", "title": "The whole dictionary", "items": ["The app now uses the full database: 5,364 signs, 31,643 words and 47,087 sentences from 7,405 texts.", "The first start downloads the dictionary once (about 66 MB, so Wi-Fi is a good idea). After that it opens from the copy on your phone, also without internet.", "Signs from Unicode's extended list are now shown with the NewGardiner font."]}, {"version": "2026-10-10", "items": ["After an update, this window shows what has changed."]}, {"version": "2026-10-06", "title": "New version of the app", "items": ["A menu with History, Help and Settings (the button at the top right).", "Recently used signs on the keyboard.", "Hold a finger on what you have written to magnify it and move the cursor.", "Sort menus in the Dictionary and in Saved.", "The app now updates itself when a new version is published."]}];
+  const LOG = [{"version": "2026-10-26.3", "title": "Choose the app's look", "items": ["Settings → Appearance: Classic, Egyptian, Modern or Dark & elegant. The three new looks have hieroglyph icons in the tabs."]}, {"version": "2026-10-26.2", "items": ["Fixed: after an update the tabs at the bottom (Dictionary, Search, Saved) could end up below the screen until the app was restarted."]}, {"version": "2026-10-26", "title": "Better reading from photos", "items": ["Before a photo is read you can set a frame around the text, like a document scanner: drag the four corners and the photo is straightened.", "The app finds the reading direction itself from the way the signs face. A third sample photo shows a line read right to left.", "A sign finder for photos of walls and reliefs, and better guesses from which signs usually follow each other in the known texts.", "Correct the reading directly on the photo: choose between five suggestions, delete a sign or insert a lost one."]}, {"version": "2026-10-21", "items": ["The app now opens with a splash screen with its icon while the dictionary is loaded, instead of showing the loading steps."]}, {"version": "2026-10-19", "title": "More English translations", "items": ["45,889 sentences now have an English translation, up from 13,141. The new ones are machine-translated from the German of the source and marked as such.", "The dictionary is downloaded again once (about 71 MB, so Wi-Fi is a good idea)."]}, {"version": "2026-10-12.3", "items": ["The app starts faster: it reads the dictionary on the phone straight away instead of waiting for the internet, and the copy is read up to ten times faster.", "The Check for updates button in Settings is no longer hidden behind the phone's navigation bar."]}, {"version": "2026-10-12.2", "items": ["A clearer start screen while the dictionary downloads and opens, with progress in percent.", "This window now waits until the app is ready."]}, {"version": "2026-10-12", "title": "Read from a photo", "items": ["The camera button now really recognises the signs in a photo, on the phone and without internet. Two example photos are included to try it.", "Better sentence reading: the app chooses words by how they are used in the known texts.", "Words show example sentences, other spellings grouped by form, and where the information comes from, with a link to the source.", "Names show the most important facts (for kings: dynasty and years). \"Did you mean\" suggests a similar sign when nothing is found.", "An updated dictionary. It is downloaded again once (about 66 MB)."]}, {"version": "2026-10-10.3", "items": ["Settings has a Check for updates button, so you can get a new version straight away.", "Fixed: the app again stores itself on the phone, so it opens without internet and updates itself."]}, {"version": "2026-10-10.2", "title": "The whole dictionary", "items": ["The app now uses the full database: 5,364 signs, 31,643 words and 47,087 sentences from 7,405 texts.", "The first start downloads the dictionary once (about 66 MB, so Wi-Fi is a good idea). After that it opens from the copy on your phone, also without internet.", "Signs from Unicode's extended list are now shown with the NewGardiner font."]}, {"version": "2026-10-10", "items": ["After an update, this window shows what has changed."]}, {"version": "2026-10-06", "title": "New version of the app", "items": ["A menu with History, Help and Settings (the button at the top right).", "Recently used signs on the keyboard.", "Hold a finger on what you have written to magnify it and move the cursor.", "Sort menus in the Dictionary and in Saved.", "The app now updates itself when a new version is published."]}];
   const SEEN = 'hiero-news-seen', STORE = 'hiero-proto-v1';
   if (!LOG.length) return;
   const latest = LOG[0].version;
@@ -5454,7 +5569,7 @@ boot();
 </style>
 <script>
 (function () {
-  const VERSION = "2026-10-26.2";
+  const VERSION = "2026-10-26.3";
   const host = document.getElementById('settings');
   if (!host) return;
   const label = v => { const d = new Date(String(v).slice(0, 10) + 'T12:00:00'); return isNaN(d) ? v : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); };

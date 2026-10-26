@@ -1,0 +1,40 @@
+<!-- Udseende: Settings -> Appearance vælger mellem Classic (prototypens eget) og tre andre udseender. Valget gemmes på telefonen og sættes,
+     før noget vises (data-skin på <html>). Stilarkene ligger i tools/skins/ og afgrænses til hvert valg af build.py. -->
+<style>
+/*SKINS*/
+</style>
+<script>
+(function () {
+  const KEY = 'hiero-skin', root = document.documentElement;
+  const SKINS = [['classic', 'Classic', 'The original look.'], ['egypt', 'Egyptian', 'Papyrus, lapis blue and gold, with a frieze of hieroglyphs.'],
+    ['modern', 'Modern', 'Colourful gradient, coloured cards and round tabs.'], ['dark', 'Dark & elegant', 'Night blue and gold, like a museum showcase. Always dark.']];
+  const BAR = { egypt: '#1f4e8c', modern: '#2d63c8', dark: '#0f1924' };      /* telefonens statuslinje */
+  let skin = 'classic';
+  try { skin = localStorage.getItem(KEY) || 'classic'; } catch (e) {}
+  if (!SKINS.some(s => s[0] === skin)) skin = 'classic';
+  const metas = Array.from(document.querySelectorAll('meta[name="theme-color"]')), orig = metas.map(m => m.content);
+  function apply(s) {
+    skin = s;
+    if (s === 'classic') root.removeAttribute('data-skin'); else root.setAttribute('data-skin', s);
+    metas.forEach((m, i) => { m.content = BAR[s] || orig[i]; });
+  }
+  apply(skin);
+  window.__setSkin = s => { apply(s); try { localStorage.setItem(KEY, s); } catch (e) {} };
+  /* Settings: øverst et felt til udseendet, i samme stil som de andre indstillinger */
+  document.addEventListener('DOMContentLoaded', () => {
+    const host = document.getElementById('settings'); if (!host) return;
+    function add() {
+      if (host.querySelector('.skinbox') || !host.children.length) return;
+      const box = document.createElement('div'); box.className = 'field skinbox';
+      box.innerHTML = '<label for="set-skin">Appearance</label><select id="set-skin">' + SKINS.map(s => '<option value="' + s[0] + '"' + (s[0] === skin ? ' selected' : '') + '>' + s[1] + '</option>').join('') + '</select><small></small>';
+      const note = box.querySelector('small'), sel = box.querySelector('select');
+      const say = () => { note.textContent = (SKINS.find(s => s[0] === sel.value) || [])[2] || ''; };
+      say();
+      sel.addEventListener('change', e => { e.stopPropagation(); window.__setSkin(sel.value); say(); });
+      host.insertBefore(box, host.firstChild);
+    }
+    new MutationObserver(add).observe(host, { childList: true });
+    add();
+  });
+})();
+</script>
