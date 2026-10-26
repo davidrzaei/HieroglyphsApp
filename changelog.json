@@ -1,5 +1,15 @@
 [
   {
+    "version": "2026-10-26",
+    "title": "Better reading from photos",
+    "items": [
+      "Before a photo is read you can set a frame around the text, like a document scanner: drag the four corners and the photo is straightened.",
+      "The app finds the reading direction itself from the way the signs face. A third sample photo shows a line read right to left.",
+      "A sign finder for photos of walls and reliefs, and better guesses from which signs usually follow each other in the known texts.",
+      "Correct the reading directly on the photo: choose between five suggestions, delete a sign or insert a lost one."
+    ]
+  },
+  {
     "version": "2026-10-21",
     "items": [
       "The app now opens with a splash screen with its icon while the dictionary is loaded, instead of showing the loading steps."
