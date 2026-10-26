@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parent.parent
 INDEX, SW = ROOT / 'index.html', ROOT / 'sw.js'
 CHANGELOG, NEWS, UPDATE, BOOTUI = ROOT / 'changelog.json', ROOT / 'tools' / 'changelog.html', ROOT / 'tools' / 'update.html', ROOT / 'tools' / 'boot.html'
 SPLASH, VIEWPORT = ROOT / 'tools' / 'splash.html', ROOT / 'tools' / 'viewport.html'
+SKINS, SKIN_DIR = ROOT / 'tools' / 'skins.html', ROOT / 'tools' / 'skins'
 
 AUTO_UPDATE = """  /* Ny udgave: når appen åbnes eller kommer frem igen, ser den efter en ny sw.js. Findes der en, overtager den, og siden genindlæses én gang med de nye filer. */
   if ('serviceWorker' in navigator) {
@@ -49,6 +50,27 @@ BOOT_PATCHES = [
       if (b && b.byteLength === meta.bytes) {"""),
     ("""idbPut([[IDB.bytes, bytes], [IDB.meta,""", """idbPut([[IDB.bytes, new Blob([bytes])], [IDB.meta,"""),
 ]
+
+
+def scope_css(css, scope):
+    """Afgrænser et simpelt stilark (ingen @-regler) til ét udseende: :root bliver :root<scope>, alt andet får :root<scope> foran."""
+    css = re.sub(r'/\*.*?\*/', '', css, flags=re.S)
+    if '@' in css:
+        sys.exit('Udseendernes stilark må ikke have @-regler (tools/skins/)')
+    out = []
+    for sel, body in re.findall(r'([^{}]+)\{([^{}]*)\}', css):
+        sels = [x.strip() for x in sel.split(',') if x.strip()]
+        sels = [(':root' + scope + x[5:]) if x.startswith(':root') else (':root' + scope + ' ' + x) for x in sels]
+        out.append(','.join(sels) + '{' + body.strip() + '}')
+    return '\n'.join(out)
+
+
+def skins_css():
+    parts = [scope_css((SKIN_DIR / 'icons.css').read_text(encoding='utf-8'), '[data-skin]')]
+    for f in sorted(SKIN_DIR.glob('*.css')):
+        if f.stem != 'icons':
+            parts.append(scope_css(f.read_text(encoding='utf-8'), '[data-skin="%s"]' % f.stem))
+    return '\n'.join(parts)
 
 
 def cut(text, start, end, what):
@@ -93,7 +115,7 @@ def main():
     news = BOOTUI.read_text(encoding='utf-8') + NEWS.read_text(encoding='utf-8').replace('/*CHANGELOG*/[]', json.dumps(log, ensure_ascii=False).replace('</', '<\\/'))
     news += UPDATE.read_text(encoding='utf-8').replace("/*VERSION*/''", json.dumps(log[0]['version'] if log else ''))
 
-    out = head + styles.rstrip() + '\n\n' + webapp + '</head>\n<body class="app">\n' + VIEWPORT.read_text(encoding='utf-8') + SPLASH.read_text(encoding='utf-8') + body + '\n' + news + '</body>\n</html>\n'
+    out = head + styles.rstrip() + '\n\n' + webapp + '</head>\n<body class="app">\n' + VIEWPORT.read_text(encoding='utf-8') + SKINS.read_text(encoding='utf-8').replace('/*SKINS*/', skins_css()) + SPLASH.read_text(encoding='utf-8') + body + '\n' + news + '</body>\n</html>\n'
     INDEX.write_text(out, encoding='utf-8')
 
     version = hashlib.sha1(out.encode('utf-8')).hexdigest()[:10]

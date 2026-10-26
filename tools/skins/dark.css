@@ -1,0 +1,24 @@
+/* Dark & elegant: natblå og guld, som en museumsmontre. Altid mørk. */
+:root{color-scheme:dark;--bg:#0b121b;--surface:#0f1924;--key:#152230;--line:#24364a;--ink:#efe6d0;--muted:#a3977c;--lapis:#d6b25e;--lapis-soft:#2a2414;--on-lapis:#0f1924;--fn:#1c2a3a;--tabbar:#0c151f;--tabsel:#16212d;--menu:#0c151f;--menu-head:#09111a;--guess:#e2c670;--guess-soft:#383016;--guess-line:#7a6a2c;--err:#eea195;--err-soft:#40211c;--err-line:#7d4138;--phone:#000;--scrim:rgba(0,0,0,.6)}
+body.app{background:var(--surface)}
+.appbar{border-bottom:1px solid #6e5a2c;background:radial-gradient(120% 140% at 50% -40%,#1d2c3e,#0f1924)}
+.appbar b{color:var(--lapis);font-size:1.3rem;letter-spacing:.08em;text-transform:uppercase;font-weight:400}
+.appbar span{color:#7f7560}
+#menubtn{color:var(--lapis)}
+.gl{color:#efe6d0}
+.bigbtn{background:linear-gradient(180deg,#132131,#0f1a26);border:1px solid #3a4a5e;border-radius:6px;box-shadow:inset 0 0 0 1px rgba(214,178,94,.12),0 10px 24px rgba(0,0,0,.35)}
+.bigbtn .gl{color:var(--lapis);font-size:1.8rem}
+.bigbtn b{color:var(--lapis);font-weight:400;letter-spacing:.04em}
+.bhome::before{content:"\132F9";text-align:center;font-family:var(--glyph);font-size:3rem;color:var(--lapis);opacity:.85}
+.tabs{border-top:1px solid #6e5a2c;box-shadow:none}
+.tabind{background:none;border-top:2px solid var(--lapis)}
+.tabs button{color:#7f7560}
+.tabs button[aria-pressed="true"]{color:var(--lapis)}
+.seg{border-color:#3a4a5e}
+.seg button{background:transparent}
+.seg button[aria-pressed="true"]{background:var(--lapis);color:#0f1924}
+.kbd{background:#0c151f}
+.key{background:#132131;border-color:#2a3b50}
+.key .gl{color:#efe6d0}
+#field{background:#132131;border-color:#3a4a5e}
+.cathead{background:var(--surface);border-bottom:1px solid #6e5a2c;color:var(--lapis)}
