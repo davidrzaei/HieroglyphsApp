@@ -16,7 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 INDEX, SW = ROOT / 'index.html', ROOT / 'sw.js'
 CHANGELOG, NEWS, UPDATE, BOOTUI = ROOT / 'changelog.json', ROOT / 'tools' / 'changelog.html', ROOT / 'tools' / 'update.html', ROOT / 'tools' / 'boot.html'
-SPLASH = ROOT / 'tools' / 'splash.html'
+SPLASH, VIEWPORT = ROOT / 'tools' / 'splash.html', ROOT / 'tools' / 'viewport.html'
 
 AUTO_UPDATE = """  /* Ny udgave: når appen åbnes eller kommer frem igen, ser den efter en ny sw.js. Findes der en, overtager den, og siden genindlæses én gang med de nye filer. */
   if ('serviceWorker' in navigator) {
@@ -93,7 +93,7 @@ def main():
     news = BOOTUI.read_text(encoding='utf-8') + NEWS.read_text(encoding='utf-8').replace('/*CHANGELOG*/[]', json.dumps(log, ensure_ascii=False).replace('</', '<\\/'))
     news += UPDATE.read_text(encoding='utf-8').replace("/*VERSION*/''", json.dumps(log[0]['version'] if log else ''))
 
-    out = head + styles.rstrip() + '\n\n' + webapp + '</head>\n<body class="app">\n' + SPLASH.read_text(encoding='utf-8') + body + '\n' + news + '</body>\n</html>\n'
+    out = head + styles.rstrip() + '\n\n' + webapp + '</head>\n<body class="app">\n' + VIEWPORT.read_text(encoding='utf-8') + SPLASH.read_text(encoding='utf-8') + body + '\n' + news + '</body>\n</html>\n'
     INDEX.write_text(out, encoding='utf-8')
 
     version = hashlib.sha1(out.encode('utf-8')).hexdigest()[:10]

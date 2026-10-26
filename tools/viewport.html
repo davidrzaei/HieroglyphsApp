@@ -1,0 +1,25 @@
+<!-- Appens højde: efter en opdatering genindlæser appen sig selv, og Android kan i det øjeblik give en forkert skærmhøjde, så 100dvh
+     bliver for høj, og fanerne nederst havner under skærmen, til appen genstartes. Appen sættes derfor fast på skærmen og får sin
+     højde fra den målte vindueshøjde, målt igen ved hver ændring, når appen kommer frem, og et par gange lige efter start. Siden må
+     heller ikke stå rullet (en genindlæsning kan genskabe en gammel rulleposition). -->
+<style>
+html,body.app{overflow:hidden;overscroll-behavior:none}
+body.app .phone{position:fixed;top:0;left:0;right:0;bottom:auto;height:var(--app-h,100dvh)}
+</style>
+<script>
+(function () {
+  try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
+  const root = document.documentElement;
+  function fit() {
+    const h = Math.round(window.innerHeight || 0);
+    if (h > 200) root.style.setProperty('--app-h', h + 'px');
+    if (window.scrollX || window.scrollY) window.scrollTo(0, 0);
+  }
+  fit();
+  ['resize', 'orientationchange', 'pageshow', 'load', 'focus'].forEach(ev => window.addEventListener(ev, fit));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { fit(); setTimeout(fit, 300); } });
+  window.addEventListener('scroll', () => { if (window.scrollY) window.scrollTo(0, 0); }, { passive: true });
+  [100, 400, 1000, 2500].forEach(ms => setTimeout(fit, ms));
+  window.addEventListener('app-ready', () => { fit(); setTimeout(fit, 300); });
+})();
+</script>
