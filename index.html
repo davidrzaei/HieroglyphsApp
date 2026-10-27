@@ -177,6 +177,8 @@ svg.quad text.sel{fill:var(--lapis);stroke:var(--lapis);stroke-width:45}
 .banner.err{cursor:default}
 .banner::after{content:"";position:absolute;left:50%;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;opacity:.75}
 .banner.err::after{content:none}
+.banner.tip{cursor:default;margin:8px 0}
+.banner.tip::after{content:none}
 .banner[aria-expanded="true"]{padding-bottom:20px}
 .banner[aria-expanded="true"]::after{bottom:7px;transform:translateX(-50%) rotate(-135deg)}
 .banner.folded{height:18px;padding:0;border-radius:999px;font-size:0;line-height:0;user-select:none;-webkit-user-select:none}
@@ -612,6 +614,8 @@ details.orig>summary{font-weight:500;font-size:.86rem;color:var(--muted)}
 .photowrap .photoimg{width:100%;height:100%;max-width:none;margin:0}
 .photowrap .photoimg img{width:100%;height:100%;max-height:none;pointer-events:none;-webkit-user-drag:none}
 .layer{position:absolute;inset:0}
+.hqd{display:inline-block;border:1px dashed var(--lapis);border-radius:4px;padding:1px 3px}
+.qd{position:absolute;border:1px dashed var(--lapis);border-radius:4px;opacity:.28;pointer-events:none;margin:-3px;padding:3px}
 .sg{position:absolute;border-radius:2px;outline:none;cursor:text}
 .sg::before{content:"";position:absolute;inset:0;border:1px solid var(--lapis);border-radius:2px;opacity:.32}
 .sg.unc::before{border:1.5px solid var(--warn);opacity:1}
@@ -3721,7 +3725,7 @@ function foldBanners() {
   });
 }
 function toggleBanner(b) {
-  if (b.classList.contains('err')) return;
+  if (b.classList.contains('err') || b.classList.contains('tip')) return;   /* P3 F: tippet til en usikker aflæsning står altid åbent */
   const i = Number(b.dataset.note), open = b.classList.contains('folded');
   if (open) curNotes.add(i); else curNotes.delete(i);
   b.classList.toggle('folded', !open); b.setAttribute('aria-expanded', open);
@@ -4256,6 +4260,9 @@ async function loadOCR() {
   try { const fj = await (await fetch(new URL('facing.json', base))).json(); await mod.loadFacing({ json: fj, bin: await fetchWeights(base, fj.weights_file, fj.total_bytes) }); } catch (e) { /* uden retningsmodel */ }
   /* tegnfinderen til vægfotos (P3 B): det.json + det.bin. Mangler den, bruges den klassiske opdeling alene (som før). */
   try { const dj = await (await fetch(new URL('det.json', base))).json(); await mod.loadDetector({ json: dj, bin: await fetchWeights(base, dj.weights_file, dj.total_bytes) }); } catch (e) { /* uden tegnfinder */ }
+  /* P3 F: nærbilleder - tegnfinderen finjusteret til store, blege tegn (det_close.json + det_close.bin) bruges på de mindre udgaver af
+     billedet, når første gennemløb finder få tegn. Mangler den, kører de mindre udgaver med den almindelige tegnfinder. */
+  try { const cj = await (await fetch(new URL('det_close.json', base))).json(); await mod.loadCloseDetector({ json: cj, bin: await fetchWeights(base, cj.weights_file, cj.total_bytes) }); } catch (e) { /* uden nærbilledfinder */ }
   /* tegnfølgerne fra korpusset (P3 C2): signlm.json + signlm.bin, tegn-tre-grammer fra databasens sætninger (bygget af photo/signlm.py).
      Hver linje læses samlet: blandt hvert tegns ti bud vælges det, som passer bedst med genkendelsen og nabotegnene. Mangler filen,
      beholder hvert tegn genkenderens eget første bud (som før). */
@@ -4266,11 +4273,27 @@ async function loadOCR() {
    unc = genkenderens eget usikkerhedsflag (sikkerhed under modellens tærskel, i dag 0,56). */
 function scanSigns(r, W, H) {
   const U = umap(), signs = [];
-  r.lines.forEach((L, li) => L.signs.forEach(x => {
-    const alts = []; x.alts.forEach(a => { const c = U[String(a.codepoint).toUpperCase()]; if (c && !alts.some(y => y[0] === c)) alts.push([c, a.conf]); });
-    if (alts.length) signs.push({ id: x.wbox.join(','), c: alts[0][0], orig: alts[0][0], conf: alts[0][1], unc: !!x.uncertain, status: 'intact', alts, line: li, box: [x.box[0] / W * 100, x.box[1] / H * 100, x.box[2] / W * 100, x.box[3] / H * 100] });
-  }));
+  r.lines.forEach((L, li) => {
+    /* P3 G: kvadraterne, genkenderen fandt (tegn over/ved siden af hinanden i samme felt): hvert tegn i en kvadrat med flere tegn får
+       q = { k: kvadratens nøgle, p: pladsen i kvadraten, n: antal tegn, t: opstillingen i appens format (som skrevne kvadrater) } */
+    const qa = new Map(); (L.quads || []).forEach(q => { for (let p = 0; p < q.n; p++) qa.set(q.at + p, { k: li + ':' + q.at, p, n: q.n, t: q.tree }); });
+    L.signs.forEach((x, si) => {
+      const alts = []; x.alts.forEach(a => { const c = U[String(a.codepoint).toUpperCase()]; if (c && !alts.some(y => y[0] === c)) alts.push([c, a.conf]); });
+      if (alts.length) signs.push({ id: x.wbox.join(','), c: alts[0][0], orig: alts[0][0], conf: alts[0][1], unc: !!x.uncertain, status: 'intact', alts, line: li, q: qa.get(si) || null, box: [x.box[0] / W * 100, x.box[1] / H * 100, x.box[2] / W * 100, x.box[3] / H * 100] });
+    });
+  });
   return signs;
+}
+/* P3 G: kvadraterne i en række af aflæsningens tegn (i læserækkefølgen) -> appens kvadrater { at, n, tree }, som når brugeren selv skriver
+   en kvadrat. Kun hele kvadrater tæller: alle tegnene i rækkefølge, intet slettet eller indsat imellem. */
+function scanQuads(list) {
+  const out = [];
+  for (let i = 0; i < list.length; i++) {
+    const q = list[i].q; if (!q || q.p !== 0 || i + q.n > list.length) continue;
+    let ok = true; for (let p = 1; p < q.n; p++) { const y = list[i + p].q; if (!y || y.k !== q.k || y.p !== p || list[i + p].line !== list[i].line) { ok = false; break; } }
+    if (ok) { out.push({ at: i, n: q.n, tree: q.t }); i += q.n - 1; }
+  }
+  return out;
 }
 /* Læseretningen skiftes uden ny genkendelse: genkenderen sætter de samme tegn i den anden rækkefølge (reorder). Valgte bud, sletninger
    og markeringen følger tegnet; et indsat tabt tegn bliver mellem de to tegn, det stod mellem (ellers ved det tegn, der fulgte efter). */
@@ -4281,7 +4304,7 @@ function scanReorder(sc, want) {
   const old = new Map(sc.signs.filter(x => !x.ins).map(x => [x.id, x])), del = sc.deleted || new Set(), out = [];
   /* tegnfølgerne afhænger af rækkefølgen (P3 C2): et tegn, brugeren ikke har rettet, får den nye læsning; et valgt bud bliver stående */
   fresh.forEach(x => { if (del.has(x.id)) return; const o = old.get(x.id);
-    if (o) { o.line = x.line; if (o.c === o.orig) Object.assign(o, { c: x.c, orig: x.orig, conf: x.conf, unc: x.unc, alts: x.alts }); out.push(o); } else out.push(x); });
+    if (o) { o.line = x.line; o.q = x.q; if (o.c === o.orig) Object.assign(o, { c: x.c, orig: x.orig, conf: x.conf, unc: x.unc, alts: x.alts }); out.push(o); } else out.push(x); });
   sc.signs.forEach((x, i) => {
     if (!x.ins) return;
     const pv = sc.signs.slice(0, i).reverse().find(y => !y.ins), nx = sc.signs.slice(i + 1).find(y => !y.ins);
@@ -4331,6 +4354,8 @@ async function readPhoto(meta, blob, opts = {}) {
     if (frame && !frame.whole) step([], 'Rammen rettes op: firkanten afbildes på et rektangel ' + W + ' × ' + H + ' px (homografi, bilineær sampling, ' + frame.ms + ' ms). Kun det rettede udsnit genkendes og vises.');
     step(['scan', 'scan_line'], 'Billedet og de fundne linjer gemmes med samlet sikkerhed. Genkendelsen sker på enheden (' + signs.length + ' tegn, ' + Math.round(r.stats.total_ms) + ' ms).');
     step(['scan'], sc.seg === 'detector' ? 'Tegnene er fundet af tegnfinderen (et lille netværk til vægfotos, P3 B).' : 'Tegnene er fundet af den klassiske opdeling (rene tryk og tegnede kopier).');
+    { const ss = r.segmenter_scores; if (ss && ss.levels) step(['scan'], 'Få tegn i første gennemløb: tegnfinderen kørte også på mindre udgaver af billedet (' + ss.levels.map(l => l[0] + ' px: ' + l[2] + ' tegn').join(', ') + '), så store tegn i et nærbillede kommer i den størrelse, den er trænet på. Den udgave med den bedste sikkerhed blev brugt (' + ss.det_side + ' px' + (sc.seg === 'detector' ? '' : '; den klassiske opdeling var dog bedre') + ').'); }
+    if (r.quality && r.quality.poor) step(['scan'], 'Aflæsningen er usikker (' + r.quality.signs + ' tegn, gennemsnitlig sikkerhed ' + pct(r.quality.mean_conf) + '): arket siger det og giver ét råd (' + r.quality.tip + ').');
     if (sc.auto) step(['scan'], 'Læseretningen findes af tegnenes vending (' + sc.auto.votes + ' tegn stemte, ' + (sc.auto.direction === 'rtl' ? 'højre mod venstre' : 'venstre mod højre') + ', ' + pct(sc.auto.certainty) + '). Brugerens valg af retning gælder frem for den fundne.');
     if (r.decode && r.decode.applied) step(['scan_sign_candidate'], 'Hver linje er læst samlet med tegnfølgerne fra databasens sætninger: blandt hvert tegns ti bud er det valgt, der passer bedst med genkendelsen og nabotegnene (' + r.decode.changed + ' tegn fik et andet bud end genkenderens første, ' + Math.round(r.stats.decode_ms) + ' ms). Sikkerheden er den samlede.');
     step(['scan_sign', 'scan_sign_candidate'], 'Hvert tegn har placering, sikkerhed og fem bud. Tegnene vises som et markerbart lag på fotoet. Intet læses, før brugeren markerer noget.');
@@ -4561,7 +4586,11 @@ let PG = null;
 const PH = { p: null, h: null, last: null, kanchor: null };      /* fotoets gestus: tryk/træk (p), håndtag (h), sidste tryk (dobbelttryk), tastaturets anker */
 function layerHTML(sc) {
   const foc = sc.signs.findIndex(x => x.id === sc.focus);
-  return sc.signs.map((x, i) => { const b = PG.B[i];
+  /* P3 G: kvadraterne med flere tegn står svagt bag tegnenes felter (kun til at se; de kan ikke trykkes) */
+  const qh = scanQuads(sc.signs).map(q => { const bs = []; for (let i = q.at; i < q.at + q.n; i++) bs.push(PG.B[i]);
+    const x0 = Math.min(...bs.map(b => b[0])), y0 = Math.min(...bs.map(b => b[1])), x1 = Math.max(...bs.map(b => b[0] + b[2])), y1 = Math.max(...bs.map(b => b[1] + b[3]));
+    return '<span class="qd" aria-hidden="true" style="left:' + x0.toFixed(2) + '%;top:' + y0.toFixed(2) + '%;width:' + (x1 - x0).toFixed(2) + '%;height:' + (y1 - y0).toFixed(2) + '%"></span>'; }).join('');
+  return qh + sc.signs.map((x, i) => { const b = PG.B[i];
     const k = x.ins ? ' ins' : (x.c !== x.orig ? ' pick' : (x.unc ? ' unc ' + cc(x.conf) : ''));
     return '<span class="sg' + k + '" role="option" tabindex="' + (i === (foc < 0 ? 0 : foc) ? 0 : -1) + '" data-si="' + i + '" aria-selected="false" aria-label="' + esc(signLabel(x)) + '" style="left:' + b[0].toFixed(2) + '%;top:' + b[1].toFixed(2) + '%;width:' + b[2].toFixed(2) + '%;height:' + b[3].toFixed(2) + '%"></span>'; }).join('');
 }
@@ -4723,8 +4752,15 @@ function selRead() {
 }
 async function selCopy() {
   const sc = curScan(); if (!sc || !sc.sel.size) return;
-  const sel = selSigns(sc), mdc = [], uni = [[]];
-  sel.forEach((x, k) => { if (k && sel[k - 1].line !== x.line) { mdc.push('!'); uni.push([]); } mdc.push(isLost(x.c) ? '//' : CODE(x.c)); uni[uni.length - 1].push(isLost(x.c) ? '▨' : ((SG[x.c] && SG[x.c].ch) || '')); });
+  const sel = selSigns(sc), mdc = [], uni = [[]], qs = new Map(scanQuads(sel).map(q => [q.at, q]));
+  /* P3 G: en kvadrat skrives med MdC's tegn for opstillingen (':' over hinanden, '*' ved siden af hinanden) */
+  for (let k = 0; k < sel.length; k++) {
+    const x = sel[k];
+    if (k && sel[k - 1].line !== x.line) { mdc.push('!'); uni.push([]); }
+    const q = qs.get(k);
+    if (q) { const cs = sel.slice(k, k + q.n).map(y => y.c); mdc.push(mdcOf(cs, q.tree)); cs.forEach(c => uni[uni.length - 1].push((SG[c] && SG[c].ch) || '')); k += q.n - 1; continue; }
+    mdc.push(isLost(x.c) ? '//' : CODE(x.c)); uni[uni.length - 1].push(isLost(x.c) ? '▨' : ((SG[x.c] && SG[x.c].ch) || ''));
+  }
   const text = mdc.join('-') + '\n' + uni.map(l => l.join('')).join('\n');
   state.copied = text; let ok = false;
   try { await navigator.clipboard.writeText(text); ok = true; } catch (e) {
@@ -4854,7 +4890,7 @@ const CCWORD = { ok: 'sure', warn: 'uncertain', bad: 'doubtful', guess: 'restore
 function scanCtxOf(sc, list) {
   list = list || sc.signs;
   const words = wordsOf(list), signs = list.map(x => ({ key: sc.id + ':' + x.id, ref: x.id, orig: x.orig, c: x.c, conf: x.conf, status: x.status, alts: x.alts }));
-  return { id: sc.id, title: sc.title, conf: confOf(list), signs, words, quads: [], codes: signs.map(s => s.c), open: false };
+  return { id: sc.id, title: sc.title, conf: confOf(list), signs, words, quads: scanQuads(list), codes: signs.map(s => s.c), open: false };
 }
 const scanLive = () => { const c = state.scanCtx; return c && S.mode === 'sentence' && state.view === 'search' && state.panel === 'search' && state.buf.length === c.codes.length && state.buf.every((x, i) => x === c.codes[i]) ? c : null; };
 /* Et tegn, brugeren selv har valgt et andet bud for (eller sat ind), har ikke længere aflæsningens sikkerhed. */
@@ -4968,11 +5004,27 @@ function renderPhoto() {
     '<div class="selbar" role="toolbar" aria-label="Selection" hidden><button type="button" class="on" data-act="selread">Read</button><i></i><button type="button" data-act="selcopy">Copy</button><i></i><button type="button" data-act="selsearch">Search</button><i></i><button type="button" data-act="selall">Select all</button></div>' +
     (fx ? '<div class="fixpop" role="dialog" aria-label="Correct this sign">' + fixHTML(sc, fx) + '</div>' : '') + '</div>';
   h += '<div class="selstat" id="selstat" aria-live="polite"></div>';
+  h += poorHTML(sc);
   h += dirField(sc);
   h += '<div style="display:flex;flex-wrap:wrap;gap:8px"><button type="button" class="secondary" data-act="frameadj">Adjust frame</button><button type="button" class="secondary" data-act="scansuggest"' + (edited ? '' : ' disabled') + '>Send correction</button></div>';
   h += '<p class="note">' + (edited ? '' : 'Is a sign wrong? Select it and tap it to pick another candidate, delete it or insert a lost sign. ') + (sc.frame && !sc.frame.whole ? 'The framed part was straightened and read' : 'Read') + ' on this device in ' + (sc.ms / 1000).toFixed(1) + ' s. The photo is not uploaded.</p>';
   el.innerHTML = h;
   paintSel(sc); placeFix(); renderRead();
+}
+
+/* P3 F: en usikker aflæsning (få tegn eller lav sikkerhed, hiero_ocr.readingQuality) siges ligeud, med ét praktisk råd efter den
+   sandsynlige årsag: store tegn (nærbillede) -> gå et skridt tilbage; bleg sten -> jævnere lys; små tegn -> gå tættere på; ellers stabilt. */
+const POORTIP = { step_back: 'step back a little, so that whole signs are smaller in the picture and several fit in each column.',
+                  light: 'take the photo in more even light, or with light from the side, so the signs stand out from the stone.',
+                  closer: 'move closer, or frame a smaller part, so each sign is larger in the picture.',
+                  steady: 'hold the phone straight on and steady, so the photo is sharp.',
+                  frame: 'tap Adjust frame and put the frame tightly around the inscription, leaving out stone, sky and stains.' };
+function poorHTML(sc) {
+  const Q = sc.r && sc.r.quality;
+  if (!Q || !Q.poor) return '';
+  const n = Q.signs;
+  return '<p class="banner tip" role="status"><b>' + (n < 2 ? 'Only one sign could be found in this photo.' : 'This reading is unsure: many signs were read with low confidence.') +
+    '</b> Tip: ' + esc(POORTIP[(Q.tip === 'steady' || !Q.tip) && sc.frame && sc.frame.whole ? 'frame' : Q.tip] || POORTIP.steady) + '</p>';
 }
 
 /* ---------- gemt, indstillinger, lag ---------- */
@@ -5129,6 +5181,7 @@ function renderHelp() {
       row('<span class="hframe" aria-hidden="true"></span>', 'Frame', 'A photo from the camera or the gallery first shows a frame. The app suggests it around the signs it finds; drag the four corners to the edges of the inscription, or use the whole photo. The app straightens the framed part before reading it, so a slanted or tapering surface reads as straight lines. Adjust frame in the result goes back; Undo brings the earlier reading back.'),
       row('<span class="hsel" aria-hidden="true"><i></i><i class="on"></i><i class="on"></i><i class="unc"></i></span>', 'Select to read', 'The app frames every sign it found on the photo; uncertain signs have a coloured frame. Nothing is read until you select: tap a sign for its word, double-tap for its line, or hold and drag. Drag the handles to select more or less. Read, Copy and Search use only the selection. Tap an uncertain sign in the selection to correct it.'),
       row('<span class="gl sm">' + ch('G17') + ch('D21') + '</span>', 'Read line by line', 'Each sign is first recognised on its own. Then every line is read as a whole: for each sign the app weighs its ten best guesses against the sign sequences of the texts in the database, so a sign that fits its neighbours wins. The certainty shown is the combined one.'),
+      row('<span class="hqd">' + gl((q => q.every(c => c && INK[c]) ? quadSVG(q, { t: 'v', k: [0, 1] }) : ch('N35') + ch('I9'))([GCODE('N35'), GCODE('I9')])) + '</span>', 'Squares', 'Signs are written in squares: one sign, or a few stacked or side by side in one box. In a close-up the app first works out the size of a square (about the width of a line) from the signs it sees, reads the signs at that size, then finds the lines and the squares in them. A square with more than one sign has a faint dashed frame. Copy writes it in MdC (: above, * beside), and Search keeps it as a square, as if you had typed it.'),
       row('<span class="pill dir c-ok">Right to left · sure</span>', 'Reading direction', 'Signs face the start of the line. Automatic tells the direction from the way the people, animals and other one-sided signs face, and says how sure it is. With too few such signs it reads left to right and says so. Choosing a direction puts the same signs in the other order.')]) +
     sec('Name frames', Object.keys(ENCL).map(k => row(gl('<span class="encl ' + k + '">' + ch('N5') + '</span>'), esc(ENCL[k].label), cap(ENCL[k].what) + '. The signs inside are read as one name.'))) +
     sec('Keyboard', [
@@ -5447,7 +5500,7 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasure)
 /* F: the corpus model (word pairs from the sentences, DB.LM) is built in small slices while the page is idle, so the first sentence
    search does not have to wait for it (it finishes at once if a search needs it earlier) */
 (function lmIdle() { if (DB.LM.step(1000)) return; if (window.requestIdleCallback) requestIdleCallback(lmIdle, { timeout: 400 }); else setTimeout(lmIdle, 40); })();
-window.__app = { SCANS, PHOTO: { readPhoto, framePhoto, frameRead, frameBack, frameAdjust, moveCorner, warpQuad, squareToQuad, frameSize, autoFrame, photoCanvas, FRAME, fgeo: () => FG, loadOCR, photoFix, selAll, selRange, selWord, selLine, selSigns, selIdx, scanWords, paintSel, renderPhoto, renderRead, readOf, nearest, curScan, PH, geo: () => PG }, load, restart, renderField, renderRecent, S, state, analyse, D, DB, sortKey, INK, QUADS, quadSVG, canBack, GCODE, CODE, refresh, setMode, setView, setDrawerPane, setOverlay, openLemma, openSentence, openSign, rerender };
+window.__app = { SCANS, PHOTO: { readPhoto, framePhoto, frameRead, frameBack, frameAdjust, moveCorner, warpQuad, squareToQuad, frameSize, autoFrame, photoCanvas, FRAME, fgeo: () => FG, loadOCR, photoFix, selAll, selRange, selWord, selLine, selSigns, selIdx, scanWords, paintSel, renderPhoto, renderRead, readOf, nearest, curScan, PH, geo: () => PG, scanQuads, scanCtxOf, selCopy, selSearch }, load, restart, renderField, renderRecent, S, state, analyse, D, DB, sortKey, INK, QUADS, quadSVG, canBack, GCODE, CODE, refresh, setMode, setView, setDrawerPane, setOverlay, openLemma, openSentence, openSign, rerender };
 
 }
 boot();
@@ -5537,7 +5590,7 @@ boot();
 </div>
 <script>
 (function () {
-  const LOG = [{"version": "2026-10-26.3", "title": "Choose the app's look", "items": ["Settings → Appearance: Classic, Egyptian, Modern or Dark & elegant. The three new looks have hieroglyph icons in the tabs."]}, {"version": "2026-10-26.2", "items": ["Fixed: after an update the tabs at the bottom (Dictionary, Search, Saved) could end up below the screen until the app was restarted."]}, {"version": "2026-10-26", "title": "Better reading from photos", "items": ["Before a photo is read you can set a frame around the text, like a document scanner: drag the four corners and the photo is straightened.", "The app finds the reading direction itself from the way the signs face. A third sample photo shows a line read right to left.", "A sign finder for photos of walls and reliefs, and better guesses from which signs usually follow each other in the known texts.", "Correct the reading directly on the photo: choose between five suggestions, delete a sign or insert a lost one."]}, {"version": "2026-10-21", "items": ["The app now opens with a splash screen with its icon while the dictionary is loaded, instead of showing the loading steps."]}, {"version": "2026-10-19", "title": "More English translations", "items": ["45,889 sentences now have an English translation, up from 13,141. The new ones are machine-translated from the German of the source and marked as such.", "The dictionary is downloaded again once (about 71 MB, so Wi-Fi is a good idea)."]}, {"version": "2026-10-12.3", "items": ["The app starts faster: it reads the dictionary on the phone straight away instead of waiting for the internet, and the copy is read up to ten times faster.", "The Check for updates button in Settings is no longer hidden behind the phone's navigation bar."]}, {"version": "2026-10-12.2", "items": ["A clearer start screen while the dictionary downloads and opens, with progress in percent.", "This window now waits until the app is ready."]}, {"version": "2026-10-12", "title": "Read from a photo", "items": ["The camera button now really recognises the signs in a photo, on the phone and without internet. Two example photos are included to try it.", "Better sentence reading: the app chooses words by how they are used in the known texts.", "Words show example sentences, other spellings grouped by form, and where the information comes from, with a link to the source.", "Names show the most important facts (for kings: dynasty and years). \"Did you mean\" suggests a similar sign when nothing is found.", "An updated dictionary. It is downloaded again once (about 66 MB)."]}, {"version": "2026-10-10.3", "items": ["Settings has a Check for updates button, so you can get a new version straight away.", "Fixed: the app again stores itself on the phone, so it opens without internet and updates itself."]}, {"version": "2026-10-10.2", "title": "The whole dictionary", "items": ["The app now uses the full database: 5,364 signs, 31,643 words and 47,087 sentences from 7,405 texts.", "The first start downloads the dictionary once (about 66 MB, so Wi-Fi is a good idea). After that it opens from the copy on your phone, also without internet.", "Signs from Unicode's extended list are now shown with the NewGardiner font."]}, {"version": "2026-10-10", "items": ["After an update, this window shows what has changed."]}, {"version": "2026-10-06", "title": "New version of the app", "items": ["A menu with History, Help and Settings (the button at the top right).", "Recently used signs on the keyboard.", "Hold a finger on what you have written to magnify it and move the cursor.", "Sort menus in the Dictionary and in Saved.", "The app now updates itself when a new version is published."]}];
+  const LOG = [{"version": "2026-10-27", "title": "Close-up photos", "items": ["Photos taken up close: a sign finder tuned for large, faint signs.", "Signs written together in a square are recognised as a group and kept together in the reading.", "When a reading is uncertain, the app says so plainly, with a practical tip."]}, {"version": "2026-10-26.3", "title": "Choose the app's look", "items": ["Settings → Appearance: Classic, Egyptian, Modern or Dark & elegant. The three new looks have hieroglyph icons in the tabs."]}, {"version": "2026-10-26.2", "items": ["Fixed: after an update the tabs at the bottom (Dictionary, Search, Saved) could end up below the screen until the app was restarted."]}, {"version": "2026-10-26", "title": "Better reading from photos", "items": ["Before a photo is read you can set a frame around the text, like a document scanner: drag the four corners and the photo is straightened.", "The app finds the reading direction itself from the way the signs face. A third sample photo shows a line read right to left.", "A sign finder for photos of walls and reliefs, and better guesses from which signs usually follow each other in the known texts.", "Correct the reading directly on the photo: choose between five suggestions, delete a sign or insert a lost one."]}, {"version": "2026-10-21", "items": ["The app now opens with a splash screen with its icon while the dictionary is loaded, instead of showing the loading steps."]}, {"version": "2026-10-19", "title": "More English translations", "items": ["45,889 sentences now have an English translation, up from 13,141. The new ones are machine-translated from the German of the source and marked as such.", "The dictionary is downloaded again once (about 71 MB, so Wi-Fi is a good idea)."]}, {"version": "2026-10-12.3", "items": ["The app starts faster: it reads the dictionary on the phone straight away instead of waiting for the internet, and the copy is read up to ten times faster.", "The Check for updates button in Settings is no longer hidden behind the phone's navigation bar."]}, {"version": "2026-10-12.2", "items": ["A clearer start screen while the dictionary downloads and opens, with progress in percent.", "This window now waits until the app is ready."]}, {"version": "2026-10-12", "title": "Read from a photo", "items": ["The camera button now really recognises the signs in a photo, on the phone and without internet. Two example photos are included to try it.", "Better sentence reading: the app chooses words by how they are used in the known texts.", "Words show example sentences, other spellings grouped by form, and where the information comes from, with a link to the source.", "Names show the most important facts (for kings: dynasty and years). \"Did you mean\" suggests a similar sign when nothing is found.", "An updated dictionary. It is downloaded again once (about 66 MB)."]}, {"version": "2026-10-10.3", "items": ["Settings has a Check for updates button, so you can get a new version straight away.", "Fixed: the app again stores itself on the phone, so it opens without internet and updates itself."]}, {"version": "2026-10-10.2", "title": "The whole dictionary", "items": ["The app now uses the full database: 5,364 signs, 31,643 words and 47,087 sentences from 7,405 texts.", "The first start downloads the dictionary once (about 66 MB, so Wi-Fi is a good idea). After that it opens from the copy on your phone, also without internet.", "Signs from Unicode's extended list are now shown with the NewGardiner font."]}, {"version": "2026-10-10", "items": ["After an update, this window shows what has changed."]}, {"version": "2026-10-06", "title": "New version of the app", "items": ["A menu with History, Help and Settings (the button at the top right).", "Recently used signs on the keyboard.", "Hold a finger on what you have written to magnify it and move the cursor.", "Sort menus in the Dictionary and in Saved.", "The app now updates itself when a new version is published."]}];
   const SEEN = 'hiero-news-seen', STORE = 'hiero-proto-v1';
   if (!LOG.length) return;
   const latest = LOG[0].version;
@@ -5569,7 +5622,7 @@ boot();
 </style>
 <script>
 (function () {
-  const VERSION = "2026-10-26.3";
+  const VERSION = "2026-10-27";
   const host = document.getElementById('settings');
   if (!host) return;
   const label = v => { const d = new Date(String(v).slice(0, 10) + 'T12:00:00'); return isNaN(d) ? v : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); };
