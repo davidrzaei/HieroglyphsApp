@@ -4,6 +4,7 @@
 //   await loadModel('model.json');            // or loadModel({ json: <object|string>, bin: <ArrayBuffer|Uint8Array> })
 //   await loadFacing('facing.json');          // optional (reading direction); or loadFacing({ json, bin })
 //   await loadDetector('det.json');           // optional (P3 B sign detector for walls); or loadDetector({ json, bin })
+//   await loadCloseDetector('det_close.json'); // optional (P3 F: the detector for the smaller pyramid levels = close-ups)
 //   await loadSignLM('signlm.json');          // optional (P3 C2: each line decoded with the corpus' sign sequences)
 //   const r = recognise(imageData, { direction: 'auto' });  // 'ltr' | 'rtl' | 'auto' (from the signs' facing)
 //   r = { layout: 'rows'|'columns', direction, direction_source: 'auto'|'user'|'default (no facing model)',
@@ -16,6 +17,11 @@
 //   detector lines get in-line merges (P3 C1, DET_PARAMS.det_merge: overlapping boxes, plural-stroke runs read as one sign).
 //   opts.segmenter: 'auto' (default with a detector: detector; if it finds <= 30 signs also the classical segmentation,
 //   the larger quality score wins) | 'classic' | 'detector'; without loadDetector() always 'classic'.
+//   P3 G: at the close-up scale (few signs at the 640 pass, quadrat size U at that input >= 80 px) the quadrat path reads the
+//   pyramid levels together (r.segmenter 'quad', r.segmenter_scores.quad = { U, U640, U_lines, levels, filled }); every
+//   result line has quads: [{ at, n, tree }] = its quadrats of >= 2 signs (positions in reading order; tree { t: 'v' | 'h',
+//   k: [position | subtree] } = the app's typed-input format: v = above each other, h = side by side). opts.quads: false
+//   switches the quadrat path off.
 //   const r2 = reorder(r, 'rtl');             // the same signs in the other reading direction (no new recognition)
 //
 // imageData: { width, height, data } with RGBA (browser ImageData), RGB or grey (1 byte per pixel) data.
@@ -851,8 +857,21 @@ export function voteDirection(signs, fm = FACING, vote = {}) {
 
 // lines in the order of direction `from` -> the same signs in the order of direction `to` (exactly what segment() gives
 // with `to`: the line order flips for columns, each line is re-ordered by orderLine from its boxes in segment order k)
-function orderSigns(lines, axis, ang, from, to, p = PARAMS) {
+function orderSigns(lines, axis, ang, from, to, p = PARAMS, quad = false) {
   if (from === to) return lines;
+  if (quad) {                                    // P3 G: the quadrats stay; their order and the order inside each flips
+    const out = lines.map((L) => {
+      const runs = [];
+      for (const s of L.signs) { if (!runs.length || runs[runs.length - 1][0].group !== s.group) runs.push([]); runs[runs.length - 1].push(s); }
+      const G = axis === 'rows' ? runs.slice().reverse() : runs, signs = [];
+      G.forEach((g, gi) => {
+        const boxes = g.map((s) => [s.wbox[0], s.wbox[1], s.wbox[2], s.wbox[3], 0]);
+        for (const i of xyCut(g.map((_, k) => k), boxes, to, true, p.cut_tol)) signs.push(Object.assign(g[i], { group: gi }));
+      });
+      return Object.assign({}, L, { signs });
+    });
+    return axis === 'columns' ? out.reverse() : out;
+  }
   const out = lines.map((L) => {
     const byK = L.signs.slice().sort((a, b) => a.k - b.k);
     const boxes = byK.map((s) => [s.wbox[0], s.wbox[1], s.wbox[2], s.wbox[3], 0]);
@@ -866,8 +885,10 @@ function orderSigns(lines, axis, ang, from, to, p = PARAMS) {
 // in r.direction_auto. source: 'user' (an override) or 'auto'.
 export function reorder(r, direction, source = 'user') {
   const to = direction === 'rtl' ? 'rtl' : 'ltr';
+  const pp = Object.assign({}, PARAMS, r.params || {});
   const lines = orderSigns(r.lines.map((L) => ({ signs: L.signs.map((s) => Object.assign({}, s)) })), r.layout, r.angle || 0,
-                           r.direction, to, Object.assign({}, PARAMS, r.params || {}));
+                           r.direction, to, pp, r.segmenter === 'quad');
+  for (const L of lines) L.quads = lineQuads(L.signs, to, pp.cut_tol);
   const out = Object.assign({}, r, { lines, direction: to, direction_source: source });
   if (source === 'auto' && r.direction_auto) out.direction_certainty = to === 'rtl' ? r.direction_auto.p_rtl : 1 - r.direction_auto.p_rtl;
   if (r.decode && r.decode.applied && to !== r.direction && SIGNLM) {      // P3 C2: the decoding depends on the order
@@ -887,7 +908,22 @@ export function reorder(r, direction, source = 'user') {
 // the classical segmentation runs too and the larger quality score sum(top-1 probability - sel_floor) wins.
 let DETECTOR = null;
 export const DET_PARAMS = Object.freeze({ det_side: 640, det_thr: 0.40, det_nms: 0.6, det_min_px: 3, det_floor: 0.2, det_gate: 30,
-                                         det_merge: 6, pl_wide: 1.2, pl_min: 0.4, pl_gain: -9.0, pl_count: 1 });   // P3 C1: det_merge, pl_*
+                                         det_merge: 6, pl_wide: 1.2, pl_min: 0.4, pl_gain: -9.0, pl_count: 1,   // P3 C1: det_merge, pl_*
+                                         det_levels: [640, 320, 224, 160], det_pyr_gate: 30, det_lvl_floor: 0.3, det_cls_floor: 0.5, det_lvl_thr: 0.3 });  // P3 F
+// P3 F (close-ups): det_levels = the detector pyramid (det_side values; the first pass is det_side), run when the first
+// pass found <= det_pyr_gate signs: the detector was trained on signs of 12-140 px at its input, so large signs (a
+// close-up) are only found whole at a smaller det_side. The smaller levels use the close-up detector (loadCloseDetector:
+// the same net fine-tuned on close-ups, det_close.json/.bin; without it the main one) with the threshold det_lvl_thr.
+// The level with the largest sum(conf - det_lvl_floor) is kept (the first pass wins ties); when the pyramid ran, the
+// classical result is compared with it on sum(conf - det_cls_floor) instead of the usual selection score.
+let DETECTOR_CLOSE = null;
+export async function loadCloseDetector(src) {
+  const { meta, bin } = await readModelFiles(src);
+  const { T, bytes } = parseTensors(meta, bin);
+  const ops = meta.ops.map((o) => Object.assign({}, o, o.op === 'conv' ? { W: T[o.name + '.weight'], B: T[o.name + '.bias'] } : {}));
+  DETECTOR_CLOSE = { meta, ops, bytes, decode: meta.decode || {} };
+  return DETECTOR_CLOSE;
+}
 // (= detect.DET_DEFAULTS, chosen on the dev sets only)
 
 export async function loadDetector(src) {
@@ -1218,8 +1254,355 @@ export function segmentDet(img, opts = {}) {
   const res = orderDetBoxes(kept, f, direction, opts.layout || 'auto', p, score, top);
   let sc = 0.0;
   if (score) for (const L of res.lines) for (const s of L) sc += s.conf - p.sel_floor;
-  res.selection_score = sc; res.n_det = boxes.length; res.work = g0; res.det_ms = detMs;
+  res.selection_score = sc; res.n_det = boxes.length; res.work = g0; res.det_ms = detMs; res.det_side = p.det_side;
   return res;
+}
+
+const levelScore = (r, floor) => { let s = 0.0; for (const L of r.lines) for (const x of L) s += x.conf - floor; return s; };   // P3 F
+
+// ------------------------------------------------------------------ P3 G: read the quadrats first, then the signs inside them
+// (quads.py is the Python reference: same operations in the same order). At the close-up scale the boxes of all pyramid
+// levels near the comfortable size are pooled: U (the quadrat size = line thickness) comes from the best level's confident
+// signs, the signs are chosen ACROSS levels (most confident first, no two overlapping), the layout is the hypothesis with the
+// fewest lines whose signs all cross one position (stabbing), lines are ordered, each line splits into quadrats (signs
+// overlapping along the line, + short neighbours that fit one quadrat), inside a quadrat the reading order of segment()
+// (top to bottom, then along the direction). Empty places inside a line long enough for a sign are read too (stage 3).
+export const QUAD_PARAMS = Object.freeze({ q_on: 1, q_T: 56.0, q_R: 2.0, q_ufloor: 0.5, q_uq: 0.75, q_theta: 0.4, q_ov: 0.3, q_shrink: 0.15,
+  q_lmerge: 0.5, q_qmax: 1.0, q_qgap: 0.08, q_qshort: 0.5, q_swap: 1, q_ucl: 100.0, q_lratio: 0.8,
+  q_slot: 1, q_fu: 24.0, q_ek: 2, q_smin: 0.35, q_send: 1.2, q_sedge: 0.02, q_sprof: 0.3, q_stight: 0.15, q_ssplit: 1.3,
+  q_fth: 0.5, q_fov: 0.15 });
+const qArea = (b) => Math.max(0, b[2] - b[0]) * Math.max(0, b[3] - b[1]);
+const qConflict = (a, b, ov) => inter(a, b) >= ov * Math.min(qArea(a), qArea(b));
+
+// levels: [[side, cands]] (cands {box: [x0,y0,x1,y1] work px, conf}) -> [U, side of the best level]
+export function estimateU(levels, p = QUAD_PARAMS) {
+  let best = null, bs = null;
+  for (const lv of levels) {
+    let s = 0; for (const c of lv[1]) s += c.conf - 0.3;
+    if (best === null || s > bs) { best = lv; bs = s; }
+  }
+  const [side, cands] = best;
+  let sel = cands.filter((c) => c.conf >= p.q_ufloor);
+  if (!sel.length) sel = cands;
+  if (!sel.length) return [0.0, side];
+  const v = sel.map((c) => Math.max(c.box[2] - c.box[0], c.box[3] - c.box[1])).sort((a, b) => a - b);
+  return [v[Math.floor(p.q_uq * (v.length - 1))], side];
+}
+
+export function selectCands(pool, p = QUAD_PARAMS) {
+  const th = p.q_theta, ov = p.q_ov;
+  const order = pool.map((_, i) => i).sort((i, j) => (pool[j].conf - pool[i].conf) || (qArea(pool[j].box) - qArea(pool[i].box)) || (i - j));
+  let sel = [];
+  for (const i of order) {
+    if (pool[i].conf < th) continue;
+    if (sel.every((j) => !qConflict(pool[i].box, pool[j].box, ov))) sel.push(i);
+  }
+  if (p.q_swap) {
+    const snap = sel.slice().sort((i, j) => (pool[i].conf - pool[j].conf) || (i - j));
+    for (const i of snap) {
+      if (!sel.includes(i)) continue;
+      const others = sel.filter((j) => j !== i);
+      const S = order.filter((k) => !sel.includes(k) && pool[k].conf >= th && qConflict(pool[k].box, pool[i].box, ov) &&
+                                    others.every((j) => !qConflict(pool[k].box, pool[j].box, ov)));
+      const sub = [];
+      for (const k of S) if (sub.every((m) => !qConflict(pool[k].box, pool[m].box, ov))) sub.push(k);
+      let s = 0; for (const k of sub) s += pool[k].conf - th;
+      if (sub.length >= 2 && s > pool[i].conf - th) sel = others.concat(sub);
+    }
+  }
+  return sel.sort((a, b) => a - b);
+}
+
+function stabGroups(iv) {
+  const order = iv.map((_, i) => i).sort((i, j) => (iv[i][1] - iv[j][1]) || (iv[i][0] - iv[j][0]) || (i - j));
+  const pts = [];
+  for (const i of order) if (!pts.length || iv[i][0] > pts[pts.length - 1]) pts.push(iv[i][1]);
+  const groups = pts.map(() => []);
+  for (let i = 0; i < iv.length; i++) {
+    const [a, b] = iv[i], c = (a + b) / 2.0;
+    let best = 0, bd = null;
+    pts.forEach((t, k) => { if (a <= t && t <= b) { const d = Math.abs(t - c); if (bd === null || d < bd) { best = k; bd = d; } } });
+    groups[best].push(i);
+  }
+  return groups.filter((g) => g.length);
+}
+
+function lineExtent(G, B, axis, ang) {
+  let a0 = Infinity, a1 = -Infinity, u0 = Infinity, u1 = -Infinity;
+  for (const i of G) { const r = rotCoords(B[i], axis, ang); a0 = Math.min(a0, r[2]); a1 = Math.max(a1, r[3]); u0 = Math.min(u0, r[0]); u1 = Math.max(u1, r[1]); }
+  return [a0, a1, u0, u1];
+}
+
+function mergeLines(groups, B, axis, ang, p) {
+  const gs = groups.map((G, i) => { const e = lineExtent(G, B, axis, ang); return [e[0] + e[1], i, G]; })
+    .sort((a, b) => (a[0] - b[0]) || (a[1] - b[1])).map((x) => x[2]);
+  const out = [];
+  for (const G of gs) {
+    if (out.length) {
+      const [a0, a1] = lineExtent(out[out.length - 1], B, axis, ang), [b0, b1] = lineExtent(G, B, axis, ang);
+      const ov = Math.min(a1, b1) - Math.max(a0, b0);
+      if (ov >= p.q_lmerge * Math.min(a1 - a0, b1 - b0)) { out[out.length - 1] = out[out.length - 1].concat(G); continue; }
+    }
+    out.push(G.slice());
+  }
+  return out;
+}
+
+function quadratsOfLine(L, B, axis, ang, U, p, sp) {
+  const Ls = L.slice().sort((a, b) => a - b), rc = new Map(Ls.map((i) => [i, rotCoords(B[i], axis, ang)]));
+  const parent = new Map(Ls.map((i) => [i, i]));
+  const find = (x) => { while (parent.get(x) !== x) { parent.set(x, parent.get(parent.get(x))); x = parent.get(x); } return x; };
+  for (let ii = 0; ii < Ls.length; ii++) for (let jj = ii + 1; jj < Ls.length; jj++) {
+    const i = Ls[ii], j = Ls[jj], a = rc.get(i), b = rc.get(j);
+    const ov = Math.min(a[1], b[1]) - Math.max(a[0], b[0]);
+    if (ov >= sp.group_overlap * Math.min(a[1] - a[0], b[1] - b[0])) {
+      const x = find(i), y = find(j);
+      if (x !== y) parent.set(Math.max(x, y), Math.min(x, y));
+    }
+  }
+  const gm = new Map();
+  for (const i of Ls) { const r = find(i); if (!gm.has(r)) gm.set(r, []); gm.get(r).push(i); }
+  const start = (g) => { let m = Infinity; for (const i of g) m = Math.min(m, rc.get(i)[0]); return m; };
+  const G = [...gm.values()].map((g) => [start(g), Math.min(...g), g]).sort((a, b) => (a[0] - b[0]) || (a[1] - b[1])).map((x) => x[2]);
+  const ext = (g) => { let a = Infinity, b = -Infinity; for (const i of g) { a = Math.min(a, rc.get(i)[0]); b = Math.max(b, rc.get(i)[1]); } return [a, b]; };
+  const out = [];
+  for (const g of G) {
+    if (out.length && U > 0) {
+      const [a0, a1] = ext(out[out.length - 1]), [b0, b1] = ext(g);
+      if (a1 - a0 <= p.q_qshort * U && b1 - b0 <= p.q_qshort * U && Math.max(a1, b1) - Math.min(a0, b0) <= p.q_qmax * U && b0 - a1 <= p.q_qgap * U) {
+        out[out.length - 1] = out[out.length - 1].concat(g); continue;
+      }
+    }
+    out.push(g.slice());
+  }
+  return out;
+}
+
+// = quads.xy_struct: the cut structure of xyCut (leaf = box index, node = ['v'|'h', children])
+function xyStruct(idx, boxes, direction, preferY, tol, depth = 0) {
+  if (idx.length === 1) return idx[0];
+  if (depth > 8) return ['v', idx.slice()];
+  for (const useY of (preferY ? [true, false] : [false, true])) {
+    const lo = useY ? (b) => b[1] : (b) => b[0];
+    const hi = useY ? (b) => b[3] : (b) => b[2];
+    const items = idx.slice().sort((i, j) => (lo(boxes[i]) + hi(boxes[i])) / 2.0 - (lo(boxes[j]) + hi(boxes[j])) / 2.0);
+    let parts = [], cur = [], end = null;
+    for (const i of items) {
+      const b = boxes[i], ext = hi(b) - lo(b), a0 = lo(b) + tol * ext;
+      if (cur.length && a0 >= end) { parts.push(cur); cur = []; end = null; }
+      cur.push(i);
+      const e = hi(b) - tol * ext;
+      end = end === null ? e : Math.max(end, e);
+    }
+    parts.push(cur);
+    if (parts.length > 1) {
+      if (!useY && direction === 'rtl') parts = parts.reverse();
+      const kind = useY ? 'v' : 'h', ch = [];
+      for (const q of parts) {
+        const t = xyStruct(q, boxes, direction, !useY, tol, depth + 1);
+        if (typeof t !== 'number' && t[0] === kind) ch.push(...t[1]); else ch.push(t);
+      }
+      return [kind, ch];
+    }
+  }
+  const sgn = direction === 'rtl' ? -1 : 1;
+  return ['v', idx.slice().sort((i, j) => cmpTuple([(boxes[i][1] + boxes[i][3]) / 2.0, sgn * (boxes[i][0] + boxes[i][2]) / 2.0],
+                                                   [(boxes[j][1] + boxes[j][3]) / 2.0, sgn * (boxes[j][0] + boxes[j][2]) / 2.0]))];
+}
+const treePositions = (t, pos) => typeof t === 'number' ? pos.get(t) : { t: t[0], k: t[1].map((c) => treePositions(c, pos)) };
+
+// the quadrats of a recognised line: runs of signs with the same group (>= 2 signs) -> [{ at, n, tree }] with the app's
+// tree format ({ t: 'v' | 'h', k: [position | subtree] }, positions in reading order)  (= quads.line_quads)
+export function lineQuads(signs, direction, tol = PARAMS.cut_tol) {
+  const out = [];
+  let i = 0;
+  while (i < signs.length) {
+    let j = i + 1;
+    while (j < signs.length && signs[j].group === signs[i].group) j++;
+    if (j - i >= 2) {
+      const boxes = signs.slice(i, j).map((s) => s.wbox), idx = boxes.map((_, k) => k);
+      const t = xyStruct(idx, boxes, direction, true, tol);
+      out.push({ at: i, n: j - i, tree: treePositions(t, new Map(idx.map((k) => [k, k]))) });
+    }
+    i = j;
+  }
+  return out;
+}
+
+function assembleQuads(cands, direction, layout, U, p, sp, f = 1) {
+  const B = cands.map((c) => [c.box[0], c.box[1], c.box[2], c.box[3], qArea(c.box)]);
+  const res = { layout: 'rows', angle: 0.0, lines: [], U, factor: f, scale: 0.0, polarity: 'detector' };
+  if (!B.length) return res;
+  const sides = B.map((b) => Math.max(b[2] - b[0], b[3] - b[1])).sort((a, b) => a - b), n = sides.length;
+  const scale = n % 2 ? sides[n >> 1] : (sides[n / 2 - 1] + sides[n / 2]) / 2.0;
+  res.scale = scale;
+  const hyp = {};
+  for (const ax of ['rows', 'columns']) {
+    const ang = skewAngle(B, ax, scale, sp);
+    const iv = B.map((b) => { const r = rotCoords(b, ax, ang), d = (r[3] - r[2]) * p.q_shrink; return [r[2] + d, r[3] - d]; });
+    const G = mergeLines(stabGroups(iv), B, ax, ang, p);
+    hyp[ax] = [G.length, elongation(B, G, ax, ang), ang, G];
+  }
+  let axis;
+  if (layout === 'rows' || layout === 'columns') axis = layout;
+  else {
+    const r = hyp.rows, c = hyp.columns;
+    if (Math.min(r[0], c[0]) >= p.q_lratio * Math.max(r[0], c[0])) axis = r[1] >= c[1] ? 'rows' : 'columns';   // similar counts: elongation
+    else axis = r[0] < c[0] ? 'rows' : 'columns';                                                                // clearly fewer lines
+  }
+  const ang = hyp[axis][2];
+  let G = hyp[axis][3];
+  res.layout = axis; res.angle = ang; res.hyp = { rows: hyp.rows.slice(0, 2), columns: hyp.columns.slice(0, 2) };
+  const th = G.map((L) => { const e = lineExtent(L, B, axis, ang); return e[1] - e[0]; }).sort((a, b) => a - b);
+  res.U_lines = th[(th.length - 1) >> 1];
+  const Uq = U > 0 ? U : res.U_lines;
+  G = G.map((L, i) => { const e = lineExtent(L, B, axis, ang); return [e[0] + e[1], i, L]; }).sort((a, b) => (a[0] - b[0]) || (a[1] - b[1])).map((x) => x[2]);
+  if (axis === 'columns' && direction === 'rtl') G = G.reverse();
+  for (const L of G) {
+    let Q = quadratsOfLine(L, B, axis, ang, Uq, p, sp);
+    if (axis === 'rows' && direction === 'rtl') Q = Q.reverse();
+    const line = [];
+    Q.forEach((g, gi) => {
+      for (const i of xyCut(g, B, direction, true, sp.cut_tol)) {
+        const b = B[i];
+        line.push(Object.assign({}, cands[i], { box: [b[0] * f, b[1] * f, (b[2] - b[0]) * f, (b[3] - b[1]) * f], wbox: b.slice(0, 4), group: gi }));
+      }
+    });
+    res.lines.push(line);
+  }
+  return res;
+}
+
+// stage 3 helpers (= quads.downscale_by, edge_energy, box_smooth, tight)
+function downscaleBy(g, f) {
+  const { w: W, h: H, d } = g;
+  if (f <= 1) return { w: W, h: H, d: d.slice() };
+  const h = Math.floor(H / f), w = Math.floor(W / f), out = new Uint8Array(w * h), ff = f * f, half = Math.floor(ff / 2);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    let s = 0;
+    for (let dy = 0; dy < f; dy++) { const row = (y * f + dy) * W + x * f; for (let dx = 0; dx < f; dx++) s += d[row + dx]; }
+    out[y * w + x] = Math.floor((s + half) / ff);
+  }
+  return { w, h, d: out };
+}
+function lowerMedian(v) {                       // lower median of non-negative ints (sorted[(n-1)//2])
+  const c = new Map(); let mx = 0;
+  for (const x of v) { c.set(x, (c.get(x) || 0) + 1); if (x > mx) mx = x; }
+  const r = Math.floor((v.length - 1) / 2) + 1;
+  let acc = 0;
+  for (let x = 0; x <= mx; x++) { acc += c.get(x) || 0; if (acc >= r) return x; }
+  return mx;
+}
+function edgeEnergy(a, k) {
+  const b = box3(a), { w: W, h: H } = b, gx = new Int32Array(W * H), gy = new Int32Array(W * H);
+  for (let y = 0; y < H; y++) for (let x = 1; x < W - 1; x++) gx[y * W + x] = Math.abs(b.d[y * W + x + 1] - b.d[y * W + x - 1]);
+  for (let y = 1; y < H - 1; y++) for (let x = 0; x < W; x++) gy[y * W + x] = Math.abs(b.d[(y + 1) * W + x] - b.d[(y - 1) * W + x]);
+  const mx = k * lowerMedian(gx), my = k * lowerMedian(gy), e = new Float64Array(W * H);
+  for (let i = 0; i < W * H; i++) e[i] = Math.max(0, gx[i] - mx) + Math.max(0, gy[i] - my);
+  return { w: W, h: H, e };
+}
+function boxSmooth(v, r) {
+  const n = v.length, c = new Float64Array(n + 1), out = new Float64Array(n);
+  for (let i = 0; i < n; i++) c[i + 1] = c[i] + v[i];
+  for (let i = 0; i < n; i++) { const lo = Math.max(0, i - r), hi = Math.min(n, i + r + 1); out[i] = (c[hi] - c[lo]) / (hi - lo); }
+  return out;
+}
+function tightRange(prof, frac) {
+  if (!prof.length) return null;
+  const s = boxSmooth(prof, 1);
+  let mx = -Infinity; for (const x of s) if (x > mx) mx = x;
+  if (mx <= 0) return null;
+  let a = -1, b = -1;
+  for (let i = 0; i < s.length; i++) if (s[i] >= frac * mx) { if (a < 0) a = i; b = i; }
+  return [a, b + 1];
+}
+
+// stage 3: empty places along a line (= quads.fill_lines). top(box) -> [class, prob]
+function fillLines(g0, res, U, p, top) {
+  const fa = Math.max(1, Math.floor(U / p.q_fu));
+  const E = edgeEnergy(downscaleBy(g0, fa), p.q_ek), Wa = E.w, Ha = E.h, H = g0.h, W = g0.w;
+  const axis = res.layout, ang = res.angle;
+  const chosen = res.lines.flatMap((L) => L.map((s) => s.wbox));
+  const out = [];
+  const colSum = (X0, X1, Y0, Y1) => { const v = new Float64Array(X1 - X0); for (let y = Y0; y < Y1; y++) for (let x = X0; x < X1; x++) v[x - X0] += E.e[y * Wa + x]; return v; };
+  const rowSum = (X0, X1, Y0, Y1) => { const v = new Float64Array(Y1 - Y0); for (let y = Y0; y < Y1; y++) { let s = 0; for (let x = X0; x < X1; x++) s += E.e[y * Wa + x]; v[y - Y0] = s; } return v; };
+  for (const L of res.lines) {
+    if (!L.length) continue;
+    const rc = L.map((s) => rotCoords([s.wbox[0], s.wbox[1], s.wbox[2], s.wbox[3], 0], axis, ang));
+    let a0 = Infinity, a1 = -Infinity; for (const r of rc) { a0 = Math.min(a0, r[2]); a1 = Math.max(a1, r[3]); }
+    const iv = rc.map((r) => [r[0], r[1]]).sort(cmpTuple);
+    const gaps = [[iv[0][0] - p.q_send * U, iv[0][0]]];
+    let end = iv[0][1];
+    for (const [s0, s1] of iv.slice(1)) { if (s0 > end) gaps.push([end, s0]); end = Math.max(end, s1); }
+    gaps.push([end, end + p.q_send * U]);
+    for (const [g0_, g1_] of gaps) {
+      if (g1_ - g0_ < p.q_smin * U) continue;
+      let x0, x1, y0, y1;
+      if (axis === 'rows') { x0 = g0_; x1 = g1_; y0 = a0; y1 = a1; } else { x0 = a0; x1 = a1; y0 = g0_; y1 = g1_; }
+      const m = p.q_sedge * Math.max(H, W);
+      if (x0 < m || y0 < m || x1 > W - m || y1 > H - m) {
+        if (g0_ < 0 || g1_ > (axis === 'rows' ? W : H)) continue;
+        x0 = Math.max(0, x0); y0 = Math.max(0, y0); x1 = Math.min(W, x1); y1 = Math.min(H, y1);
+      }
+      const X0 = Math.floor(x0 / fa), X1 = Math.min(Wa, Math.ceil(x1 / fa)), Y0 = Math.floor(y0 / fa), Y1 = Math.min(Ha, Math.ceil(y1 / fa));
+      if (X1 - X0 < 3 || Y1 - Y0 < 3) continue;
+      const tx = tightRange(colSum(X0, X1, Y0, Y1), p.q_sprof), ty = tightRange(rowSum(X0, X1, Y0, Y1), p.q_sprof);
+      if (!tx || !ty) continue;
+      const bx = [(X0 + tx[0]) * fa, (Y0 + ty[0]) * fa, Math.min(W, (X0 + tx[1]) * fa), Math.min(H, (Y0 + ty[1]) * fa)];
+      if (Math.max(bx[2] - bx[0], bx[3] - bx[1]) < p.q_stight * U) continue;
+      const opts = [[bx]];
+      const along = axis === 'rows' ? bx[2] - bx[0] : bx[3] - bx[1];
+      if (along > p.q_ssplit * U) {
+        const sx0 = Math.floor(bx[0] / fa), sx1 = Math.ceil(bx[2] / fa), sy0 = Math.floor(bx[1] / fa), sy1 = Math.ceil(bx[3] / fa);
+        const prof = axis === 'rows' ? colSum(sx0, Math.min(Wa, sx1), sy0, Math.min(Ha, sy1)) : rowSum(sx0, Math.min(Wa, sx1), sy0, Math.min(Ha, sy1));
+        const nn = prof.length;
+        if (nn >= 6) {
+          let k = Math.floor(nn / 4);
+          for (let t = Math.floor(nn / 4); t < nn - Math.floor(nn / 4); t++) if (prof[t] < prof[k]) k = t;
+          const cut = (axis === 'rows' ? bx[0] : bx[1]) + k * fa;
+          opts.push(axis === 'rows' ? [[bx[0], bx[1], cut, bx[3]], [cut, bx[1], bx[2], bx[3]]] : [[bx[0], bx[1], bx[2], cut], [bx[0], cut, bx[2], bx[3]]]);
+        }
+      }
+      let best = null, bs = 0.0;
+      for (const o of opts) {
+        if (o.some((b) => chosen.some((c) => qConflict(b, c, p.q_fov)))) continue;
+        const rd = o.map((b) => top(b));
+        if (rd.every((r) => r[1] >= p.q_fth)) {
+          let sc = 0; for (const r of rd) sc += r[1] - p.q_fth;
+          if (best === null || sc > bs) { best = o.map((b, t) => [b, rd[t][1]]); bs = sc; }
+        }
+      }
+      if (best) for (const [b, pr] of best) out.push({ box: b, conf: pr, level: -2 });
+    }
+  }
+  return out;
+}
+
+// the quadrat path on the pyramid runs ([[side, segmentDet result]], the first = the 640 pass); null = not the close-up
+// scale (U at the 640 input < q_ucl): the caller keeps the F rule.
+function quadPath(runs, direction, layout, p, top) {
+  const b = runs[0][1], g0 = b.work, M = Math.max(g0.w, g0.h);
+  const levels = runs.map(([s, r]) => [s, r.lines.flatMap((L) => L.map((x) => ({ box: x.wbox.slice(0, 4), conf: x.conf })))]);
+  const [U, bside] = estimateU(levels, p);
+  const U640 = U * Math.min(1.0, 640.0 / M);
+  if (U640 < p.q_ucl) return { seg: null, U, U640 };
+  const pool = [];
+  for (const [s, cs] of levels) {
+    const Ui = U * Math.min(1.0, s / M);
+    if (Math.abs(Math.log(Math.max(Ui, 1e-6) / p.q_T)) <= Math.log(p.q_R) || s === bside) for (const c of cs) pool.push(Object.assign({}, c, { level: s }));
+  }
+  const chosen = selectCands(pool, p).map((i) => pool[i]);
+  let nfill = 0;
+  let res = assembleQuads(chosen, direction, layout, U, p, p, b.factor);
+  if (p.q_slot && top && U > 0) {
+    const add = fillLines(g0, res, U, p, top);
+    if (add.length) { chosen.push(...add); nfill = add.length; res = assembleQuads(chosen, direction, layout, U, p, p, b.factor); }
+  }
+  res.work = g0; res.segmenter = 'quad';
+  let sc = 0.0; for (const L of res.lines) for (const s of L) sc += s.conf - p.sel_floor;
+  res.selection_score = sc;
+  res.quad = { U: U * b.factor, U640, U_lines: (res.U_lines || 0) * b.factor, levels: [...new Set(pool.map((c) => c.level))].sort((x, y) => x - y), filled: nfill };
+  return { seg: res, U, U640 };
 }
 
 // ------------------------------------------------------------------ dictionary decoding of each line (P3 C2)
@@ -1468,6 +1851,7 @@ export function recognise(imageData, opts = {}) {
   };
   // P3 B: classical segmentation, the detector, or both ('auto', default with a detector): the larger quality score wins
   const det = opts.detector === undefined ? DETECTOR : opts.detector;
+  const closeDet = opts.detectorClose === undefined ? DETECTOR_CLOSE : opts.detectorClose;      // P3 F
   const mode = det ? (opts.segmenter || 'auto') : 'classic';
   const grey = imageData.d ? imageData : toGrey(imageData);
   const sopts = { direction, layout: opts.layout, params: opts.params, classify: (crop) => cls(crop).prob[0], detector: det,
@@ -1476,13 +1860,44 @@ export function recognise(imageData, opts = {}) {
   if (mode === 'classic') seg = segment(grey, sopts);
   else if (mode === 'detector') seg = segmentDet(grey, sopts);
   else {
-    const b = segmentDet(grey, sopts), gp = Object.assign({}, DET_PARAMS, opts.params || {});
-    if (b.lines.reduce((n, L) => n + L.length, 0) > gp.det_gate) { seg = b; scores = { classic: null, detector: b.selection_score, gate: true }; }
+    let b = segmentDet(grey, sopts);
+    const gp = Object.assign({}, DET_PARAMS, opts.params || {}), nb = b.lines.reduce((n, L) => n + L.length, 0);
+    if (nb > gp.det_gate) { seg = b; scores = { classic: null, detector: b.selection_score, gate: true }; }
     else {
-      const a = segment(grey, sopts);
-      scores = { classic: a.selection_score, detector: b.selection_score, gate: false };
-      seg = b.selection_score > a.selection_score ? b : a;
-      seg.det_ms = b.det_ms;
+      let levels = null, detMs = b.det_ms, quad = null;
+      const runs = [[gp.det_side, b]];
+      if (nb <= gp.det_pyr_gate && gp.det_levels.length > 1) {          // P3 F: the detector pyramid (close-ups)
+        let best = b, bs = levelScore(b, gp.det_lvl_floor);
+        levels = [[gp.det_side, Math.round(bs * 1e4) / 1e4, nb]];
+        for (const side of gp.det_levels) {
+          if (side === gp.det_side) continue;
+          const r = segmentDet(grey, Object.assign({}, sopts, { detector: closeDet || det,
+            params: Object.assign({}, opts.params || {}, { det_side: side, det_thr: gp.det_lvl_thr }) }));
+          const rs = levelScore(r, gp.det_lvl_floor);
+          detMs += r.det_ms;
+          runs.push([side, r]);
+          levels.push([side, Math.round(rs * 1e4) / 1e4, r.lines.reduce((n, L) => n + L.length, 0)]);
+          if (rs > bs) { best = r; bs = rs; }
+        }
+        b = best;
+        // P3 G: at the close-up scale the quadrat path reads the pooled levels (U, signs across levels, layout, quadrats)
+        const qp = Object.assign({}, PARAMS, DET_PARAMS, QUAD_PARAMS, opts.params || {});
+        if (opts.quads !== false && qp.q_on !== 0) {
+          const work = runs[0][1].work;
+          quad = quadPath(runs, direction, opts.layout || 'auto', qp, (bx) => sopts.classifyTop(prepCrop(work, bx, qp.crop_pad)));
+        }
+      }
+      if (quad && quad.seg) {
+        seg = quad.seg;
+        scores = { classic: null, detector: b.selection_score, gate: false, levels, det_side: null, levels_detector: closeDet ? 'close' : 'main', quad: seg.quad };
+      } else {
+        const a = segment(grey, sopts);
+        const sb = levels ? levelScore(b, gp.det_cls_floor) : b.selection_score, sa = levels ? levelScore(a, gp.det_cls_floor) : a.selection_score;
+        scores = { classic: a.selection_score, detector: b.selection_score, gate: false, levels, det_side: b.det_side, levels_detector: levels ? (closeDet ? 'close' : 'main') : null };
+        if (quad) scores.quad = { path: 'normal', U: quad.U * runs[0][1].factor, U640: quad.U640 };
+        seg = sb > sa ? b : a;
+      }
+      seg.det_ms = detMs;
     }
   }
   const C = model.classes;
@@ -1499,12 +1914,12 @@ export function recognise(imageData, opts = {}) {
   }));
   const res = { layout: seg.layout, direction, direction_source: dirIn === 'auto' ? 'default (no facing model)' : 'user',
                 polarity: seg.polarity, scale: seg.scale * seg.factor, angle: seg.angle || 0, params: opts.params || null, lines,
-                segmenter: seg.polarity === 'detector' ? 'detector' : 'classic', segmenter_mode: mode, segmenter_scores: scores,
+                segmenter: seg.segmenter === 'quad' ? 'quad' : (seg.polarity === 'detector' ? 'detector' : 'classic'), segmenter_mode: mode, segmenter_scores: scores,
                 stats: { cnn_crops: nCnn, cnn_ms: msCnn, det_ms: seg.det_ms != null ? seg.det_ms : null } };
   if (auto) {
     const tf = now();
     const v = voteDirection(lines.flatMap((L) => L.signs), fm, opts.vote);
-    if (v.direction !== direction) res.lines = orderSigns(lines, seg.layout, res.angle, direction, v.direction, p);
+    if (v.direction !== direction) res.lines = orderSigns(lines, seg.layout, res.angle, direction, v.direction, p, res.segmenter === 'quad');
     Object.assign(res, { direction: v.direction, direction_source: 'auto', direction_certainty: v.certainty, direction_votes: v.votes,
                          direction_flag: v.flagged ? 'too little evidence' : null, direction_auto: v });
     res.stats.facing_ms = now() - tf;
@@ -1514,6 +1929,28 @@ export function recognise(imageData, opts = {}) {
     res.decode = { applied: true, params: lmP, changed: d.changed };
     res.stats.decode_ms = now() - tl;
   } else res.decode = { applied: false };
+  for (const L of res.lines) L.quads = lineQuads(L.signs, res.direction, p.cut_tol);     // P3 G: the quadrats of each line
+  res.quality = readingQuality(res, grey);
   res.stats.total_ms = now() - t0;
   return res;
+}
+
+// P3 F: is the reading poor (few signs or low confidence)? Then one practical tip, by the most likely cause:
+// 'step_back' (the signs are large in the picture: a close-up), 'light' (pale, low-contrast photo), 'closer' (tiny signs),
+// otherwise 'steady'. Sizes relative to the photo; contrast = 99 % - 1 % grey level.
+// min_signs / min_conf chosen on the DEV close-ups + pages_dev (JS outputs, NOTES_P3 F): flagged readings have SER > 50 % in
+// 22 of 23 dev images; the tip thresholds are set a priori (large = median sign >= 15 % of the shorter side, pale = grey
+// range < 60 levels, small = median sign < 2 % of the longer side).
+export const QUALITY = Object.freeze({ min_signs: 2, min_conf: 0.6, large: 0.15, pale: 60, small: 0.02 });
+export function readingQuality(res, grey, q = QUALITY) {
+  const signs = res.lines.flatMap((L) => L.signs), n = signs.length;
+  const mean = n ? signs.reduce((a, s) => a + s.conf, 0) / n : 0;
+  const sz = signs.map((s) => Math.max(s.box[2], s.box[3])).sort((a, b) => a - b), med = n ? sz[n >> 1] : 0;
+  const contrast = rankValue(grey.d, 0.99) - rankValue(grey.d, 0.01);
+  const shortSide = Math.min(grey.w, grey.h), longSide = Math.max(grey.w, grey.h);
+  const ds = res.segmenter_scores && res.segmenter_scores.det_side;
+  const large = (n && med >= q.large * shortSide) || (res.segmenter === 'detector' && ds != null && ds < DET_PARAMS.det_side) || res.segmenter === 'quad';
+  const poor = n < q.min_signs || mean < q.min_conf;
+  const tip = !poor ? null : (large ? 'step_back' : (contrast < q.pale ? 'light' : (n && med < q.small * longSide ? 'closer' : 'steady')));
+  return { poor, tip, signs: n, mean_conf: mean, sign_px: med, contrast, large: !!large };
 }
