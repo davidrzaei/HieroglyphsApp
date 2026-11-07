@@ -35,7 +35,9 @@ AUTO_UPDATE = """  /* Ny udgave: når appen åbnes eller kommer frem igen, ser d
 
 # Hurtigere start (byttes ind i prototypens boot; bygningen stopper, hvis prototypen er ændret her).
 #  1. Kopien på telefonen læses, mens appen spørger nettet, om databasen er ny; har den en kopi, venter den højst 1,5 s på svar.
-#  2. Kopien gemmes som en Blob, der læses 5-10 gange hurtigere end en Uint8Array og uden at låse skærmen. Gamle kopier omgemmes.
+#  2. Prototypen gemmer kopien i stykker på 16 MB (Chrome afviser én værdi på ~190 MB). Stykkerne gemmes her som Blobs, der læses
+#     5-10 gange hurtigere end Uint8Arrays og uden at låse skærmen.
+#  3. En kopi, som en tidligere udgave af webappen gemte som én Blob, kan stadig læses, så den ikke hentes igen.
 BOOT_PATCHES = [
     ("""    try { man = await (await fetchOk(DATA_DIR + 'manifest.json')).json(); } catch (e) { manErr = e; }
     const meta = await idbGet(IDB.meta);
@@ -43,12 +45,14 @@ BOOT_PATCHES = [
     const meta = await idbGet(IDB.meta);
     await (meta ? Promise.race([manP, new Promise(r => setTimeout(r, 1500))]) : manP);
 """),
-    ("""      const b = await idbGet(IDB.bytes);
-      if (b && b.byteLength === meta.bytes) {""", """      let b = await idbGet(IDB.bytes); const wasBlob = b instanceof Blob;
-      if (wasBlob) b = b.size === meta.bytes ? new Uint8Array(await b.arrayBuffer()) : null;
-      else if (b && b.byteLength === meta.bytes) { const keep = b instanceof Uint8Array ? b : new Uint8Array(b); setTimeout(() => idbPut([[IDB.bytes, new Blob([keep])]]), 3000); }
-      if (b && b.byteLength === meta.bytes) {"""),
-    ("""idbPut([[IDB.bytes, bytes], [IDB.meta,""", """idbPut([[IDB.bytes, new Blob([bytes])], [IDB.meta,"""),
+    ("""    if (!(await idbPut([[idbChunkKey(i), part]]))) {""",
+     """    if (!(await idbPut([[idbChunkKey(i), new Blob([part])]]))) {"""),
+    ("""    const u = c instanceof Uint8Array ? c : new Uint8Array(c);""",
+     """    const u = c instanceof Blob ? new Uint8Array(await c.arrayBuffer()) : c instanceof Uint8Array ? c : new Uint8Array(c);"""),
+    ("""    const b = await idbGet(IDB.bytes);
+    return b && b.byteLength === meta.bytes""", """    let b = await idbGet(IDB.bytes);
+    if (b instanceof Blob) b = b.size === meta.bytes ? new Uint8Array(await b.arrayBuffer()) : null;      /* kopi gemt som én Blob af en tidligere webapp */
+    return b && b.byteLength === meta.bytes"""),
 ]
 
 

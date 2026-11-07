@@ -1012,7 +1012,7 @@ const $ = (s, r) => (r || document).querySelector(s);
    noget. Alle kald til lageret er pakket ind i try/catch: uden lager virker siden, den henter bare igen. */
 const SQLITE_URLS = ["vendor/sqlite-wasm/index.mjs", "https://cdn.jsdelivr.net/npm/@sqlite.org/sqlite-wasm@3.53.4-build2/dist/index.mjs"];
 const DATA_DIR = 'data/';
-const IDB = { name: 'hiero-app', store: 'db', meta: 'meta', bytes: 'bytes' };
+const IDB = { name: 'hiero-app', store: 'db', meta: 'meta', bytes: 'bytes', chunk: 16 * 1048576 };   /* P3 I: bytes in 16 MB chunks 'bytes.000'.. */
 const BOOT = window.__boot = { phase: 'start', source: null, t0: performance.now(), ms: {}, error: null };
 const bootEsc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const MB = n => (n / 1048576).toFixed(1);
@@ -1041,14 +1041,22 @@ function bootError(msg) {
 }
 $('#bresults').addEventListener('click', e => { if (e.target.closest('[data-boot="retry"]') && BOOT.phase === 'error') boot(); });
 
-/* ---- IndexedDB: meta = { sha256, bytes }, bytes = de udpakkede bytes ---- */
+/* ---- IndexedDB: meta = { sha256, bytes, chunks, chunk }, de udpakkede bytes i stykker 'bytes.000', 'bytes.001', ... ----
+   P3 I: Chromium (2026) afviser én værdi på ~190 MB (put afbrydes med UnknownError), så databasen blev hentet igen ved hver start.
+   Stykkerne skrives ét ad gangen, meta til sidst (meta = kopien er hel); en ældre kopi som én værdi ('bytes') læses stadig og
+   slettes, når en ny kopi skrives. */
+let idbConn = null;
 function idbOpen() {
-  return new Promise((res, rej) => {
+  if (idbConn) return idbConn;
+  idbConn = new Promise((res, rej) => {
     let r; try { r = indexedDB.open(IDB.name, 1); } catch (e) { rej(e); return; }
     r.onupgradeneeded = () => { try { r.result.createObjectStore(IDB.store); } catch (e) {} };
     r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); r.onblocked = () => rej(new Error('blocked'));
   });
+  idbConn.catch(() => { idbConn = null; });
+  return idbConn;
 }
+const idbChunkKey = i => IDB.bytes + '.' + String(i).padStart(3, '0');
 async function idbGet(key) {
   try {
     const db = await idbOpen();
@@ -1063,6 +1071,44 @@ async function idbPut(pairs) {
       catch (e) { res(false); }
     });
   } catch (e) { return false; }
+}
+
+async function idbDel(keys) {
+  try {
+    const db = await idbOpen();
+    return await new Promise(res => {
+      try { const tx = db.transaction(IDB.store, 'readwrite'), st = tx.objectStore(IDB.store); keys.forEach(k => st.delete(k)); tx.oncomplete = () => res(true); tx.onerror = tx.onabort = () => res(false); }
+      catch (e) { res(false); }
+    });
+  } catch (e) { return false; }
+}
+async function idbSaveBytes(bytes, sha) {
+  const old = await idbGet(IDB.meta), oldN = old && old.chunks ? old.chunks : 0;
+  if (!(await idbDel([IDB.meta, IDB.bytes]))) return false;          /* først ugyldig: ingen meta = ingen kopi */
+  const n = Math.ceil(bytes.length / IDB.chunk);
+  for (let i = 0; i < n; i++) {
+    const part = bytes.slice(i * IDB.chunk, Math.min(bytes.length, (i + 1) * IDB.chunk));   /* en kopi: et udsnit ville gemme hele bufferen */
+    if (!(await idbPut([[idbChunkKey(i), new Blob([part])]]))) { await idbDel(Array.from({ length: Math.max(n, oldN) }, (_, k) => idbChunkKey(k))); return false; }
+  }
+  const stale = []; for (let i = n; i < oldN; i++) stale.push(idbChunkKey(i));
+  if (stale.length) await idbDel(stale);
+  return idbPut([[IDB.meta, { sha256: sha, bytes: bytes.length, chunks: n, chunk: IDB.chunk, at: Date.now() }]]);
+}
+async function idbLoadBytes(meta) {
+  if (!meta.chunks) {                                                 /* ældre kopi: én værdi */
+    let b = await idbGet(IDB.bytes);
+    if (b instanceof Blob) b = b.size === meta.bytes ? new Uint8Array(await b.arrayBuffer()) : null;      /* kopi gemt som én Blob af en tidligere webapp */
+    return b && b.byteLength === meta.bytes ? (b instanceof Uint8Array ? b : new Uint8Array(b)) : null;
+  }
+  let out; try { out = new Uint8Array(meta.bytes); } catch (e) { return null; }
+  let off = 0;
+  for (let i = 0; i < meta.chunks; i++) {
+    const c = await idbGet(idbChunkKey(i)); if (!c) return null;
+    const u = c instanceof Blob ? new Uint8Array(await c.arrayBuffer()) : c instanceof Uint8Array ? c : new Uint8Array(c);
+    if (off + u.length > out.length) return null;
+    out.set(u, off); off += u.length;
+  }
+  return off === meta.bytes ? out : null;
 }
 
 async function fetchOk(url) { const r = await fetch(url, { cache: 'no-cache' }); if (!r.ok) throw new Error('Could not fetch ' + url + ' (HTTP ' + r.status + ').'); return r; }
@@ -1131,10 +1177,8 @@ async function boot() {
     await (meta ? Promise.race([manP, new Promise(r => setTimeout(r, 1500))]) : manP);
     let bytes = null;
     if (meta && meta.sha256 && (!man || meta.sha256 === man.sha256)) {
-      let b = await idbGet(IDB.bytes); const wasBlob = b instanceof Blob;
-      if (wasBlob) b = b.size === meta.bytes ? new Uint8Array(await b.arrayBuffer()) : null;
-      else if (b && b.byteLength === meta.bytes) { const keep = b instanceof Uint8Array ? b : new Uint8Array(b); setTimeout(() => idbPut([[IDB.bytes, new Blob([keep])]]), 3000); }
-      if (b && b.byteLength === meta.bytes) { bytes = b instanceof Uint8Array ? b : new Uint8Array(b); BOOT.source = 'cache'; }
+      const b = await idbLoadBytes(meta);
+      if (b) { bytes = b; BOOT.source = 'cache'; }
     }
     mark('cache');
     let fresh = false;
@@ -1157,8 +1201,8 @@ async function boot() {
     BOOT.wasmBytes = sqlite3.wasm.heap8u().length;
     if (performance.memory) BOOT.jsHeap = performance.memory.usedJSHeapSize;
     if (fresh && man) {      /* gemmes bagefter, så appen ikke venter på lageret */
-      const sha = man.sha256, n = bytes.length;
-      setTimeout(() => { idbPut([[IDB.bytes, new Blob([bytes])], [IDB.meta, { sha256: sha, bytes: n, at: Date.now() }]]).then(ok => { BOOT.cached = ok; bytes = null; }); }, 500);
+      const sha = man.sha256;
+      setTimeout(() => { idbSaveBytes(bytes, sha).then(ok => { BOOT.cached = ok; bytes = null; }); }, 500);
     } else bytes = null;
   } catch (e) {
     bootError(e && e.message ? e.message : String(e));
@@ -4225,16 +4269,10 @@ function setMode(m) {
    tegn vises som et markerbart lag på fotoet (en svag ramme pr. tegn, appens usikkerhedsmærke på usikre tegn, en pil for læseretningen),
    og brugeren markerer den del, der skal læses, som når man markerer tekst. Kun markeringen læses (Read), kopieres (Copy) eller søges
    (Search). Rettelser sker direkte i markeringen: et andet bud, slet, eller et tabt tegn (▨), som søgningen udfylder.
-   Prøverne er tre syntetiske sider fra genkenderens sæt (tegnet med Noto og NewGardiner, begge OFL; teksten fra AED, CC BY-SA);
-   P3 er en spejlet linje (læses fra højre), som læseretningen (P3 A0) finder selv.
+   P3 H: appen har ingen prøvebilleder; fotoet kommer fra kameraet eller galleriet.
    P3 C: tegnfinderens bud på flertalsstreger samles til ét tegn (C1), og hver linje læses samlet med tegnfølgerne fra korpusset (C2). */
 const cc = (c, st) => st === 'restored' ? 'guess' : (c >= .85 ? 'ok' : (c >= .6 ? 'warn' : 'bad'));
 const pct = c => Math.round(c * 100) + '%';
-const SAMPLES = [
-  { id: 'P1', title: 'Printed page', sub: 'Clean print, one uncertain sign', url: 'photo/samples/p1.png', dir: 'ltr' },
-  { id: 'P2', title: 'Carved relief', sub: 'Shadows and worn edges', url: 'photo/samples/p2.png', dir: 'ltr' },
-  { id: 'P3', title: 'Mirrored line', sub: 'The signs face right: read right to left', url: 'photo/samples/p3.png', dir: 'rtl' },
-];
 const SCANS = {};
 /* genkenderens kodepunkt (hex) -> tegnets id; grundtegnet foretrækkes frem for en variant med samme kodepunkt */
 let UMAP = null;
@@ -4263,6 +4301,9 @@ async function loadOCR() {
   /* P3 F: nærbilleder - tegnfinderen finjusteret til store, blege tegn (det_close.json + det_close.bin) bruges på de mindre udgaver af
      billedet, når første gennemløb finder få tegn. Mangler den, kører de mindre udgaver med den almindelige tegnfinder. */
   try { const cj = await (await fetch(new URL('det_close.json', base))).json(); await mod.loadCloseDetector({ json: cj, bin: await fetchWeights(base, cj.weights_file, cj.total_bytes) }); } catch (e) { /* uden nærbilledfinder */ }
+  /* P3 J: læseren (reader.json + reader.bin) - en anden genkender, trænet også på rigtige fotos, læser de færdige tegn; model.json
+     træffer stadig alle valg om, hvor tegnene er. Mangler den, læser model.json også tegnene (som før). */
+  if (mod.loadReader) try { const rj = await (await fetch(new URL('reader.json', base))).json(); await mod.loadReader({ json: rj, bin: await fetchWeights(base, rj.weights_file, rj.total_bytes) }); } catch (e) { /* uden læser */ }
   /* tegnfølgerne fra korpusset (P3 C2): signlm.json + signlm.bin, tegn-tre-grammer fra databasens sætninger (bygget af photo/signlm.py).
      Hver linje læses samlet: blandt hvert tegns ti bud vælges det, som passer bedst med genkendelsen og nabotegnene. Mangler filen,
      beholder hvert tegn genkenderens eget første bud (som før). */
@@ -4979,11 +5020,10 @@ function renderPhoto() {
   if (!sc) {
     Object.assign(state, { readOpen: false, fixId: null }); PG = null;
     el.innerHTML = '<p class="note">Take a photo of an inscription or choose one from your gallery. The app suggests a frame around the inscription and straightens it; then it finds the signs itself and shows them on the photo in reading order. Select the part you want to read, the way you select text: only what you select is read.</p>' +
-      '<p class="banner info">Experimental. Clean printed pages and drawn copies read well. Carved walls are harder: in a test on ten wall photos the app found about half of the signs (54 %, up from 12 %), and a reading of a whole wall still needs many corrections. Select the parts that were read well.</p>' +
+      '<p class="banner info">Experimental. Clean printed pages and drawn copies read well. Carved walls are harder: on three photographed wall plates held out from training it found 58 % of the signs and read 84 % of those right (before: 78 %); about 4 in 10 signs of a whole wall still need correcting, and other walls and lighting can do much worse. Select the parts that were read well.</p>' +
       (state.scanErr ? '<p class="banner err">The photo could not be read. ' + esc(state.scanErr) + '</p>' : '') +
       '<div class="photoin"><label class="primary" for="photocam">Take a photo</label><input type="file" id="photocam" accept="image/*" capture="environment"><label class="secondary" for="photofile">Choose from gallery</label><input type="file" id="photofile" accept="image/*"></div>' +
-      dirField(null) +
-      '<p class="eyebrow">Sample photos</p>' + SAMPLES.map(s => '<button type="button" class="rowbtn" data-scan="' + s.id + '"><img class="thumb" src="' + s.url + '" alt=""><span class="grow">' + esc(s.title) + '<small>' + esc(s.sub) + '</small></span></button>').join('');
+      dirField(null);
     return renderRead();
   }
   const rtl = sc.dir === 'rtl', cols = sc.layout === 'columns', edited = scanEdited(sc), unit = cols ? ['column', 'columns'] : ['line', 'lines'];
@@ -5177,11 +5217,11 @@ function renderHelp() {
       row('<span class="gl sm rtl">' + ch('G17') + ch('D21') + '</span>', 'Mirrored line', 'The source writes this line from right to left. Settings → Writing direction reverses every line. What you write is always shown as you wrote it.'),
       row(gl((q => q.every(c => c && INK[c]) ? quadSVG(q, { t: 'v', k: [0, 1] }) : ch('N35') + ch('X1'))([GCODE('N35'), GCODE('X1')])), 'Stacked signs', 'Settings → Sign layout → In quadrats lets the app stack small signs. The sources write everything in a row.')]) +
     sec('Photo', [
-      row('<span class="pill g">Experimental</span>', 'Experimental', 'Reading from a photo works on clean printed pages and drawn copies. On carved walls it finds about half of the signs so far.'),
+      row('<span class="pill g">Experimental</span>', 'Experimental', 'Reading from a photo works on clean printed pages and drawn copies. On carved walls it finds over half of the signs in tests, and readings still need checking.'),
       row('<span class="hframe" aria-hidden="true"></span>', 'Frame', 'A photo from the camera or the gallery first shows a frame. The app suggests it around the signs it finds; drag the four corners to the edges of the inscription, or use the whole photo. The app straightens the framed part before reading it, so a slanted or tapering surface reads as straight lines. Adjust frame in the result goes back; Undo brings the earlier reading back.'),
       row('<span class="hsel" aria-hidden="true"><i></i><i class="on"></i><i class="on"></i><i class="unc"></i></span>', 'Select to read', 'The app frames every sign it found on the photo; uncertain signs have a coloured frame. Nothing is read until you select: tap a sign for its word, double-tap for its line, or hold and drag. Drag the handles to select more or less. Read, Copy and Search use only the selection. Tap an uncertain sign in the selection to correct it.'),
       row('<span class="gl sm">' + ch('G17') + ch('D21') + '</span>', 'Read line by line', 'Each sign is first recognised on its own. Then every line is read as a whole: for each sign the app weighs its ten best guesses against the sign sequences of the texts in the database, so a sign that fits its neighbours wins. The certainty shown is the combined one.'),
-      row('<span class="hqd">' + gl((q => q.every(c => c && INK[c]) ? quadSVG(q, { t: 'v', k: [0, 1] }) : ch('N35') + ch('I9'))([GCODE('N35'), GCODE('I9')])) + '</span>', 'Squares', 'Signs are written in squares: one sign, or a few stacked or side by side in one box. In a close-up the app first works out the size of a square (about the width of a line) from the signs it sees, reads the signs at that size, then finds the lines and the squares in them. A square with more than one sign has a faint dashed frame. Copy writes it in MdC (: above, * beside), and Search keeps it as a square, as if you had typed it.'),
+      row('<span class="hqd">' + gl((q => q.every(c => c && INK[c]) ? quadSVG(q, { t: 'v', k: [0, 1] }) : ch('N35') + ch('I9'))([GCODE('N35'), GCODE('I9')])) + '</span>', 'Squares', 'Signs are written in squares: one sign, or a few stacked or side by side in one box. In every photo the app first works out the size of a square (about the width of a line) from the signs it sees, then finds the lines and the squares in them: small pieces that cannot be a sign of their own are dropped, and a square where ink is left without a sign is read once more. A square with more than one sign has a faint dashed frame. Copy writes it in MdC (: above, * beside), and Search keeps it as a square, as if you had typed it.'),
       row('<span class="pill dir c-ok">Right to left · sure</span>', 'Reading direction', 'Signs face the start of the line. Automatic tells the direction from the way the people, animals and other one-sided signs face, and says how sure it is. With too few such signs it reads left to right and says so. Choosing a direction puts the same signs in the other order.')]) +
     sec('Name frames', Object.keys(ENCL).map(k => row(gl('<span class="encl ' + k + '">' + ch('N5') + '</span>'), esc(ENCL[k].label), cap(ENCL[k].what) + '. The signs inside are read as one name.'))) +
     sec('Keyboard', [
@@ -5300,7 +5340,6 @@ document.addEventListener('click', e => {
   if (d.favopen) { const f = state.favs.find(x => favKey(x) === d.favopen); trace('Åbner favorit'); return load(f.mode, f.codes, f.quads); }
   if (d.favdel) { state.favs = state.favs.filter(x => favKey(x) !== d.favdel); trace('Favorit'); step(['favorite'], 'Rækken slettes.'); return renderSaved(); }
   if (d.hist) { const x = state.hist[Number(d.hist)]; return load(x.mode, x.codes, x.quads); }
-  if (d.scan) { const m = SAMPLES.find(x => x.id === d.scan); trace('Foto: ' + m.title); return readPhoto(m); }
   if (d.fix !== undefined) { const on = state.fixId === d.fix && state.fixWhere === 'sheet'; state.fixId = on ? null : d.fix; state.fixWhere = 'sheet'; const p = $('#photo .fixpop'); if (p) p.remove(); return renderRead(); }
   if (d.palt) { const p = d.palt.split('|'); return photoFix('alt', p[0], p[1]); }
   if (d.pdel) return photoFix('del', d.pdel);
@@ -5590,7 +5629,7 @@ boot();
 </div>
 <script>
 (function () {
-  const LOG = [{"version": "2026-10-27", "title": "Close-up photos", "items": ["Photos taken up close: a sign finder tuned for large, faint signs.", "Signs written together in a square are recognised as a group and kept together in the reading.", "When a reading is uncertain, the app says so plainly, with a practical tip."]}, {"version": "2026-10-26.3", "title": "Choose the app's look", "items": ["Settings → Appearance: Classic, Egyptian, Modern or Dark & elegant. The three new looks have hieroglyph icons in the tabs."]}, {"version": "2026-10-26.2", "items": ["Fixed: after an update the tabs at the bottom (Dictionary, Search, Saved) could end up below the screen until the app was restarted."]}, {"version": "2026-10-26", "title": "Better reading from photos", "items": ["Before a photo is read you can set a frame around the text, like a document scanner: drag the four corners and the photo is straightened.", "The app finds the reading direction itself from the way the signs face. A third sample photo shows a line read right to left.", "A sign finder for photos of walls and reliefs, and better guesses from which signs usually follow each other in the known texts.", "Correct the reading directly on the photo: choose between five suggestions, delete a sign or insert a lost one."]}, {"version": "2026-10-21", "items": ["The app now opens with a splash screen with its icon while the dictionary is loaded, instead of showing the loading steps."]}, {"version": "2026-10-19", "title": "More English translations", "items": ["45,889 sentences now have an English translation, up from 13,141. The new ones are machine-translated from the German of the source and marked as such.", "The dictionary is downloaded again once (about 71 MB, so Wi-Fi is a good idea)."]}, {"version": "2026-10-12.3", "items": ["The app starts faster: it reads the dictionary on the phone straight away instead of waiting for the internet, and the copy is read up to ten times faster.", "The Check for updates button in Settings is no longer hidden behind the phone's navigation bar."]}, {"version": "2026-10-12.2", "items": ["A clearer start screen while the dictionary downloads and opens, with progress in percent.", "This window now waits until the app is ready."]}, {"version": "2026-10-12", "title": "Read from a photo", "items": ["The camera button now really recognises the signs in a photo, on the phone and without internet. Two example photos are included to try it.", "Better sentence reading: the app chooses words by how they are used in the known texts.", "Words show example sentences, other spellings grouped by form, and where the information comes from, with a link to the source.", "Names show the most important facts (for kings: dynasty and years). \"Did you mean\" suggests a similar sign when nothing is found.", "An updated dictionary. It is downloaded again once (about 66 MB)."]}, {"version": "2026-10-10.3", "items": ["Settings has a Check for updates button, so you can get a new version straight away.", "Fixed: the app again stores itself on the phone, so it opens without internet and updates itself."]}, {"version": "2026-10-10.2", "title": "The whole dictionary", "items": ["The app now uses the full database: 5,364 signs, 31,643 words and 47,087 sentences from 7,405 texts.", "The first start downloads the dictionary once (about 66 MB, so Wi-Fi is a good idea). After that it opens from the copy on your phone, also without internet.", "Signs from Unicode's extended list are now shown with the NewGardiner font."]}, {"version": "2026-10-10", "items": ["After an update, this window shows what has changed."]}, {"version": "2026-10-06", "title": "New version of the app", "items": ["A menu with History, Help and Settings (the button at the top right).", "Recently used signs on the keyboard.", "Hold a finger on what you have written to magnify it and move the cursor.", "Sort menus in the Dictionary and in Saved.", "The app now updates itself when a new version is published."]}];
+  const LOG = [{"version": "2026-11-07", "title": "Better reading from photos", "items": ["A new sign reader, also trained on real photos, reads the signs in your photos.", "Fixed: on newer phones the dictionary could be downloaded again at every start. It is now kept on the phone in smaller pieces.", "The sample photos have been removed from Read from a photo."]}, {"version": "2026-10-27", "title": "Close-up photos", "items": ["Photos taken up close: a sign finder tuned for large, faint signs.", "Signs written together in a square are recognised as a group and kept together in the reading.", "When a reading is uncertain, the app says so plainly, with a practical tip."]}, {"version": "2026-10-26.3", "title": "Choose the app's look", "items": ["Settings → Appearance: Classic, Egyptian, Modern or Dark & elegant. The three new looks have hieroglyph icons in the tabs."]}, {"version": "2026-10-26.2", "items": ["Fixed: after an update the tabs at the bottom (Dictionary, Search, Saved) could end up below the screen until the app was restarted."]}, {"version": "2026-10-26", "title": "Better reading from photos", "items": ["Before a photo is read you can set a frame around the text, like a document scanner: drag the four corners and the photo is straightened.", "The app finds the reading direction itself from the way the signs face. A third sample photo shows a line read right to left.", "A sign finder for photos of walls and reliefs, and better guesses from which signs usually follow each other in the known texts.", "Correct the reading directly on the photo: choose between five suggestions, delete a sign or insert a lost one."]}, {"version": "2026-10-21", "items": ["The app now opens with a splash screen with its icon while the dictionary is loaded, instead of showing the loading steps."]}, {"version": "2026-10-19", "title": "More English translations", "items": ["45,889 sentences now have an English translation, up from 13,141. The new ones are machine-translated from the German of the source and marked as such.", "The dictionary is downloaded again once (about 71 MB, so Wi-Fi is a good idea)."]}, {"version": "2026-10-12.3", "items": ["The app starts faster: it reads the dictionary on the phone straight away instead of waiting for the internet, and the copy is read up to ten times faster.", "The Check for updates button in Settings is no longer hidden behind the phone's navigation bar."]}, {"version": "2026-10-12.2", "items": ["A clearer start screen while the dictionary downloads and opens, with progress in percent.", "This window now waits until the app is ready."]}, {"version": "2026-10-12", "title": "Read from a photo", "items": ["The camera button now really recognises the signs in a photo, on the phone and without internet. Two example photos are included to try it.", "Better sentence reading: the app chooses words by how they are used in the known texts.", "Words show example sentences, other spellings grouped by form, and where the information comes from, with a link to the source.", "Names show the most important facts (for kings: dynasty and years). \"Did you mean\" suggests a similar sign when nothing is found.", "An updated dictionary. It is downloaded again once (about 66 MB)."]}, {"version": "2026-10-10.3", "items": ["Settings has a Check for updates button, so you can get a new version straight away.", "Fixed: the app again stores itself on the phone, so it opens without internet and updates itself."]}, {"version": "2026-10-10.2", "title": "The whole dictionary", "items": ["The app now uses the full database: 5,364 signs, 31,643 words and 47,087 sentences from 7,405 texts.", "The first start downloads the dictionary once (about 66 MB, so Wi-Fi is a good idea). After that it opens from the copy on your phone, also without internet.", "Signs from Unicode's extended list are now shown with the NewGardiner font."]}, {"version": "2026-10-10", "items": ["After an update, this window shows what has changed."]}, {"version": "2026-10-06", "title": "New version of the app", "items": ["A menu with History, Help and Settings (the button at the top right).", "Recently used signs on the keyboard.", "Hold a finger on what you have written to magnify it and move the cursor.", "Sort menus in the Dictionary and in Saved.", "The app now updates itself when a new version is published."]}];
   const SEEN = 'hiero-news-seen', STORE = 'hiero-proto-v1';
   if (!LOG.length) return;
   const latest = LOG[0].version;
@@ -5622,7 +5661,7 @@ boot();
 </style>
 <script>
 (function () {
-  const VERSION = "2026-10-27";
+  const VERSION = "2026-11-07";
   const host = document.getElementById('settings');
   if (!host) return;
   const label = v => { const d = new Date(String(v).slice(0, 10) + 'T12:00:00'); return isNaN(d) ? v : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); };
