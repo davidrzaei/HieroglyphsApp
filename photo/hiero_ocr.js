@@ -22,6 +22,11 @@
 //   result line has quads: [{ at, n, tree }] = its quadrats of >= 2 signs (positions in reading order; tree { t: 'v' | 'h',
 //   k: [position | subtree] } = the app's typed-input format: v = above each other, h = side by side). opts.quads: false
 //   switches the quadrat path off.
+//   P3 H: on EVERY path (wall, normal scale, close-up) the lines are cut into quadrats again after the signs are found:
+//   fragments are dropped, neighbours that fit one square are joined, a quadrat's cell grows over the ink next to it, ink
+//   left between quadrats is read as an empty quadrat, and a quadrat whose ink the signs do not cover is read again by
+//   arrangements (1, 2/3 stacked, side by side, 2x2, tall + stack; see "P3 H"). r.quadrats = { cells, multi, examined,
+//   changed, U }; every line's quads come from these quadrats. opts.quads: false switches G and H off.
 //   const r2 = reorder(r, 'rtl');             // the same signs in the other reading direction (no new recognition)
 //
 // imageData: { width, height, data } with RGBA (browser ImageData), RGB or grey (1 byte per pixel) data.
@@ -658,6 +663,17 @@ export async function loadModel(src) {
   return CURRENT;
 }
 
+// P3 J: optional READER = a second recogniser (same conv1-3 as the model) that reads only the FINAL signs; the model
+// loaded with loadModel() keeps making every segmentation decision. loadReader(null) removes it.
+let READER = null;
+export async function loadReader(src) {
+  if (src === null) { READER = null; return null; }
+  const { meta, bin } = await readModelFiles(src);
+  READER = parseModel(meta, bin);
+  return READER;
+}
+export function readerLoaded() { return READER; }
+
 async function readModelFiles(src) {
   let meta, bin;
   if (typeof src === 'string') {
@@ -887,12 +903,12 @@ export function reorder(r, direction, source = 'user') {
   const to = direction === 'rtl' ? 'rtl' : 'ltr';
   const pp = Object.assign({}, PARAMS, r.params || {});
   const lines = orderSigns(r.lines.map((L) => ({ signs: L.signs.map((s) => Object.assign({}, s)) })), r.layout, r.angle || 0,
-                           r.direction, to, pp, r.segmenter === 'quad');
+                           r.direction, to, pp, r.segmenter === 'quad' || !!r.quadrats);
   for (const L of lines) L.quads = lineQuads(L.signs, to, pp.cut_tol);
   const out = Object.assign({}, r, { lines, direction: to, direction_source: source });
   if (source === 'auto' && r.direction_auto) out.direction_certainty = to === 'rtl' ? r.direction_auto.p_rtl : 1 - r.direction_auto.p_rtl;
   if (r.decode && r.decode.applied && to !== r.direction && SIGNLM) {      // P3 C2: the decoding depends on the order
-    const d = decodeLines(out.lines, SIGNLM, r.decode.params);
+    const d = decodeLines(out.lines, SIGNLM, r.decode.params, READER || CURRENT);   // P3 J
     out.decode = Object.assign({}, r.decode, { changed: d.changed });
   }
   return out;
@@ -1270,7 +1286,15 @@ const levelScore = (r, floor) => { let s = 0.0; for (const L of r.lines) for (co
 export const QUAD_PARAMS = Object.freeze({ q_on: 1, q_T: 56.0, q_R: 2.0, q_ufloor: 0.5, q_uq: 0.75, q_theta: 0.4, q_ov: 0.3, q_shrink: 0.15,
   q_lmerge: 0.5, q_qmax: 1.0, q_qgap: 0.08, q_qshort: 0.5, q_swap: 1, q_ucl: 100.0, q_lratio: 0.8,
   q_slot: 1, q_fu: 24.0, q_ek: 2, q_smin: 0.35, q_send: 1.2, q_sedge: 0.02, q_sprof: 0.3, q_stight: 0.15, q_ssplit: 1.3,
-  q_fth: 0.5, q_fov: 0.15 });
+  q_fth: 0.5, q_fov: 0.15, q_gmean: 0.4, q_gshare: 0.28 });
+// P3 J routing guard (= quads.py wall_guard): a first pass with more than det_gate signs that are mostly unreadable
+// (mean top-1 < q_gmean and share of top-1 >= 0.5 below q_gshare) is texture on a close-up, not a wall -> pyramid.
+const wallGuard = (r, p) => {
+  if (!p.q_gmean) return false;
+  const c = r.lines.flatMap((L) => L.map((s) => s.conf || 0));
+  if (!c.length) return false;
+  return c.reduce((a, v) => a + v, 0) / c.length < p.q_gmean && c.filter((v) => v >= 0.5).length / c.length < p.q_gshare;
+};
 const qArea = (b) => Math.max(0, b[2] - b[0]) * Math.max(0, b[3] - b[1]);
 const qConflict = (a, b, ov) => inter(a, b) >= ov * Math.min(qArea(a), qArea(b));
 
@@ -1594,7 +1618,7 @@ function quadPath(runs, direction, layout, p, top) {
   const chosen = selectCands(pool, p).map((i) => pool[i]);
   let nfill = 0;
   let res = assembleQuads(chosen, direction, layout, U, p, p, b.factor);
-  if (p.q_slot && top && U > 0) {
+  if (p.q_slot && top && U > 0 && !(p.q_h && p.h_noslot)) {
     const add = fillLines(g0, res, U, p, top);
     if (add.length) { chosen.push(...add); nfill = add.length; res = assembleQuads(chosen, direction, layout, U, p, p, b.factor); }
   }
@@ -1603,6 +1627,370 @@ function quadPath(runs, direction, layout, p, top) {
   res.selection_score = sc;
   res.quad = { U: U * b.factor, U640, U_lines: (res.U_lines || 0) * b.factor, levels: [...new Set(pool.map((c) => c.level))].sort((x, y) => x - y), filled: nfill };
   return { seg: res, U, U640 };
+}
+
+// ------------------------------------------------------------------ P3 H: quadrats on every photo, arrangement inside each
+// (quads.py "P3 H" is the Python reference: same operations in the same order.) After the signs are found (wall path,
+// normal path or the G quadrat path) every line is cut into quadrats again: (1) fragments go (a box below h_tiny U, or far
+// below the natural size of the sign it reads as and inside another sign or read unsurely); (2) signs overlapping along the
+// line are merged with neighbours that fit one square; every quadrat's cell grows over the contiguous ink next to it, ink
+// left between quadrats is an empty cell; (3) in a cell the arrangements 1, 2/3 stacked, 2/3 side by side, 2x2, tall + a
+// stack of 2/3 (either side), 2 side by side over/under 1 are cut at the valleys of the cell's ink profiles, every slot
+// tightened to its ink and read; the detector's boxes are one more candidate; score = sum over slots [log(p / theta) +
+// aspect and size of the read class's natural glyph vs the slot] + LM association of neighbours + ink coverage.
+// GLYPH_WH = natural [w, h] of every class (1/100 of the height of A1; js/glyphm.json, built by h_work/make_glyphm.py).
+const GLYPH_WH_B64 = 'TGRHZEpkRmRRZEpkSmRPZE9kYWRKZD9kW2REZExkT2RkWVRkZTlCZEpkUGQ+ZEhkTWRDZEtkSWQ9ZFBkSmRFZEtkP2Q3ZDZkPWRBZENkP2RPZFJkYWRjZHRkP2RCZD9kVmRWZDhkOGRNZDxkQGRPZFRkRGRDZEpkSmRZZCBkZSJlQk1kU2RQZFtkUmUxZDFkVGRfZDFkTmQ3ZE1kRGRVZDtkRGRCZEFkRGRJZEdkVGRQZEZkOGQ6ZDJkM2Q6ZDpkS2RUZDpkOmRAZDVkMWQ9ZFRkN2Q5ZEFkQWRFZDlkOmQmZC9kO2Q5ZDtkQGQ6ODk+YzhkHmIgYSliJmQiYydkO2RUNS8nJ2QTXixlLRhWYk80QkZEQkJkHWQrZDpkEWMpTUA3Jzc0SkpJY0ReOmQ6ZD1iZGNkW2RWZBdkIGQiZCBkIWUtZCRlIGUqZDBlSGUlZDplHWUeZDVVMBZkNGRSZGRkKGQoZDZkNmQeZIBkZRhkJWRkZSVGOkdJRzpCXWRdOmRkZElkZVZlVVRRZCktWGQ8Hh4cQEA+QEBkPmRAfTx9PWRkZFFkRWRJZWRkR2RkZF5kV1RkZFljQWRIZEhkPlZkY1hlXmRkZGRrX1xjZGJXZGRkY2RvPmQ7ZTFlMGQ8ZVQ7ZGNkXmRgY1xkYWRjT2NLZT9pNUlkZGRkWDo5TDNjWGJOZEJQZFdkZFBkZDdLJmQvYydkWEFYL2FkYWRkO2RkZR5kN2RKRzlJO008ZSVlJSBkY0IsZClkWWRkSDBkJGRkGmM6MTMiZCRjZD5dMFA4Sy9SUGRQTEFjHzw8Yy83ZDVkZR1lIWQdZR5lIGUgZWQnLWQpIGQnLy46PmReZGxjZGRkZGNkY2RkZFBkZWNSZExkT2RlZGQ0Y1lkP2RaX2RfZG1kX2RzZGRkZGRiZFtkZFNlW2RDZF1fZGRkZUtpPGRkhWRkZGRkZGRNZGRSZUZkO2RKZDtkZGVkZGRkZG1JQ2RTZFlkZGRkZFBkVGR0R2Q9ZExlVGQ6XGRlWDE4ZEY6SSU3ZR0eZC1kY2QpOGRkZEBlIGVSZDNkH0wwZFBMZGQjZC5kZGRkZGRkZEJkPGRkKmM+ZDRlL2QpbzJkKDBGYFteKUJkY2RkZEtkazdkIi8vLzBCZBpbKGRXZGRkT09kF2JkJGQqZC1kJGRjNWRVTE1VMGQlIGRFZGRkg2SSZD9kUmRSZDVkJmNVZEJkQmQ6ZDlkGWQ3ZCBkUGRjZFtkM2RkZDVkNWQgZEFkQmRjZEJkOWQSZBlkMFAZSyBkZRYfZEA/LGQlMjw3QjJjQjc4GWQhZEIURUJ0ZCdkZR1bZFZkZUYvL2Q5N2QtQjY2OztkImQiV1lPTFRVZRllD2UXZRhlGGU9ZBhCIVQePCBiJWUrZSFSMVI7UCkuMGQqZDA1ThkZWBhJTU1LYhBjZGQaZRplGmUaZRplQTo3OjdkZGRVZGRkZGNkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGNWZGNkZGRkZGRkZGRkZGRkZGRjY2RkZGRkZGRkZGRkZGRkYGRkZGRkZGRkZFxkY2NfZGFbZGRkZGRkZGRhZF9SKlRkVGRkZD0vRzpLPSdkKG0pbSltKW0pbSltKGRkZGRkZWRlZGVkUmQeZGRkZGRXUmVkZUNjT1dkZGRYZD9kPWQ6ZGRPZWQ/ZFlZIGRMZE1kZFsYZGQWFmQdZH9kZBhDZFRkZF1kEGRHJ2Q8azxrKmsqa2lLTVA9GUpEZDZjNmQeNmRCPjJEUB43Njg6Nzc1NDU0ZFJvOm86ZVVkQ2RFZDVjZCBkZGQUZGRkZWQUZC9kY0QpMFI4ZSdkQTJkZGRkZE9kZGRkMmRCZSplImU6Lk4qZDBkTWM5ZChkZEVPZBxkPWQlZCRkMWQ7ZC1kQWQtZGUPZBxkKFNkZGQuZDVkM2RCZGRkOGRPZGRkT2RkZDxkZWRkZERkR0ZANWQxZGRkZGRkVmRlZEljOWRkQlJjWFEmRjk5ZENkQmQVZD9GVWUdZBlPVGVkFmRkZGRkZBopZDVkTmRPZDtkIWQaZBhkHmQdZCJkEmQtZFRZPz9kGWM+GWQ6ZCdkUGRbZGQdM2QYZB9kZBBjEmQQYxVPTkdPJ2QZZBRkZCMkZGRFG2QdZBNkZC4fZB9kTUI1Y2REZCk1NWRPZC9kMWRQZGRlNGRkHWQTZDRkX2RkRWRkZGRkRT5jKmQqZGUxYzBcQ1xTUGRQZGRLZSdkMWRHWERkVWM9YxtjJiJAGmQYZCJkLWQgZBZkJWQlZEdkLD5kMylkHGQhZCVkW2QVZFREZGQiZDRkO2QeZB47Qj5kPnM5WGVYZGRkZWR6ZIQ0ZDtOVmUwW2Q1ZCNGI0YoZC9kI0o7P2Q4MjgzZTVkNWRkPGQ+Y0lkG2QbZEJkKypkImRLUSAgIUZMREtGZDxkPoQ9hDxkZFAfZByEHZAbY2RkQGRCYDoUZBpkZBhkExtkZGQvZGRkYyBjGWMdZB1lIDFALzw2STlGMWRDRWRCImQrZCAjRiM3ZD9kZCljHmNkZFlELEIxZCAqPy49NyYsLTYvOjA2MiBkZGQyZERkXWRWZGlkZGQrZC1kNDEhNTExKy9wJjZkMhsmPiY+ZRpkJGUaZCE7Mi8wIjAyZDRkZBobZGQYUWRQZGQjID4xYzZkBiljKEEoYxhBVEFUBWQoZBhjLyIyKDY9GiJkNyA1WR4uM1g4PWQvKjEzICkEKyArOCtYKztbO11YW1hdNGRkKysEKyArOytYWztcO1tYXFhkNTM0Oz5UPk40W1BkMmMpZClkU2QXZRViGmQSZA9jGGMiZBo8HTw7RlBJVB5kJ2RlZGRCZC9RZCdkLGQYZBRkGWQtZBlkNWQ=';
+let GLYPH_WH = null;
+function glyphWH() {
+  if (!GLYPH_WH) {
+    const s = GLYPH_WH_B64, tab = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/', out = [];
+    let buf = 0, bits = 0;
+    for (const ch of s) { if (ch === '=') break; buf = (buf << 6) | tab.indexOf(ch); bits += 6; if (bits >= 8) { bits -= 8; out.push((buf >> bits) & 255); } }
+    GLYPH_WH = [];
+    for (let i = 0; i + 1 < out.length; i += 2) GLYPH_WH.push([out[i] / 100.0, out[i + 1] / 100.0]);
+  }
+  return GLYPH_WH;
+}
+export const H_PARAMS = Object.freeze({ q_h: 1, h_noslot: 1, h_fu: 24.0, h_ek: 2, h_eq: 0.95, h_et: 0.25, h_en: 2, h_cmin: 1.0,
+  h_tiny: 0.15, h_frs: 0.5, h_fin: 0.3, h_fconf: 0.7, h_qshort: 0.5, h_qlong: 1.0, h_qmax: 1.1, h_qgap: 0.12,
+  h_egap: 0.08, h_pfrac: 0.05, h_xmax: 1.25, h_aext: 0.5, h_send: 1.2, h_smin: 0.3,
+  h_cov: 0.8, h_low: 0.0, h_maxq: 60, h_all: 0, h_cutlo: 0.2, h_cuthi: 0.8, h_cutmax: 0.35, h_sprof: 0.3, h_slotmin: 0.12,
+  h_theta: 0.3, h_wa: 0.5, h_sa: 0.4, h_wz: 0.5, h_sz: 0.5, h_wlm: 0.3, h_wcov: 2.0, h_margin: 0.0, h_fth: 0.9, h_rth: 0.9, h_same: 1, h_emin: 0.0 });
+
+function hInkmap(g0, U, p) {
+  const fa = Math.max(1, Math.floor(U / p.h_fu));
+  const E = edgeEnergy(downscaleBy(g0, fa), p.h_ek), W = E.w, H = E.h, n = W * H;
+  const v = Float64Array.from(E.e).sort();
+  const hi = v[Math.floor(p.h_eq * (n - 1))], mid = v[Math.floor(0.75 * (n - 1))];
+  const tau = Math.max(1, Math.floor(p.h_et * hi), Math.floor(p.h_en * mid));
+  const m = new Uint8Array(n);
+  for (let i = 0; i < n; i++) m[i] = E.e[i] >= tau ? 1 : 0;
+  if (p.h_cmin > 0) {
+    const [comps, lab] = components(m, W, H), lim = p.h_cmin * U / fa;
+    for (let i = 0; i < n; i++) if (m[i] && comps[lab[i] - 1][4] < lim) m[i] = 0;
+  }
+  return { fa, m, W, H };
+}
+function hMrect(ink, b) {
+  const fa = ink.fa;
+  const X0 = Math.max(0, Math.min(ink.W, Math.floor(b[0] / fa))), Y0 = Math.max(0, Math.min(ink.H, Math.floor(b[1] / fa)));
+  const X1 = Math.max(X0, Math.min(ink.W, Math.ceil(b[2] / fa))), Y1 = Math.max(Y0, Math.min(ink.H, Math.ceil(b[3] / fa)));
+  return [X0, Y0, X1, Y1];
+}
+const hWrect = (ink, r, Wg, Hg) => [r[0] * ink.fa, r[1] * ink.fa, Math.min(Wg, r[2] * ink.fa), Math.min(Hg, r[3] * ink.fa)];
+function hUnrot(al, ac, axis, ang) {
+  const t = ang * (Math.PI / 180.0), c = Math.cos(t), s = Math.sin(t);
+  if (axis === 'rows') return [al * c - ac * s, al * s + ac * c];
+  return [ac * c - al * s, ac * s + al * c];
+}
+function hProf(ink, r, alongX) {                 // mask sums per column (alongX) or per row of map rect r
+  const out = new Float64Array(alongX ? r[2] - r[0] : r[3] - r[1]);
+  for (let y = r[1]; y < r[3]; y++) for (let x = r[0]; x < r[2]; x++) if (ink.m[y * ink.W + x]) out[alongX ? x - r[0] : y - r[1]] += 1;
+  return out;
+}
+function hFragments(L, U, p, gwh, top) {
+  const out = [];
+  L.forEach((s, i) => {
+    const b = s.wbox, l = Math.max(b[2] - b[0], b[3] - b[1]);
+    if (l < p.h_tiny * U) { out.push(i); return; }
+    const [c, pr] = top(b), nat = Math.max(gwh[c][0], gwh[c][1]);
+    if (l < p.h_frs * nat * U) {
+      const a = qArea(b);
+      let ins = false;
+      for (let j = 0; j < L.length; j++) if (j !== i && inter(b, L[j].wbox) >= p.h_fin * a) { ins = true; break; }
+      if (ins || pr < p.h_fconf) out.push(i);
+    }
+  });
+  return out;
+}
+function hQuadrats(L, axis, ang, U, p, sp) {
+  const rc = L.map((s) => rotCoords(s.wbox.slice(0, 4).concat([0]), axis, ang));
+  const parent = L.map((_, i) => i);
+  const find = (x) => { while (parent[x] !== x) { parent[x] = parent[parent[x]]; x = parent[x]; } return x; };
+  for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++) {
+    const ov = Math.min(rc[i][1], rc[j][1]) - Math.max(rc[i][0], rc[j][0]);
+    if (ov >= sp.group_overlap * Math.min(rc[i][1] - rc[i][0], rc[j][1] - rc[j][0])) {
+      const a = find(i), b = find(j);
+      if (a !== b) parent[Math.max(a, b)] = Math.min(a, b);
+    }
+  }
+  const gm = new Map();
+  for (let i = 0; i < L.length; i++) { const r = find(i); if (!gm.has(r)) gm.set(r, []); gm.get(r).push(i); }
+  const A = [...gm.values()].map((g) => [Math.min(...g.map((i) => rc[i][0])), Math.min(...g), g]).sort((a, b) => (a[0] - b[0]) || (a[1] - b[1])).map((x) => x[2]);
+  const ext = (g) => { let a = Infinity, b = -Infinity; for (const i of g) { a = Math.min(a, rc[i][0]); b = Math.max(b, rc[i][1]); } return [a, b]; };
+  const out = [];
+  for (const g of A) {
+    if (out.length && U > 0) {
+      const [a0, a1] = ext(out[out.length - 1]), [b0, b1] = ext(g), la = a1 - a0, lb = b1 - b0;
+      if (Math.max(a1, b1) - Math.min(a0, b0) <= p.h_qmax * U && b0 - a1 <= p.h_qgap * U &&
+          Math.min(la, lb) <= p.h_qshort * U && Math.max(la, lb) <= p.h_qlong * U) { out[out.length - 1] = out[out.length - 1].concat(g); continue; }
+    }
+    out.push(g.slice());
+  }
+  return [out, rc];
+}
+function hRuns(P, thr, gapb) {
+  const out = [];
+  for (let j = 0; j < P.length; j++) if (P[j] >= thr) {
+    if (out.length && j - out[out.length - 1][1] <= gapb) out[out.length - 1][1] = j + 1; else out.push([j, j + 1]);
+  }
+  return out;
+}
+function hWalk(P, thr, gapb, maxb) {
+  let last = -1, empty = 0;
+  for (let j = 0; j < Math.min(P.length, maxb); j++) {
+    if (P[j] >= thr) { last = j; empty = 0; } else { empty++; if (empty > gapb) break; }
+  }
+  return last + 1;
+}
+const hRev = (P) => Float64Array.from(P).reverse();
+function hCells(L, Q, rc, axis, ang, U, ink, p, lim, Wg, Hg) {
+  const k = axis === 'rows' ? 0 : 1, fa = ink.fa;
+  let a0 = Infinity, a1 = -Infinity; for (const r of rc) { a0 = Math.min(a0, r[2]); a1 = Math.max(a1, r[3]); }
+  const [loLim, hiLim] = lim, nb = k === 0 ? Wg : Hg, j1 = 1 - k;
+  const band = (al) => {
+    const p0 = hUnrot(al, a0, axis, ang), p1 = hUnrot(al, a1, axis, ang);
+    const q0 = hUnrot(al, Math.max(loLim, a0 - p.h_aext * U), axis, ang), q1 = hUnrot(al, Math.min(hiLim, a1 + p.h_aext * U), axis, ang);
+    return [Math.min(p0[j1], p1[j1]), Math.max(p0[j1], p1[j1]), Math.min(q0[j1], q1[j1]), Math.max(q0[j1], q1[j1])];
+  };
+  const box = (l0, l1, c0, c1) => (k === 0 ? [l0, c0, l1, c1] : [c0, l0, c1, l1]);
+  const ext = Q.map((g) => [Math.min(...g.map((i) => L[i].wbox[k])), Math.max(...g.map((i) => L[i].wbox[k + 2]))]);
+  const cen = Q.map((g) => { let s = 0; for (const i of g) s += rc[i][0] + rc[i][1]; return s / (2.0 * g.length); });
+  const gapb = Math.max(0, Math.floor(p.h_egap * U / fa));
+  const newx = ext.map((e) => e.slice()), empties = [];
+  for (let gi = 0; gi <= Q.length; gi++) {
+    const g0 = gi > 0 ? ext[gi - 1][1] : Math.max(0.0, ext[0][0] - p.h_send * U);
+    const g1 = gi < Q.length ? ext[gi][0] : Math.min(nb, ext[ext.length - 1][1] + p.h_send * U);
+    if (g1 - g0 < fa) continue;
+    let al = gi > 0 ? cen[gi - 1] : cen[0];
+    if (gi > 0 && gi < Q.length) al = (cen[gi - 1] + cen[gi]) / 2.0;
+    const [c0, c1] = band(al);
+    const r = hMrect(ink, box(g0, g1, c0, c1)), Pg = hProf(ink, r, k === 0), n = Pg.length;
+    if (n === 0) continue;
+    const thr = Math.max(1.0, p.h_pfrac * (k === 0 ? r[3] - r[1] : r[2] - r[0]));
+    let el = 0, er = 0;
+    if (gi > 0) el = hWalk(Pg, thr, gapb, Math.max(0, Math.floor((p.h_xmax * U - (ext[gi - 1][1] - ext[gi - 1][0])) / fa)));
+    if (gi < Q.length) er = hWalk(hRev(Pg), thr, gapb, Math.max(0, Math.floor((p.h_xmax * U - (ext[gi][1] - ext[gi][0])) / fa)));
+    if (el + er > n) {
+      const s0 = n - er, s1 = el;
+      let j = s0;
+      if (s1 > s0) { let bv = Infinity; for (let t = s0; t < s1; t++) if (Pg[t] < bv) { bv = Pg[t]; j = t; } }
+      el = j; er = n - j;
+    }
+    const start = k === 0 ? r[0] : r[1];
+    if (gi > 0 && el > 0) newx[gi - 1][1] = Math.max(newx[gi - 1][1], (start + el) * fa);
+    if (gi < Q.length && er > 0) newx[gi][0] = Math.min(newx[gi][0], (start + n - er) * fa);
+    const mid = Pg.subarray(el, n - er);
+    for (const [u0, u1] of hRuns(mid, thr, gapb)) if ((u1 - u0) * fa >= p.h_smin * U) empties.push([gi, (start + el + u0) * fa, (start + el + u1) * fa, al]);
+  }
+  const out = [];
+  let ei = 0;
+  for (let gi = 0; gi <= Q.length; gi++) {
+    while (ei < empties.length && empties[ei][0] === gi) { const [, l0, l1, al] = empties[ei++]; out.push({ kind: 'e', idx: [], l0, l1, al }); }
+    if (gi < Q.length) out.push({ kind: 'q', idx: Q[gi].slice(), l0: newx[gi][0], l1: newx[gi][1], al: cen[gi] });
+  }
+  for (const c of out) {
+    let [b0, b1, x0, x1] = band(c.al);
+    if (c.kind === 'q') { for (const i of c.idx) { b0 = Math.min(b0, L[i].wbox[j1]); b1 = Math.max(b1, L[i].wbox[3 - k]); } }
+    const ra = hMrect(ink, box(c.l0, c.l1, x0, b0)), Pa = hProf(ink, ra, k !== 0);
+    const thr = Math.max(1.0, p.h_pfrac * (k === 0 ? ra[2] - ra[0] : ra[3] - ra[1]));
+    const lo = hWalk(hRev(Pa), thr, gapb, Pa.length);
+    const rb = hMrect(ink, box(c.l0, c.l1, b1, x1)), Pb = hProf(ink, rb, k !== 0);
+    const hi = hWalk(Pb, thr, gapb, Pb.length);
+    const c0 = lo > 0 ? ((k === 0 ? ra[1] : ra[0]) + Pa.length - lo) * fa : b0;
+    const cc1 = hi > 0 ? ((k === 0 ? rb[1] : rb[0]) + hi) * fa : b1;
+    const bx = box(c.l0, c.l1, Math.min(c0, b0), Math.max(cc1, b1)).map((v) => Math.max(0.0, v));
+    bx[2] = Math.min(Wg, bx[2]); bx[3] = Math.min(Hg, bx[3]);
+    c.box = bx;
+  }
+  return out;
+}
+const H_SPECS = [['1', 1], ['v2', ['v', [1, 1]]], ['v3', ['v', [1, 1, 1]]], ['h2', ['h', [1, 1]]], ['h3', ['h', [1, 1, 1]]],
+  ['g4', ['v', [['h', [1, 1]], ['h', [1, 1]]]]], ['h1v2', ['h', [1, ['v', [1, 1]]]]], ['hv21', ['h', [['v', [1, 1]], 1]]],
+  ['h1v3', ['h', [1, ['v', [1, 1, 1]]]]], ['hv31', ['h', [['v', [1, 1, 1]], 1]]], ['vh21', ['v', [['h', [1, 1]], 1]]], ['v1h2', ['v', [1, ['h', [1, 1]]]]]];
+function hExtent(prof, frac, gap) {
+  if (!prof.length) return null;
+  const sm = boxSmooth(prof, 1);
+  let mx = -Infinity; for (const x of sm) if (x > mx) mx = x;
+  if (mx <= 0) return null;
+  const runs = hRuns(sm, frac * mx, gap);
+  const mass = runs.map(([a, b]) => { let s = 0; for (let i = a; i < b; i++) s += prof[i]; return s; });
+  const big = Math.max(...mass), keep = runs.filter((r, i) => mass[i] >= 0.15 * big);
+  return [keep[0][0], keep[keep.length - 1][1]];
+}
+function hTight(ink, r, p) {
+  if (r[2] - r[0] <= 0 || r[3] - r[1] <= 0) return null;
+  const tx = hExtent(hProf(ink, r, true), p.h_sprof, 2), ty = hExtent(hProf(ink, r, false), p.h_sprof, 2);
+  if (!tx || !ty) return null;
+  return [r[0] + tx[0], r[1] + ty[0], r[0] + tx[1], r[1] + ty[1]];
+}
+function hSplit(ink, r, nParts, vert, p) {
+  const prof = hProf(ink, r, !vert), n = prof.length;
+  if (n < 3 * nParts) return null;
+  let tot = 0; for (const x of prof) tot += x;
+  const mean = tot / n;
+  if (mean <= 0) return null;
+  const sm = boxSmooth(prof, 1);
+  let js, cost;
+  if (nParts === 2) {
+    const j0 = Math.ceil(p.h_cutlo * n), j1 = Math.floor(p.h_cuthi * n);
+    if (j1 < j0) return null;
+    let j = j0; for (let t = j0; t <= j1; t++) if (sm[t] < sm[j]) j = t;
+    js = [j]; cost = sm[j] / mean;
+  } else {
+    const m = Math.ceil(0.15 * n);
+    let best = null;
+    for (let a = m; a <= n - 2 * m; a++) for (let b = a + m; b <= n - m; b++) { const v = sm[a] + sm[b]; if (best === null || v < best[0]) best = [v, a, b]; }
+    if (best === null) return null;
+    js = [best[1], best[2]]; cost = Math.max(sm[best[1]], sm[best[2]]) / mean;
+  }
+  const edges = [0].concat(js, [n]), out = [];
+  for (let u = 0; u < nParts; u++) out.push(vert ? [r[0], r[1] + edges[u], r[2], r[1] + edges[u + 1]] : [r[0] + edges[u], r[1], r[0] + edges[u + 1], r[3]]);
+  return [out, cost];
+}
+function hFill(ink, r, spec, U, p) {
+  if (spec === 1) {
+    const t = hTight(ink, r, p);
+    if (!t || Math.max(t[2] - t[0], t[3] - t[1]) * ink.fa < p.h_slotmin * U) return null;
+    return [[t], 0.0];
+  }
+  const [kind, ch] = spec, sp = hSplit(ink, r, ch.length, kind === 'v', p);
+  if (!sp) return null;
+  let [rects, cost] = sp;
+  const out = [];
+  for (let i = 0; i < ch.length; i++) {
+    const f = hFill(ink, rects[i], ch[i], U, p);
+    if (!f) return null;
+    out.push(...f[0]); cost = Math.max(cost, f[1]);
+  }
+  return [out, cost];
+}
+function hCover(ink, r, boxes) {
+  const w = r[2] - r[0], h = r[3] - r[1];
+  let tot = 0; for (let y = r[1]; y < r[3]; y++) for (let x = r[0]; x < r[2]; x++) tot += ink.m[y * ink.W + x];
+  if (tot <= 0) return 1.0;
+  const cov = new Uint8Array(Math.max(0, w * h));
+  for (const b of boxes) {
+    const x0 = Math.max(r[0], b[0] - 1) - r[0], y0 = Math.max(r[1], b[1] - 1) - r[1], x1 = Math.min(r[2], b[2] + 1) - r[0], y1 = Math.min(r[3], b[3] + 1) - r[1];
+    for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) cov[y * w + x] = 1;
+  }
+  let s = 0; for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (cov[y * w + x]) s += ink.m[(y + r[1]) * ink.W + x + r[0]];
+  return s / tot;
+}
+function hEnum(ink, cbox, U, p, Wg, Hg) {
+  const r = hMrect(ink, cbox), out = [], seen = new Set();
+  for (const [name, spec] of H_SPECS) {
+    const f = hFill(ink, r, spec, U, p);
+    if (!f || f[1] > p.h_cutmax) continue;
+    const key = f[0].map((t) => t.join(',')).join(';');
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ name, boxes: f[0].map((t) => hWrect(ink, t, Wg, Hg)), cost: f[1], cov: hCover(ink, r, f[0]) });
+  }
+  return out;
+}
+function hScore(boxes, reads, cov, U, p, gwh, lm, direction, sp) {
+  let s = 0.0;
+  boxes.forEach((b, i) => {
+    const [c, pr] = reads[i], w = Math.max(1.0, b[2] - b[0]), h = Math.max(1.0, b[3] - b[1]), [gw, gh] = gwh[c];
+    const da = Math.log(w / h) - Math.log(gw / gh), dz = Math.log(Math.max(w, h) / (Math.max(gw, gh) * U));
+    s += Math.log(Math.max(pr, 1e-6) / p.h_theta) - p.h_wa * da * da / (2 * p.h_sa ** 2) - p.h_wz * dz * dz / (2 * p.h_sz ** 2);
+  });
+  if (lm && p.h_wlm && boxes.length > 1) {
+    const order = xyCut(boxes.map((_, i) => i), boxes.map((b) => b.concat([0])), direction, true, sp.cut_tol);
+    for (let t = 0; t + 1 < order.length; t++) {
+      const ca = reads[order[t]][0], cb = reads[order[t + 1]][0];
+      const v = Math.log(lmP2(lm, ca, cb, lm.params.wb)) - Math.log(lmP1(lm, cb));
+      s += p.h_wlm * Math.max(-3.0, Math.min(3.0, v));
+    }
+  }
+  return s + p.h_wcov * Math.log(Math.max(cov, 0.05));
+}
+function hLineLimits(lines, axis, ang) {
+  const bands = lines.map((L) => {
+    if (!L.length) return null;
+    let a0 = Infinity, a1 = -Infinity;
+    for (const s of L) { const r = rotCoords(s.wbox.slice(0, 4).concat([0]), axis, ang); a0 = Math.min(a0, r[2]); a1 = Math.max(a1, r[3]); }
+    return [a0, a1];
+  });
+  const idx = lines.map((_, i) => i).filter((i) => bands[i]).sort((i, j) => (bands[i][0] + bands[i][1] - bands[j][0] - bands[j][1]) || (i - j));
+  const lims = new Map();
+  idx.forEach((li, t) => {
+    const lo = t > 0 ? (bands[idx[t - 1]][1] + bands[li][0]) / 2.0 : -1e18, hi = t + 1 < idx.length ? (bands[li][1] + bands[idx[t + 1]][0]) / 2.0 : 1e18;
+    lims.set(li, [lo, hi]);
+  });
+  return lims;
+}
+function hDecide(cells, p, U, gwh, lm, direction, sp, read) {
+  for (const c of cells) c.flag = !!p.h_all || c.cov_det < p.h_cov || c.minconf < p.h_low || c.frag;
+  const ex = new Set(cells.map((c, i) => i).filter((i) => cells[i].kind === 'e' || cells[i].flag)
+    .sort((i, j) => (cells[i].cov_det - cells[j].cov_det) || (i - j)).slice(0, p.h_maxq));
+  cells.forEach((c, i) => {
+    const detb = c.det.map((s) => s.wbox);
+    if (!ex.has(i) || !c.cands) { c.out = detb.length ? [detb, 'det'] : null; return; }
+    let best = null, bs = null;
+    if (detb.length) { best = [detb, 'det']; bs = hScore(detb, detb.map(read), c.cov_det, U, p, gwh, lm, direction, sp) + p.h_margin; }
+    const need = detb.length ? p.h_rth : p.h_fth;
+    for (const cd of c.cands) {
+      if (detb.length && !p.h_same && cd.boxes.length === detb.length) continue;     // same number of signs: the detector's boxes stay
+      const rd = [];
+      for (const b of cd.boxes) { rd.push(read(b)); if (rd[rd.length - 1][1] < need) break; }   // a slot below `need` ends the candidate
+      if (rd.length < cd.boxes.length || rd[rd.length - 1][1] < need) continue;
+      const s = hScore(cd.boxes, rd, cd.cov, U, p, gwh, lm, direction, sp);
+      if (!detb.length && s < p.h_emin) continue;
+      if (bs === null || s > bs) { best = [cd.boxes, cd.name]; bs = s; }
+    }
+    c.out = best;
+  });
+}
+function hLines(cells, nLines, axis, direction, sp, read) {
+  const out = [];
+  for (let li = 0; li < nLines; li++) {
+    let cs = cells.filter((c) => c.line === li && c.out);
+    if (axis === 'rows' && direction === 'rtl') cs = cs.reverse();
+    const line = [];
+    cs.forEach((c, gi) => {
+      const [boxes, name] = c.out, conf = new Map(c.det.map((s) => [s.wbox.join(','), s.conf]));
+      for (const j of xyCut(boxes.map((_, i) => i), boxes.map((b) => b.concat([0])), direction, true, sp.cut_tol)) {
+        const b = boxes[j].map((v) => pyRound(v)), cf = conf.get(boxes[j].join(','));
+        line.push({ wbox: b, conf: cf !== undefined ? cf : read(boxes[j])[1], group: gi, src: name });
+      }
+    });
+    if (line.length) out.push(line);
+  }
+  return out;
+}
+// seg (lines of { wbox, conf }) -> seg with H's lines, U = quadrat size (work px), top(box) -> [class, prob]
+function hApply(seg, g0, U, direction, p, top, lm, f) {
+  const gwh = glyphWH(), Wg = g0.w, Hg = g0.h, axis = seg.layout, ang = seg.angle || 0.0, sp = p;
+  const lines = seg.lines.map((L) => L.map((s) => ({ wbox: s.wbox.slice(0, 4).map((v) => Math.trunc(v)), conf: s.conf != null ? s.conf : 0.0 })));
+  const ink = hInkmap(g0, U, p), lims = hLineLimits(lines, axis, ang), cells = [];
+  lines.forEach((L0, li) => {
+    if (!L0.length) return;
+    const fr = new Set(hFragments(L0, U, p, gwh, top));
+    const L = L0.filter((_, i) => !fr.has(i)), frags = L0.filter((_, i) => fr.has(i)).map((s) => s.wbox);
+    if (!L.length) return;
+    const [Q, rc] = hQuadrats(L, axis, ang, U, p, sp);
+    for (const c of hCells(L, Q, rc, axis, ang, U, ink, p, lims.get(li), Wg, Hg)) {
+      const r = hMrect(ink, c.box), det = c.idx.map((i) => L[i]);
+      c.line = li;
+      c.det = det.map((s) => ({ wbox: s.wbox.slice(), conf: s.conf }));
+      c.cov_det = det.length ? hCover(ink, r, det.map((s) => hMrect(ink, s.wbox))) : 0.0;
+      c.minconf = det.length ? Math.min(...det.map((s) => s.conf)) : 0.0;
+      c.frag = frags.some((b) => c.box[0] <= (b[0] + b[2]) / 2.0 && (b[0] + b[2]) / 2.0 <= c.box[2] && c.box[1] <= (b[1] + b[3]) / 2.0 && (b[1] + b[3]) / 2.0 <= c.box[3]);
+      cells.push(c);
+    }
+  });
+  for (const c of cells) c.flag = !!p.h_all || c.cov_det < p.h_cov || c.minconf < p.h_low || c.frag;
+  let ex = cells.map((c, i) => i).filter((i) => cells[i].kind === 'e' || cells[i].flag).sort((i, j) => (cells[i].cov_det - cells[j].cov_det) || (i - j));
+  if (!p.h_all) ex = ex.slice(0, p.h_maxq);
+  for (const i of ex) cells[i].cands = hEnum(ink, cells[i].box, U, p, Wg, Hg);
+  hDecide(cells, p, U, gwh, lm, direction, sp, top);
+  const nl = hLines(cells, lines.length, axis, direction, sp, top);
+  seg.lines = nl.map((L) => L.map((s) => Object.assign(s, { box: [s.wbox[0] * f, s.wbox[1] * f, (s.wbox[2] - s.wbox[0]) * f, (s.wbox[3] - s.wbox[1]) * f] })));
+  seg.h = { cells: cells.length, multi: cells.filter((c) => c.out && c.out[0].length > 1).length, examined: cells.filter((c) => c.cands).length,
+            changed: cells.filter((c) => c.out && c.out[1] !== 'det').length, U: U * f };
+  return seg;
 }
 
 // ------------------------------------------------------------------ dictionary decoding of each line (P3 C2)
@@ -1849,6 +2237,23 @@ export function recognise(imageData, opts = {}) {
     hit.push({ crop, res });
     return res;
   };
+  // P3 J: the reader (if loaded) reads the final signs; same caching and facing taps as cls
+  const reader = opts.reader === undefined ? READER : opts.reader;
+  const rcache = new Map();
+  const clsRead = !reader ? cls : (crop) => {
+    let h = 0; for (let i = 0; i < crop.length; i += 7) h = (h * 31 + crop[i]) | 0;
+    const key = h + ':' + crop.length;
+    let hit = rcache.get(key);
+    if (hit) for (const e of hit) if (e.crop.every((v, i) => v === crop[i])) return e.res;
+    const tc = now();
+    const tap = auto ? { after: fm.after } : null;
+    const res = classify(crop, reader, tap, kTop);
+    if (tap && res.prob[0] >= keepConf && fm.voters.has(res.idx[0])) maps.set(res, tap.map);
+    msCnn += now() - tc; nCnn++;
+    if (!hit) rcache.set(key, hit = []);
+    hit.push({ crop, res });
+    return res;
+  };
   // P3 B: classical segmentation, the detector, or both ('auto', default with a detector): the larger quality score wins
   const det = opts.detector === undefined ? DETECTOR : opts.detector;
   const closeDet = opts.detectorClose === undefined ? DETECTOR_CLOSE : opts.detectorClose;      // P3 F
@@ -1862,11 +2267,19 @@ export function recognise(imageData, opts = {}) {
   else {
     let b = segmentDet(grey, sopts);
     const gp = Object.assign({}, DET_PARAMS, opts.params || {}), nb = b.lines.reduce((n, L) => n + L.length, 0);
-    if (nb > gp.det_gate) { seg = b; scores = { classic: null, detector: b.selection_score, gate: true }; }
-    else {
+    const hp = Object.assign({}, PARAMS, DET_PARAMS, QUAD_PARAMS, H_PARAMS, opts.params || {});
+    const hTop = (work) => (bx) => sopts.classifyTop(prepCrop(work, bx, hp.crop_pad));
+    const guard = nb > gp.det_gate && wallGuard(b, hp);              // P3 J
+    if (nb > gp.det_gate && !guard) {
+      seg = b; scores = { classic: null, detector: b.selection_score, gate: true };
+      if (opts.quads !== false && hp.q_h) {                          // P3 H: quadrats on walls too
+        const U = estimateU([[gp.det_side, b.lines.flatMap((L) => L.map((x) => ({ box: x.wbox.slice(0, 4), conf: x.conf })))]], hp)[0];
+        if (U > 0) { seg = hApply(seg, b.work, U, direction, hp, hTop(b.work), lm, b.factor); scores.h = seg.h; }
+      }
+    } else {
       let levels = null, detMs = b.det_ms, quad = null;
       const runs = [[gp.det_side, b]];
-      if (nb <= gp.det_pyr_gate && gp.det_levels.length > 1) {          // P3 F: the detector pyramid (close-ups)
+      if ((nb <= gp.det_pyr_gate || guard) && gp.det_levels.length > 1) {   // P3 F: the detector pyramid (close-ups); P3 J guard
         let best = b, bs = levelScore(b, gp.det_lvl_floor);
         levels = [[gp.det_side, Math.round(bs * 1e4) / 1e4, nb]];
         for (const side of gp.det_levels) {
@@ -1881,7 +2294,7 @@ export function recognise(imageData, opts = {}) {
         }
         b = best;
         // P3 G: at the close-up scale the quadrat path reads the pooled levels (U, signs across levels, layout, quadrats)
-        const qp = Object.assign({}, PARAMS, DET_PARAMS, QUAD_PARAMS, opts.params || {});
+        const qp = hp;
         if (opts.quads !== false && qp.q_on !== 0) {
           const work = runs[0][1].work;
           quad = quadPath(runs, direction, opts.layout || 'auto', qp, (bx) => sopts.classifyTop(prepCrop(work, bx, qp.crop_pad)));
@@ -1898,14 +2311,20 @@ export function recognise(imageData, opts = {}) {
         seg = sb > sa ? b : a;
       }
       seg.det_ms = detMs;
+      if (guard) scores.guard = nb;                                   // P3 J
+      if (quad && quad.U > 0 && opts.quads !== false && hp.q_h) {    // P3 H: every path (quad and normal scale)
+        const work = runs[0][1].work;
+        seg = hApply(seg, work, quad.U, direction, hp, hTop(work), lm, runs[0][1].factor);
+        if (scores.quad) scores.quad.h = seg.h; else scores.h = seg.h;
+      }
     }
   }
-  const C = model.classes;
+  const RM = reader || model, C = RM.classes;                       // P3 J: the final signs are read by the reader
   const lines = seg.lines.map((L) => ({
     signs: L.map((s) => {
-      const r = cls(prepCrop(seg.work, s.wbox, p.crop_pad));
+      const r = clsRead(prepCrop(seg.work, s.wbox, p.crop_pad));
       const alts = r.idx.slice(0, 5).map((k, t) => ({ char: C[k].char, codepoint: C[k].codepoint, conf: r.prob[t], cls: k }));
-      const o = { char: alts[0].char, codepoint: alts[0].codepoint, conf: r.prob[0], uncertain: r.prob[0] < model.threshold,
+      const o = { char: alts[0].char, codepoint: alts[0].codepoint, conf: r.prob[0], uncertain: r.prob[0] < RM.threshold,
                   alts, box: s.box, group: s.group, wbox: s.wbox, k: s.k };
       if (lm) o.rec = { cls: r.idx.slice(0, lmP.k), prob: r.prob.slice(0, lmP.k) };     // the recogniser's own top-k (P3 C2)
       if (maps.has(r)) Object.defineProperty(o, 'fmap', { value: maps.get(r), enumerable: false });
@@ -1916,16 +2335,17 @@ export function recognise(imageData, opts = {}) {
                 polarity: seg.polarity, scale: seg.scale * seg.factor, angle: seg.angle || 0, params: opts.params || null, lines,
                 segmenter: seg.segmenter === 'quad' ? 'quad' : (seg.polarity === 'detector' ? 'detector' : 'classic'), segmenter_mode: mode, segmenter_scores: scores,
                 stats: { cnn_crops: nCnn, cnn_ms: msCnn, det_ms: seg.det_ms != null ? seg.det_ms : null } };
+  if (seg.h) res.quadrats = seg.h;                             // P3 H: the lines' quadrats come from the quadrat stage
   if (auto) {
     const tf = now();
     const v = voteDirection(lines.flatMap((L) => L.signs), fm, opts.vote);
-    if (v.direction !== direction) res.lines = orderSigns(lines, seg.layout, res.angle, direction, v.direction, p, res.segmenter === 'quad');
+    if (v.direction !== direction) res.lines = orderSigns(lines, seg.layout, res.angle, direction, v.direction, p, res.segmenter === 'quad' || !!res.quadrats);
     Object.assign(res, { direction: v.direction, direction_source: 'auto', direction_certainty: v.certainty, direction_votes: v.votes,
                          direction_flag: v.flagged ? 'too little evidence' : null, direction_auto: v });
     res.stats.facing_ms = now() - tf;
   }
   if (lm) {                                                    // P3 C2: decode each line in its final reading order
-    const tl = now(), d = decodeLines(res.lines, lm, lmP, model);
+    const tl = now(), d = decodeLines(res.lines, lm, lmP, RM);       // P3 J: the prior of the recogniser that read the signs
     res.decode = { applied: true, params: lmP, changed: d.changed };
     res.stats.decode_ms = now() - tl;
   } else res.decode = { applied: false };
