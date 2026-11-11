@@ -1,5 +1,15 @@
 [
   {
+    "version": "2026-11-11",
+    "title": "A new way to read photos",
+    "items": [
+      "Read from a photo has a new flow: set a frame around the inscription (drag its edges or pinch), watch the app find and read the signs, and the text appears under the photo with transliteration and translation.",
+      "The reading direction is chosen with small buttons: Auto, right to left or left to right.",
+      "A second sign finder, trained on real photos, finds more signs, and an improved reader reads them.",
+      "A wrong sign is corrected on a single card."
+    ]
+  },
+  {
     "version": "2026-11-07",
     "title": "Better reading from photos",
     "items": [

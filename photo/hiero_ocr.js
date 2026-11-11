@@ -652,6 +652,20 @@ function parseModel(meta, buf) {
   const { T, bytes } = parseTensors(meta, buf);
   const u8 = { byteLength: bytes };
   const layers = meta.layers.map((L) => Object.assign({}, L, L.weight ? { W: T[L.weight], B: T[L.bias] } : {}));
+  // P3 K: for every 4 output channels of a conv layer, the range of input channels with a non-zero weight (the I+J reader's
+  // conv5 is block-diagonal); the convolution skips the rest. Exact: a skipped term is 0 * pixel added to the sum.
+  for (const L of layers) if (L.type === 'conv3x3' && L.W) {
+    const C = L.in_ch, R = new Int32Array(2 * Math.ceil(L.out_ch / 4));
+    for (let c0 = 0, g = 0; c0 < L.out_ch; c0 += 4, g++) {
+      let lo = C, hi = 0;
+      for (let o = c0; o < Math.min(L.out_ch, c0 + 4); o++) for (let ci = 0; ci < C; ci++) {
+        const k = (o * C + ci) * 9; let nz = false; for (let t = 0; t < 9; t++) if (L.W[k + t] !== 0) { nz = true; break; }
+        if (nz) { if (ci < lo) lo = ci; if (ci + 1 > hi) hi = ci + 1; }
+      }
+      R[2 * g] = lo < hi ? lo : 0; R[2 * g + 1] = lo < hi ? hi : 0;
+    }
+    L.ranges = R;
+  }
   const prior = T.prior_logit || new Float32Array(meta.classes.length);
   return { meta, layers, prior, classes: meta.classes, threshold: meta.threshold != null ? meta.threshold : 0.56,
            norm: meta.normalisation, bytes: u8.byteLength };
@@ -694,7 +708,7 @@ async function readModelFiles(src) {
   return { meta, bin };
 }
 
-function conv3x3ReluPool(x, C, H, Wd, w, b, Cout) {
+function conv3x3ReluPool(x, C, H, Wd, w, b, Cout, ranges = null) {
   // zero padding 1, stride 1, then ReLU and 2x2 max-pool stride 2. Four output channels per pass over the input
   // (each input pixel is loaded once for four channels); per output the arithmetic is the same as one channel at a time.
   const Hp = H + 2, Wp = Wd + 2, pad = new Float32Array(C * Hp * Wp);
@@ -704,7 +718,8 @@ function conv3x3ReluPool(x, C, H, Wd, w, b, Cout) {
   for (let c0 = 0; c0 < Cout; c0 += 4) {
     const nb = Math.min(4, Cout - c0);
     for (let j = 0; j < 4; j++) conv.fill(j < nb ? b[c0 + j] : 0, j * HW, (j + 1) * HW);
-    for (let ci = 0; ci < C; ci++) {
+    const ciLo = ranges ? ranges[c0 >> 1] : 0, ciHi = ranges ? ranges[(c0 >> 1) + 1] : C;      // P3 K: only the non-zero inputs
+    for (let ci = ciLo; ci < ciHi; ci++) {
       const base = ci * Hp * Wp;
       const k0 = (c0 * C + ci) * 9, k1 = k0 + C * 9, k2 = k1 + C * 9, k3 = k2 + C * 9;
       if (nb < 4) {                                   // generic tail (not used by the shipped model)
@@ -761,7 +776,7 @@ export function logits(crop, model = CURRENT, tap = null) {
   let C = 1, H = 64, W = 64, nConv = 0;
   for (const L of model.layers) {
     if (L.type === 'conv3x3') {
-      x = conv3x3ReluPool(x, C, H, W, L.W, L.B, L.out_ch); C = L.out_ch; H >>= 1; W >>= 1;
+      x = conv3x3ReluPool(x, C, H, W, L.W, L.B, L.out_ch, L.ranges); C = L.out_ch; H >>= 1; W >>= 1;
       if (tap && ++nConv === tap.after) tap.map = x;
     }
     else if (L.type === 'global_avg_pool') {
@@ -949,6 +964,17 @@ export async function loadDetector(src) {
   DETECTOR = { meta, ops, bytes, decode: meta.decode || {} };
   return DETECTOR;
 }
+// P3 K: an optional second main detector; the main detector's output maps become the mean of both (= detect.py 'a.json+b.json').
+// loadDetector2(null) removes it. Call after loadDetector().
+export async function loadDetector2(src) {
+  if (!DETECTOR) throw new Error('call loadDetector() first');
+  if (src === null) { delete DETECTOR.also; return null; }
+  const { meta, bin } = await readModelFiles(src);
+  const { T, bytes } = parseTensors(meta, bin);
+  const ops = meta.ops.map((o) => Object.assign({}, o, o.op === 'conv' ? { W: T[o.name + '.weight'], B: T[o.name + '.bias'] } : {}));
+  DETECTOR.also = { meta, ops, bytes, decode: meta.decode || {} };
+  return DETECTOR.also;
+}
 
 function areaResize(g, nw, nh) {                    // = det_common.area_resize (same taps and float64 order as prepCrop)
   const { w: W, h: H, d } = g, tx = axisTaps(W, nw), ty = axisTaps(H, nh);
@@ -1027,8 +1053,21 @@ function up2(x, C, H, W) {
 }
 
 // raw detector output for a work image: { out: Float32Array 5*h*w, h, w, sx, sy, vh, vw } (stride-4 maps)
+// P3 K: the forward pass as a generator that yields after every layer (recogniseAsync shows real progress through it);
+// detectorForward() runs it to the end in one go (the same computation).
 export function detectorForward(work, side = DET_PARAMS.det_side, det = DETECTOR) {
+  const it = forwardSteps(work, side, det);
+  let r = it.next();
+  while (!r.done) r = it.next();
+  return r.value;
+}
+function* forwardSteps(work, side = DET_PARAMS.det_side, det = DETECTOR) {
   if (!det) throw new Error('call loadDetector() first');
+  if (det.also) {                                          // P3 K: two detectors fused: mean of their output maps (float32 as numpy)
+    const a = yield* forwardSteps(work, side, Object.assign({}, det, { also: null })), b = yield* forwardSteps(work, side, det.also), o = new Float32Array(a.out.length);
+    for (let i = 0; i < o.length; i++) o[i] = Math.fround(Math.fround(a.out[i] + b.out[i]) / 2);
+    return Object.assign({}, a, { out: o });
+  }
   const s = Math.min(1.0, side / Math.max(work.h, work.w));
   let g = work;
   if (s < 1.0) g = areaResize(work, Math.max(1, pyRound(work.w * s)), Math.max(1, pyRound(work.h * s)));
@@ -1054,6 +1093,7 @@ export function detectorForward(work, side = DET_PARAMS.det_side, det = DETECTOR
       for (let i = 0; i < t.length; i++) t[i] = a.t[i] + b.t[i];
       env[o.out] = { t, C: a.C, H: a.H, W: a.W };
     }
+    yield 1;
   }
   const r = env[det.meta.output];
   return { out: r.t, h: r.H, w: r.W, sx: g.w / work.w, sy: g.h / work.h, vh: g.h, vw: g.w };
@@ -1066,8 +1106,25 @@ function iouXYWH(a, b) {
 }
 
 // sign boxes in work pixels: [[x0, y0, x1, y1, area, score]] (= detect.detect_boxes)
-export function detectBoxes(work, p = Object.assign({}, PARAMS, DET_PARAMS), det = DETECTOR) {
-  const F = detectorForward(work, p.det_side, det);
+export function detectBoxes(work, p = Object.assign({}, PARAMS, DET_PARAMS), det = DETECTOR, fwd = null, fwd2 = null) {
+  // P3 K: fwd = the forward pass already run (recogniseAsync); det.union = a second detector whose peaks join (one NMS)
+  let keep;
+  if (det.union) {
+    const all = detPeaks(fwd || detectorForward(work, p.det_side, Object.assign({}, det, { union: null })), p, det)
+      .concat(detPeaks(fwd2 || detectorForward(work, p.det_side, det.union), p, det.union));
+    all.sort((a, b) => b[0] - a[0]); keep = [];
+    for (const c of all) if (keep.every((k) => iouXYWH(c[1], k[1]) < p.det_nms)) keep.push(c);
+  } else keep = detPeaks(fwd || detectorForward(work, p.det_side, det), p, det);
+  const res = [];
+  for (const [s, [bx, by, bwv, bhv]] of keep) {
+    const x0 = Math.max(0, Math.floor(bx + 0.5)), y0 = Math.max(0, Math.floor(by + 0.5));
+    const x1 = Math.min(work.w, Math.floor(bx + bwv + 0.5)), y1 = Math.min(work.h, Math.floor(by + bhv + 0.5));
+    if (x1 - x0 >= p.det_min_px && y1 - y0 >= p.det_min_px) res.push([x0, y0, x1, y1, (x1 - x0) * (y1 - y0), s]);
+  }
+  return res;
+}
+// one detector's peaks [score, [x, y, w, h]] in work pixels after its own NMS (= det_common.decode)
+function detPeaks(F, p, det) {
   const { out, h, w } = F, hw = h * w, S = det.meta.stride || 4;
   const heat = new Float64Array(hw);
   for (let i = 0; i < hw; i++) heat[i] = 1 / (1 + Math.exp(-out[i]));
@@ -1093,13 +1150,17 @@ export function detectBoxes(work, p = Object.assign({}, PARAMS, DET_PARAMS), det
   cand.sort((a, b) => b[0] - a[0]);                 // stable: ties keep the row-major order (like Python)
   const keep = [];
   for (const c of cand) if (keep.every((k) => iouXYWH(c[1], k[1]) < p.det_nms)) keep.push(c);
-  const res = [];
-  for (const [s, [bx, by, bwv, bhv]] of keep) {
-    const x0 = Math.max(0, Math.floor(bx + 0.5)), y0 = Math.max(0, Math.floor(by + 0.5));
-    const x1 = Math.min(work.w, Math.floor(bx + bwv + 0.5)), y1 = Math.min(work.h, Math.floor(by + bhv + 0.5));
-    if (x1 - x0 >= p.det_min_px && y1 - y0 >= p.det_min_px) res.push([x0, y0, x1, y1, (x1 - x0) * (y1 - y0), s]);
-  }
-  return res;
+  return keep;
+}
+// P3 K: a second main detector whose peaks are united with the first one's (one NMS over both; = detect.py 'a.json|b.json')
+export async function loadDetectorUnion(src) {
+  if (!DETECTOR) throw new Error('call loadDetector() first');
+  if (src === null) { delete DETECTOR.union; return null; }
+  const { meta, bin } = await readModelFiles(src);
+  const { T, bytes } = parseTensors(meta, bin);
+  const ops = meta.ops.map((o) => Object.assign({}, o, o.op === 'conv' ? { W: T[o.name + '.weight'], B: T[o.name + '.bias'] } : {}));
+  DETECTOR.union = { meta, ops, bytes, decode: meta.decode || {} };
+  return DETECTOR.union;
 }
 
 // P3 C1: in-line merges on the detector's lines (= detect.merge_det_line); det_merge bit flags in this order: 8 drop a box
@@ -1246,8 +1307,8 @@ export function segmentDet(img, opts = {}) {
   const direction = opts.direction === 'rtl' ? 'rtl' : 'ltr';
   const [g0, f] = downscale(img.d ? img : toGrey(img), p.max_side);
   const td = now();
-  const boxes = detectBoxes(g0, p, opts.detector || DETECTOR);
-  const detMs = now() - td;
+  const boxes = detectBoxes(g0, p, opts.detector || DETECTOR, opts.fwd || null, opts.fwd2 || null);
+  const detMs = now() - td + (opts.fwdMs || 0);
   let score = null;
   if (opts.classify) {
     const cache = new Map();
@@ -2209,7 +2270,149 @@ export function decodeLines(lines, lm = SIGNLM, params = {}, model = CURRENT) {
 //             direction_auto: { direction, certainty, level 'sure'|'likely'|'unsure', flagged, votes, facing_right,
 //             facing_left, evidence, p_rtl }, polarity, scale, angle, lines: [{ signs: [{ char, codepoint, conf,
 //             uncertain, alts, box, group, wbox, k, facing? }] }], stats }
+// P3 K: the pipeline as a generator of progress events (stage, fraction, partial boxes). recognise() runs it to the end in one
+// go (identical results); recogniseAsync() gives the browser a turn between the steps (the animation repaints) and can be
+// cancelled (opts.signal). opts.onProgress(ev) receives every event in both: ev = { stage, fraction, ... } with the stages
+// in order: start, detect (boxes of the first detector pass), level (pyramid levels of close-ups), lines (line bands),
+// quadrats (quadrat boxes), read (signs as they are read, in reading order), direction, decode, done (fraction 1).
+// Boxes are [x, y, w, h] in the pixels of imageData.
 export function recognise(imageData, opts = {}) {
+  const it = recogniseSteps(imageData, opts);
+  let r = it.next();
+  while (!r.done) r = it.next();
+  return r.value;
+}
+export async function recogniseAsync(imageData, opts = {}) {
+  const it = recogniseSteps(imageData, opts);
+  const pause = opts.pause || (() => new Promise((res) => setTimeout(res, 0)));
+  let r = it.next();
+  while (!r.done) {
+    if (opts.signal && opts.signal.aborted) { const e = new Error('cancelled'); e.name = 'AbortError'; throw e; }
+    await pause(r.value);
+    if (opts.signal && opts.signal.aborted) { const e = new Error('cancelled'); e.name = 'AbortError'; throw e; }
+    r = it.next();
+  }
+  return r.value;
+}
+const unionBox = (bs) => { let x0 = 1e18, y0 = 1e18, x1 = -1e18, y1 = -1e18;
+  for (const b of bs) { x0 = Math.min(x0, b[0]); y0 = Math.min(y0, b[1]); x1 = Math.max(x1, b[0] + b[2]); y1 = Math.max(y1, b[1] + b[3]); }
+  return [x0, y0, x1 - x0, y1 - y0]; };
+function progressLines(lines) {                       // line bands and quadrat boxes of a segmentation (lines of {box, group})
+  const bands = [], quads = [];
+  for (const L of lines) {
+    if (!L.length) continue;
+    bands.push(unionBox(L.map((x) => x.box)));
+    const g = new Map(); for (const x of L) { if (!g.has(x.group)) g.set(x.group, []); g.get(x.group).push(x.box); }
+    for (const bs of g.values()) quads.push(unionBox(bs));
+  }
+  return { bands, quads };
+}
+// P3 K2: LARGE signs (taller than the line's quadrat) that no pass boxed = bigsigns.py (JS = Python, parity in j_work/par/parity_K2.txt).
+// After the pipeline, with U = the quadrat size (work pixels): the detectors (b_dets 0 det_close, 1 main, 2 both) also run at the
+// coarse levels b_sides (threshold b_thr); every box and (b_clu) the union of each group of touching raw boxes outside the boxes
+// read are candidates; BIG = cross size >= b_u U, long side <= b_umax U, long/short <= b_asp, not at the image border (b_edge),
+// share inside the boxes read < b_cov, segmentation recogniser top-1 >= b_conf; taken by that probability (IoU < b_iou with one
+// taken); each joins the line it overlaps most as its own quadrat, in reading order (never inside a quadrat).
+export const BIG_PARAMS = Object.freeze({ b_on: 1, b_sides: [320, 224], b_dets: 0, b_thr: 0.25, b_clu: 1, b_gap: 0.1, b_cov: 0.35,
+                                          b_u: 1.3, b_umax: 4.0, b_conf: 0.6, b_iou: 0.3, b_edge: 1, b_asp: 2.5 });
+function bigCover(b, boxes) {
+  const x0 = Math.trunc(b[0]), y0 = Math.trunc(b[1]), x1 = Math.trunc(b[2]), y1 = Math.trunc(b[3]);
+  const w = Math.max(1, x1 - x0), h = Math.max(1, y1 - y0), m = new Uint8Array(w * h);
+  for (const o of boxes) {
+    const a0 = Math.max(x0, Math.trunc(o[0])), b0 = Math.max(y0, Math.trunc(o[1])), a1 = Math.min(x1, Math.trunc(o[2])), b1 = Math.min(y1, Math.trunc(o[3]));
+    if (a1 > a0 && b1 > b0) for (let y = b0 - y0; y < b1 - y0; y++) m.fill(1, y * w + a0 - x0, y * w + a1 - x0);
+  }
+  let n = 0; for (let i = 0; i < m.length; i++) n += m[i];
+  return n / m.length;
+}
+function bigIou(a, b) {
+  const ix = Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])), iy = Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1])), i = ix * iy;
+  const u = (a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - i;
+  return u > 0 ? i / u : 0;
+}
+function bigClusters(boxes, gap) {
+  const n = boxes.length, par = Array.from({ length: n }, (_, i) => i);
+  const find = (i) => { while (par[i] !== i) { par[i] = par[par[i]]; i = par[i]; } return i; };
+  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+    const a = boxes[i], b = boxes[j];
+    if (a[0] - gap <= b[2] && b[0] - gap <= a[2] && a[1] - gap <= b[3] && b[1] - gap <= a[3]) {
+      const ri = find(i), rj = find(j); if (ri !== rj) par[Math.max(ri, rj)] = Math.min(ri, rj);
+    }
+  }
+  const g = new Map();
+  for (let i = 0; i < n; i++) { const r = find(i); if (!g.has(r)) g.set(r, []); g.get(r).push(boxes[i]); }
+  return [...g.keys()].sort((a, b) => a - b).map((k) => g.get(k)).filter((v) => v.length > 1)
+    .map((v) => [Math.min(...v.map((b) => b[0])), Math.min(...v.map((b) => b[1])), Math.max(...v.map((b) => b[2])), Math.max(...v.map((b) => b[3]))]);
+}
+function bigCandidates(raw, have, U, cols, q, size) {
+  const rb = raw.filter(([d, side, sc]) => sc >= q.b_thr && q.b_sides.includes(side) && (q.b_dets === 2 || d === q.b_dets)).map((r) => r[3].slice());
+  const out = rb.concat(q.b_clu ? bigClusters(rb.filter((bx) => bigCover(bx, have) < 0.5), q.b_gap * U) : []);
+  const res = [], seen = new Set();
+  for (const bx of out) {
+    const w = bx[2] - bx[0], h = bx[3] - bx[1];
+    if ((cols ? w : h) < q.b_u * U || Math.max(w, h) > q.b_umax * U || Math.max(w, h) > q.b_asp * Math.max(1, Math.min(w, h))) continue;
+    if (q.b_edge && size && (bx[0] <= 1 || bx[1] <= 1 || bx[2] >= size[0] - 1 || bx[3] >= size[1] - 1)) continue;
+    const key = bx.join(',');
+    if (seen.has(key) || bigCover(bx, have) >= q.b_cov) continue;
+    seen.add(key); res.push(bx);
+  }
+  return res;
+}
+function bigSelect(cands, top, q) {
+  const sc = cands.map((bx) => { const [c, p] = top(bx); return [p, c, bx]; }).filter((t) => t[0] >= q.b_conf);
+  sc.sort((a, b) => b[0] - a[0]);
+  const added = [];
+  for (const [p, c, bx] of sc) if (added.every((a) => bigIou(bx, a[0]) < q.b_iou)) added.push([bx, c, p]);
+  return added;
+}
+function bigPlace(lines, bx, cols, direction) {
+  let best = 0, bo = null;
+  lines.forEach((L, li) => {
+    const lo = Math.min(...L.map((s) => cols ? s.wbox[0] : s.wbox[1])), hi = Math.max(...L.map((s) => cols ? s.wbox[2] : s.wbox[3]));
+    const o = Math.min(hi, cols ? bx[2] : bx[3]) - Math.max(lo, cols ? bx[0] : bx[1]);
+    if (bo === null || o > bo) { bo = o; best = li; }
+  });
+  const L = lines[best], c = cols ? (bx[1] + bx[3]) / 2 : (bx[0] + bx[2]) / 2, rev = !cols && direction === 'rtl';
+  let at = L.length;
+  for (let i = 0; i < L.length; i++) {
+    const s = L[i], cs = cols ? (s.wbox[1] + s.wbox[3]) / 2 : (s.wbox[0] + s.wbox[2]) / 2;
+    if (rev ? cs < c : cs > c) { at = i; break; }
+  }
+  while (at > 0 && at < L.length && L[at].group === L[at - 1].group) at++;
+  return [best, at];
+}
+// the detector boxes at the coarse levels: [det index, side, score, [x0, y0, x1, y1]] (threshold 0.15; filtered later)
+function* bigRaw(work, dets, sides, p, tick) {
+  const out = [];
+  for (let d = 0; d < dets.length; d++) {
+    if (!dets[d]) continue;
+    for (const side of sides) {
+      const pp = Object.assign({}, p, { det_side: side, det_thr: 0.15 });
+      for (const r of detectBoxes(work, pp, dets[d])) out.push([d, side, r[5], r.slice(0, 4)]);
+      if (tick) yield tick();
+    }
+  }
+  return out;
+}
+// seg: the pipeline result (lines of {box, wbox, group}); adds the big signs in place; returns their count (generator: progress)
+function* bigSigns(seg, work, U, direction, p, dets, top, tick) {
+  const q = Object.assign({}, BIG_PARAMS);
+  for (const k of Object.keys(p || {})) if (k.startsWith('b_')) q[k] = p[k];
+  if (!q.b_on || !(U > 0) || !seg.lines.length) return 0;
+  const cols = seg.layout === 'columns', f = seg.factor || 1;
+  const have = seg.lines.flatMap((L) => L.map((s) => s.wbox.slice(0, 4)));
+  const raw = yield* bigRaw(work, dets.map((d, i) => (q.b_dets === 2 || q.b_dets === i) ? d : null), q.b_sides, p, tick);
+  const added = bigSelect(bigCandidates(raw, have, U, cols, q, [work.w, work.h]), top, q);
+  for (const [bx, c, pr] of added) {
+    const [li, at] = bigPlace(seg.lines, bx, cols, direction), L = seg.lines[li];
+    const g = Math.max(-1, ...L.map((s) => s.group)) + 1;
+    L.splice(at, 0, { box: [bx[0] * f, bx[1] * f, (bx[2] - bx[0]) * f, (bx[3] - bx[1]) * f], wbox: bx.slice(), group: g, conf: pr, src: 'big', k: -1 });
+  }
+  if (added.length) seg.big = added.length;
+  return added.length;
+}
+function* recogniseSteps(imageData, opts = {}) {
+  const emit = (stage, fraction, data) => { const ev = Object.assign({ stage, fraction }, data || {}); if (opts.onProgress) opts.onProgress(ev); return ev; };
   const model = opts.model || CURRENT;
   if (!model) throw new Error('call loadModel() first');
   const dirIn = opts.direction || 'ltr';
@@ -2259,14 +2462,29 @@ export function recognise(imageData, opts = {}) {
   const closeDet = opts.detectorClose === undefined ? DETECTOR_CLOSE : opts.detectorClose;      // P3 F
   const mode = det ? (opts.segmenter || 'auto') : 'classic';
   const grey = imageData.d ? imageData : toGrey(imageData);
+  yield emit('start', 0.02, { width: grey.w, height: grey.h });
   const sopts = { direction, layout: opts.layout, params: opts.params, classify: (crop) => cls(crop).prob[0], detector: det,
                   classifyTop: (crop) => { const r = cls(crop); return [r.idx[0], r.prob[0]]; } };
-  let seg, scores = null;
+  let seg, scores = null, bigU = 0, bigWork = null;     // P3 K2: U and work image of the reading, for the big-sign step
   if (mode === 'classic') seg = segment(grey, sopts);
   else if (mode === 'detector') seg = segmentDet(grey, sopts);
   else {
-    let b = segmentDet(grey, sopts);
+    // P3 K: real progress through the blocking first pass: the detector layer by layer ('scan'), then its peaks, top to bottom,
+    // as they are checked by the recogniser ('peaks'); segmentDet then reuses both (same pass, cached reads = same result)
+    const gp0 = Object.assign({}, PARAMS, DET_PARAMS, opts.params || {}), [g00, f00] = downscale(grey, gp0.max_side);
+    const nOps = det.ops.length * (det.also ? 2 : 1) * (det.union ? 2 : 1), tf0 = now();
+    let kOp = 0;
+    const runF = function* (d) { const it = forwardSteps(g00, gp0.det_side, d); let r = it.next(); while (!r.done) { kOp++; if (kOp % 2 === 0) yield emit('scan', 0.02 + 0.1 * kOp / nOps); r = it.next(); } return r.value; };
+    const fwd = yield* runF(det.union ? Object.assign({}, det, { union: null }) : det), fwd2 = det.union ? yield* runF(det.union) : null;
+    const fwdMs = now() - tf0, boxes0 = detectBoxes(g00, gp0, det, fwd, fwd2);
+    const scaled = (bb) => [bb[0] * f00, bb[1] * f00, (bb[2] - bb[0]) * f00, (bb[3] - bb[1]) * f00];
+    if (gp0.det_floor > 0) for (let i = 0; i < boxes0.length; i++) {
+      const bb = boxes0[i]; sopts.classify(prepCrop(g00, [bb[0], bb[1], bb[2], bb[3]], gp0.crop_pad));
+      if (i % 6 === 5 || i === boxes0.length - 1) yield emit('peaks', 0.12 + 0.17 * (i + 1) / boxes0.length, { boxes: boxes0.slice(0, i + 1).map(scaled), y: (bb[3]) * f00 });
+    }
+    let b = segmentDet(grey, Object.assign({}, sopts, { fwd, fwd2, fwdMs }));
     const gp = Object.assign({}, DET_PARAMS, opts.params || {}), nb = b.lines.reduce((n, L) => n + L.length, 0);
+    yield emit('detect', 0.3, { boxes: b.lines.flatMap((L) => L.map((x) => x.box)) });
     const hp = Object.assign({}, PARAMS, DET_PARAMS, QUAD_PARAMS, H_PARAMS, opts.params || {});
     const hTop = (work) => (bx) => sopts.classifyTop(prepCrop(work, bx, hp.crop_pad));
     const guard = nb > gp.det_gate && wallGuard(b, hp);              // P3 J
@@ -2274,7 +2492,7 @@ export function recognise(imageData, opts = {}) {
       seg = b; scores = { classic: null, detector: b.selection_score, gate: true };
       if (opts.quads !== false && hp.q_h) {                          // P3 H: quadrats on walls too
         const U = estimateU([[gp.det_side, b.lines.flatMap((L) => L.map((x) => ({ box: x.wbox.slice(0, 4), conf: x.conf })))]], hp)[0];
-        if (U > 0) { seg = hApply(seg, b.work, U, direction, hp, hTop(b.work), lm, b.factor); scores.h = seg.h; }
+        if (U > 0) { yield emit('lines', 0.5, progressLines(seg.lines)); seg = hApply(seg, b.work, U, direction, hp, hTop(b.work), lm, b.factor); scores.h = seg.h; bigU = U; bigWork = b.work; }
       }
     } else {
       let levels = null, detMs = b.det_ms, quad = null;
@@ -2288,6 +2506,7 @@ export function recognise(imageData, opts = {}) {
             params: Object.assign({}, opts.params || {}, { det_side: side, det_thr: gp.det_lvl_thr }) }));
           const rs = levelScore(r, gp.det_lvl_floor);
           detMs += r.det_ms;
+          yield emit('level', 0.3 + 0.25 * runs.length / gp.det_levels.length, { side, boxes: r.lines.flatMap((L) => L.map((x) => x.box)) });
           runs.push([side, r]);
           levels.push([side, Math.round(rs * 1e4) / 1e4, r.lines.reduce((n, L) => n + L.length, 0)]);
           if (rs > bs) { best = r; bs = rs; }
@@ -2311,32 +2530,51 @@ export function recognise(imageData, opts = {}) {
         seg = sb > sa ? b : a;
       }
       seg.det_ms = detMs;
+      if (quad && quad.U > 0) { bigU = quad.U; bigWork = runs[0][1].work; }     // P3 K2
       if (guard) scores.guard = nb;                                   // P3 J
       if (quad && quad.U > 0 && opts.quads !== false && hp.q_h) {    // P3 H: every path (quad and normal scale)
+        yield emit('lines', 0.58, progressLines(seg.lines));
         const work = runs[0][1].work;
         seg = hApply(seg, work, quad.U, direction, hp, hTop(work), lm, runs[0][1].factor);
         if (scores.quad) scores.quad.h = seg.h; else scores.h = seg.h;
       }
     }
+    // P3 K2: large signs (taller than the line's quadrat) that no pass boxed; the coarse detector passes report progress
+    if (bigU > 0 && (seg.work || bigWork)) {
+      const work = seg.work || bigWork, nT = BIG_PARAMS.b_sides.length * (BIG_PARAMS.b_dets === 2 ? 2 : 1);
+      let kT = 0;
+      yield emit('large', 0.6);
+      const nb2 = yield* bigSigns(seg, work, bigU, direction, hp, [closeDet, det],
+        (bx) => sopts.classifyTop(prepCrop(work, bx, hp.crop_pad)), () => emit('large', 0.6 + 0.05 * (++kT) / nT));
+      if (nb2) scores.big = nb2;
+    }
   }
   const RM = reader || model, C = RM.classes;                       // P3 J: the final signs are read by the reader
-  const lines = seg.lines.map((L) => ({
-    signs: L.map((s) => {
+  { const pl = progressLines(seg.lines); yield emit('quadrats', 0.66, { bands: pl.bands, quads: pl.quads, layout: seg.layout, total: seg.lines.reduce((n, L) => n + L.length, 0) }); }
+  const lines = [], nAll = seg.lines.reduce((n, L) => n + L.length, 0);
+  let nRead = 0, fresh = [];
+  for (const L of seg.lines) {
+    const signs = [];
+    for (const s of L) {
       const r = clsRead(prepCrop(seg.work, s.wbox, p.crop_pad));
       const alts = r.idx.slice(0, 5).map((k, t) => ({ char: C[k].char, codepoint: C[k].codepoint, conf: r.prob[t], cls: k }));
       const o = { char: alts[0].char, codepoint: alts[0].codepoint, conf: r.prob[0], uncertain: r.prob[0] < RM.threshold,
                   alts, box: s.box, group: s.group, wbox: s.wbox, k: s.k };
       if (lm) o.rec = { cls: r.idx.slice(0, lmP.k), prob: r.prob.slice(0, lmP.k) };     // the recogniser's own top-k (P3 C2)
       if (maps.has(r)) Object.defineProperty(o, 'fmap', { value: maps.get(r), enumerable: false });
-      return o;
-    }),
-  }));
+      signs.push(o); nRead++; fresh.push(s.box);
+      if (fresh.length >= 4) { yield emit('read', 0.66 + 0.28 * nRead / Math.max(1, nAll), { boxes: fresh, found: nRead, total: nAll }); fresh = []; }
+    }
+    lines.push({ signs });
+  }
+  if (fresh.length) yield emit('read', 0.94, { boxes: fresh, found: nRead, total: nAll });
   const res = { layout: seg.layout, direction, direction_source: dirIn === 'auto' ? 'default (no facing model)' : 'user',
                 polarity: seg.polarity, scale: seg.scale * seg.factor, angle: seg.angle || 0, params: opts.params || null, lines,
                 segmenter: seg.segmenter === 'quad' ? 'quad' : (seg.polarity === 'detector' ? 'detector' : 'classic'), segmenter_mode: mode, segmenter_scores: scores,
                 stats: { cnn_crops: nCnn, cnn_ms: msCnn, det_ms: seg.det_ms != null ? seg.det_ms : null } };
   if (seg.h) res.quadrats = seg.h;                             // P3 H: the lines' quadrats come from the quadrat stage
   if (auto) {
+    yield emit('direction', 0.96, { found: nRead });
     const tf = now();
     const v = voteDirection(lines.flatMap((L) => L.signs), fm, opts.vote);
     if (v.direction !== direction) res.lines = orderSigns(lines, seg.layout, res.angle, direction, v.direction, p, res.segmenter === 'quad' || !!res.quadrats);
@@ -2345,6 +2583,7 @@ export function recognise(imageData, opts = {}) {
     res.stats.facing_ms = now() - tf;
   }
   if (lm) {                                                    // P3 C2: decode each line in its final reading order
+    yield emit('decode', 0.98, { found: nRead });
     const tl = now(), d = decodeLines(res.lines, lm, lmP, RM);       // P3 J: the prior of the recogniser that read the signs
     res.decode = { applied: true, params: lmP, changed: d.changed };
     res.stats.decode_ms = now() - tl;
@@ -2352,6 +2591,7 @@ export function recognise(imageData, opts = {}) {
   for (const L of res.lines) L.quads = lineQuads(L.signs, res.direction, p.cut_tol);     // P3 G: the quadrats of each line
   res.quality = readingQuality(res, grey);
   res.stats.total_ms = now() - t0;
+  emit('done', 1, { found: nRead });
   return res;
 }
 
