@@ -414,27 +414,44 @@ function mergeFragments(boxesIn, lh, p) {
   return boxes;
 }
 
-function xyCut(idx, boxes, direction, preferY, tol, depth = 0) {
+// one XY cut along y (useY) or x (= segment.cut_parts): [parts in axis order, gap = smallest raw distance between parts]
+function cutParts(idx, boxes, useY, tol) {
+  const lo = useY ? (b) => b[1] : (b) => b[0];
+  const hi = useY ? (b) => b[3] : (b) => b[2];
+  const items = idx.slice().sort((i, j) => (lo(boxes[i]) + hi(boxes[i])) / 2.0 - (lo(boxes[j]) + hi(boxes[j])) / 2.0);
+  const parts = []; let cur = [], end = null;
+  for (const i of items) {
+    const b = boxes[i], ext = hi(b) - lo(b), a0 = lo(b) + tol * ext;
+    if (cur.length && a0 >= end) { parts.push(cur); cur = []; end = null; }
+    cur.push(i);
+    const e = hi(b) - tol * ext;
+    end = end === null ? e : Math.max(end, e);
+  }
+  parts.push(cur);
+  let gap = null;
+  for (let k = 0; k + 1 < parts.length; k++) {
+    const g = Math.min(...parts[k + 1].map((i) => lo(boxes[i]))) - Math.max(...parts[k].map((i) => hi(boxes[i])));
+    gap = gap === null ? g : Math.min(gap, g);
+  }
+  return [parts, gap];
+}
+// P3 K3 (= segment.choose_cut): the preferred axis unless its parts overlap and the other axis cuts more cleanly
+// (a tall sign beside a stack whose top sign ends a little below the tall sign's top is side by side: U6 beside r:r)
+function chooseCut(idx, boxes, preferY, tol) {
+  const first = !!preferY, [pa, ga] = cutParts(idx, boxes, first, tol);
+  if (pa.length > 1 && ga >= 0) return [first, pa];
+  const [pb, gb] = cutParts(idx, boxes, !first, tol);
+  if (pa.length > 1) return pb.length > 1 && gb > ga ? [!first, pb] : [first, pa];
+  return pb.length > 1 ? [!first, pb] : [null, null];
+}
+export function xyCut(idx, boxes, direction, preferY, tol, depth = 0) {
   if (idx.length <= 1 || depth > 8) return idx.slice();
-  for (const useY of (preferY ? [true, false] : [false, true])) {
-    const lo = useY ? (b) => b[1] : (b) => b[0];
-    const hi = useY ? (b) => b[3] : (b) => b[2];
-    const items = idx.slice().sort((i, j) => (lo(boxes[i]) + hi(boxes[i])) / 2.0 - (lo(boxes[j]) + hi(boxes[j])) / 2.0);
-    let parts = [], cur = [], end = null;
-    for (const i of items) {
-      const b = boxes[i], ext = hi(b) - lo(b), a0 = lo(b) + tol * ext;
-      if (cur.length && a0 >= end) { parts.push(cur); cur = []; end = null; }
-      cur.push(i);
-      const e = hi(b) - tol * ext;
-      end = end === null ? e : Math.max(end, e);
-    }
-    parts.push(cur);
-    if (parts.length > 1) {
-      if (!useY && direction === 'rtl') parts = parts.reverse();
-      const out = [];
-      for (const q of parts) out.push(...xyCut(q, boxes, direction, !useY, tol, depth + 1));
-      return out;
-    }
+  let [useY, parts] = chooseCut(idx, boxes, preferY, tol);
+  if (parts) {
+    if (!useY && direction === 'rtl') parts = parts.slice().reverse();
+    const out = [];
+    for (const q of parts) out.push(...xyCut(q, boxes, direction, !useY, tol, depth + 1));
+    return out;
   }
   const sgn = direction === 'rtl' ? -1 : 1;
   return idx.slice().sort((i, j) => cmpTuple([(boxes[i][1] + boxes[i][3]) / 2.0, sgn * (boxes[i][0] + boxes[i][2]) / 2.0],
@@ -1464,31 +1481,18 @@ function quadratsOfLine(L, B, axis, ang, U, p, sp) {
 }
 
 // = quads.xy_struct: the cut structure of xyCut (leaf = box index, node = ['v'|'h', children])
-function xyStruct(idx, boxes, direction, preferY, tol, depth = 0) {
+export function xyStruct(idx, boxes, direction, preferY, tol, depth = 0) {
   if (idx.length === 1) return idx[0];
   if (depth > 8) return ['v', idx.slice()];
-  for (const useY of (preferY ? [true, false] : [false, true])) {
-    const lo = useY ? (b) => b[1] : (b) => b[0];
-    const hi = useY ? (b) => b[3] : (b) => b[2];
-    const items = idx.slice().sort((i, j) => (lo(boxes[i]) + hi(boxes[i])) / 2.0 - (lo(boxes[j]) + hi(boxes[j])) / 2.0);
-    let parts = [], cur = [], end = null;
-    for (const i of items) {
-      const b = boxes[i], ext = hi(b) - lo(b), a0 = lo(b) + tol * ext;
-      if (cur.length && a0 >= end) { parts.push(cur); cur = []; end = null; }
-      cur.push(i);
-      const e = hi(b) - tol * ext;
-      end = end === null ? e : Math.max(end, e);
+  let [useY, parts] = chooseCut(idx, boxes, preferY, tol);
+  if (parts) {
+    if (!useY && direction === 'rtl') parts = parts.slice().reverse();
+    const kind = useY ? 'v' : 'h', ch = [];
+    for (const q of parts) {
+      const t = xyStruct(q, boxes, direction, !useY, tol, depth + 1);
+      if (typeof t !== 'number' && t[0] === kind) ch.push(...t[1]); else ch.push(t);
     }
-    parts.push(cur);
-    if (parts.length > 1) {
-      if (!useY && direction === 'rtl') parts = parts.reverse();
-      const kind = useY ? 'v' : 'h', ch = [];
-      for (const q of parts) {
-        const t = xyStruct(q, boxes, direction, !useY, tol, depth + 1);
-        if (typeof t !== 'number' && t[0] === kind) ch.push(...t[1]); else ch.push(t);
-      }
-      return [kind, ch];
-    }
+    return [kind, ch];
   }
   const sgn = direction === 'rtl' ? -1 : 1;
   return ['v', idx.slice().sort((i, j) => cmpTuple([(boxes[i][1] + boxes[i][3]) / 2.0, sgn * (boxes[i][0] + boxes[i][2]) / 2.0],
